@@ -1,5 +1,103 @@
 # Artwork catalogue validation — 24 October 2026
 
+## Current status: deployed freshness verified; mobile integrated
+
+Rechecked Integration after the owner's latest cache correction. An initial
+request timed out at 15 seconds; the subsequent complete check passed:
+
+| Request | Result | Emitted Cache-Control |
+| --- | --- | --- |
+| GET metadata/artwork | 200, 424 IDs, weak ETag | `public, max-age=300` |
+| Matching If-None-Match | 304, zero body bytes | `public, max-age=300` |
+| Old If-None-Match | 200, 138272 bytes | `public, max-age=300` |
+| Anonymous account/me | 401 | `no-cache, no-store` |
+| Anonymous membership/entitlements | 401 | `no-cache, no-store` |
+
+The weak catalogue ETag is unchanged, as the image catalogue itself did not
+change. The same seven representative image HEAD requests listed below passed:
+200, image MIME, ETag and `max-age=2592000`. Earth/stable share their exact URL.
+Evidence: `.expo/artwork-validation/deployed-cache-results.json` (latest run).
+No catalogue header failure remains observed; the previous blocker is resolved.
+No local website/IIS was started and no migration or deployment was performed.
+
+The app catalogue cache/resolver and current chart consumers are implemented.
+**71 tests, lint and typecheck pass**; live catalogue parsing passes for 424 IDs.
+See [artwork integration](artwork-integration.md) for behavior, scope and remaining
+device checks. Next concrete step: reload My Chart on iPhone and verify primary
+energy artwork and Core section widgets. Device persistence/offline behavior,
+authenticated catalogue parity and forced backend media fallback remain unverified.
+
+The sections below are historical evidence, not current implementation blockers.
+
+## Latest verification: deployed cache correction
+
+This section supersedes the historical private-cache failure below.
+
+Backend checkout `feature/mobile-json-api` is at `c403464c`, containing the
+requested `0d5329aa`; fast-forward pull reported already up to date. The existing
+local modification to `deploy/last_run.txt` was preserved.
+
+VS2017 Community MSBuild 15 full Debug rebuild, .NET Framework, Any CPU,
+C# 7.3, DeployOnBuild=false: **exit 0, 0 errors, 361 warnings**, 38.21 seconds.
+Windows desktop xUnit 2.3.1: **609 passed, 0 failed, 0 skipped, 0 errors**
+(606 WebApplication, 3 DataAccessLayer). Artwork classes account for 37 checks:
+14 MobileArtworkCacheHelperTests cases, 6 MobileArtworkControllerTests cases,
+17 MobileArtworkRegistryTests cases. The real HttpCachePolicy tests exercise
+both NoCache (Debug) and ServerAndPrivate (Release) defaults inside the Debug
+test build; this is not a separate Release build or an IIS pipeline test.
+They confirm exact artwork GET exemption, private route/method/path boundaries,
+public successful responses, five-minute GetMaxAge(), weak ETag and 304,
+and unavailable-base no-store behavior. Private API base still applies
+NoCache/SetNoStore; the full suite's entitlement/private-controller tests pass.
+Logs: `.expo/artwork-validation/cache-fix-build.log`,
+`cache-fix-build-console.log`, `cache-fix-tests.log`, `cache-fix-tests.xml`.
+
+Read-only deployed Integration checks at approximately **15:08 UTC, 24 October**:
+
+| Request | Result | Actual Cache-Control |
+| --- | --- | --- |
+| GET metadata/artwork | 200, 424 logical IDs, weak ETag | `public` |
+| GET with matching If-None-Match | 304, zero body bytes | `public` |
+| GET with old If-None-Match | 200, 138272 body bytes | `public` |
+| GET account/me, anonymous | 401 | `no-cache, no-store` |
+| GET membership/entitlements, anonymous | 401 | `no-cache, no-store` |
+
+**Remaining failure:** catalogue 200/304 responses omit `max-age=300`.
+A second unconditional request confirmed this, with no Expires header either.
+The documented five-minute HTTP freshness lifetime is therefore not verified
+and is absent from the observed headers, despite passing in-memory GetMaxAge()
+assertions. Public caching and ETag correction are verified; investigate the
+hosted response header generation before declaring the full contract passed.
+Do not infer which IIS/module/proxy stage causes this from unit tests alone.
+
+Representative exact returned image URLs were checked using HEAD (no large GIF
+download): water energy, earth element, stable modality, water square trigram,
+career UI, animated spinner GIF and the about.light dark variant. All returned
+200, image/png or image/gif as appropriate, an ETag and
+`Cache-Control: max-age=2592000` (30 days). Earth and stable share the identical
+URL including revision query. These checks verify metadata/availability, not a
+fresh visual inspection or GET-body validation of every image. Evidence:
+`.expo/artwork-validation/deployed-cache-results.json`.
+
+Authenticated catalogue equality and forced media-base fallback were not tested;
+no credentials, memberships or service configuration were changed. No local
+website/IIS startup, migrations or deployment occurred. The app's 15-second
+timeout, authentication, entitlements and account edits remain untouched.
+
+Catalogue client/cache/resolver integration remains deferred under the user's
+validation gate because the emitted five-minute lifetime still fails the agreed
+contract. Once corrected, recheck 200/304 freshness headers before implementation.
+
+**Next concrete step:** the backend owner should investigate why the deployed
+catalogue omits max-age despite SetMaxAge and passing real-policy tests, correct
+the emitted HTTP lifetime, and notify the mobile work when Integration is ready.
+Then repeat unconditional, matching-ETag and stale-ETag GETs, requiring
+`Cache-Control: public, max-age=300` on 200/304 before adding the app catalogue
+client/cache/resolver. This is a correction to the existing contract, not a
+proposed contract change. Deployment remains the owner's separate workflow.
+
+## Historical verification before cache correction
+
 Backend branch `feature/mobile-json-api`, commit `e562ad10`. Fast-forward pull
 reported already up to date. Read the Public artwork catalogue contract and
 `docs/mobile-artwork-validation.md` in the backend checkout.

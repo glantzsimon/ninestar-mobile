@@ -3,6 +3,8 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { AppState } from 'react-native';
+import { artworkEnvironment, artworkStore } from '@/lib/artwork-store';
 
 import AppTabs from '@/components/app-tabs';
 import { Colors } from '@/constants/theme';
@@ -11,6 +13,13 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 SplashScreen.preventAutoHideAsync();
 
 export default function TabLayout() {
+  useEffect(() => {
+    const refresh = () => { void artworkStore.refresh(artworkEnvironment); };
+    refresh();
+    const timer = setInterval(refresh, 300000);
+    const subscription = AppState.addEventListener('change', (state) => { if (state === 'active') refresh(); });
+    return () => { clearInterval(timer); subscription.remove(); };
+  }, []);
   const colorScheme = useColorScheme();
   const [fontsLoaded, fontError] = useFonts({
     'Candara-Regular': require('../../assets/fonts/Candara-Regular.ttf'),

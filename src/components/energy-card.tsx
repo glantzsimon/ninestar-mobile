@@ -1,5 +1,4 @@
-import { Image } from 'expo-image';
-import { useState } from 'react';
+import { ArtworkImage } from '@/components/artwork-image';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -8,12 +7,11 @@ import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { type ChartEnergy } from '@/lib/personal-chart';
 
-export function EnergyCard({ energy, title, hint, compact = false, selected = false, onPress, actionLabel = 'Find out more ↓' }: {
+export function EnergyCard({ energy, title, hint, compact = false, selected = false, onPress, actionLabel = 'Find out more' }: {
   energy: ChartEnergy; title: string; hint: string; compact?: boolean;
   selected?: boolean; onPress?: () => void; actionLabel?: string;
 }) {
   const theme = useTheme();
-  const [failedArtwork, setFailedArtwork] = useState(false);
   return (
     <Pressable accessible accessibilityRole={onPress ? 'button' : 'text'}
       accessibilityLabel={`${title}, ${energy.number}${energy.name ? `, ${energy.name}` : ''}`}
@@ -24,8 +22,8 @@ export function EnergyCard({ energy, title, hint, compact = false, selected = fa
         backgroundColor: pressed || selected ? theme.backgroundSelected : theme.panelHeader,
         borderColor: selected ? theme.primary : 'transparent',
       }]}>
-      <Image source={energy.imageUrl && !failedArtwork ? { uri: energy.imageUrl } : EnergyArtwork[energy.number]}
-        onError={() => setFailedArtwork(true)} style={[styles.art, compact && styles.compactArt]}
+      <ArtworkImage artworkId={energy.artworkId} legacyUrl={energy.imageUrl} fallback={EnergyArtwork[energy.number]}
+        style={[styles.art, compact && styles.compactArt]}
         contentFit="contain" accessible={false} />
       <View style={styles.text}>
         <ThemedText type="smallBold">{title}</ThemedText>

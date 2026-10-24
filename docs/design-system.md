@@ -18,6 +18,19 @@ Website files under `D:/Workspace/ninestar/webapp/WebApplication`:
 
 ## Tokens
 
+Shared motion: FadeView uses 180 ms opacity entry and 140 ms exit, with
+ReduceMotion.System. Use it for conditional controls/disclosures and reading
+mode changes. AppPanel fades in without delaying protected-state removal.
+Back to Menu fades in only after scrolling down and fades out at the top.
+No new animation dependency; the project already uses Reanimated.
+For in-flow visibility, use FadeCollapse: animate measured natural height and
+opacity together using the same durations and ReduceMotion.System. Shared modal
+return navigation and disclosures use it so neighboring content slides smoothly.
+Hidden content remains mounted for measurement/state preservation, but has zero
+occupied height, no pointer interaction and no accessibility exposure. Parent
+screen/session unmount still removes everything immediately. FadeView remains
+for content replacement that does not need occupied-height collapse.
+
 `src/constants/theme.ts` owns semantic light/dark colours, typography, spacing,
 corner radii and minimum control height. Components resolve colours through
 `useTheme`; do not put separate palettes in screens. The owner's chosen default is
@@ -63,12 +76,49 @@ relying on colour alone. Fonts and mark add roughly 0.6 MB before compression.
 
 - `AppScreen`: safe areas, scroll, keyboard behaviour, content width and spacing.
 - `AppPanel`: bordered surface, optional tinted heading and consistent padding.
+  Panel titles use shared `sectionTitle` typography (22/28 px Candara Bold),
+  matching authored section headings at a medium size below modal titles.
+  Its optional headerAction is a compact right-aligned control with a 48 px
+  touch target. Use it for panel-level actions such as summary/full-text mode;
+  the header wraps on narrow screens or with enlarged text.
+  Optional action icons use bundled monochrome SVGs tinted with the primary
+  colour: magnifier-plus for full text, short document for summary. Keep visible
+  labels and hide decorative icons from assistive technology.
 - `EnergyCard`: shared artwork, labels, contextual hints and optional detail
   action for core and extended profile energies. Its compact variant uses 56 px
   artwork instead of 80 px, with the same shared colours/type/spacing tokens.
   Selected cards share an accent border/background and selected accessibility
-  state. Chart header cards select one detail area; they do not reveal a full
-  page of all energies' readings.
+  state. Chart header cards open their reading in the shared AppModal sheet;
+  reuse these cards for profile calculator results.
+- `EnergyFacts`: reusable element-info widget. Five available symbols share one
+  equal-column row, with artwork scaling to column width; labels/values wrap.
+  Its fact table is a collapsed More Details disclosure below the symbols,
+  inside the same panel. Reuse for profile calculator and other energy details.
+- `SectionWidgets`: large rounded buttons with catalogue artwork inside the
+  touch target above centred text. Selected/pressed surfaces use shared theme
+  tokens. Every modal starts with buttons only. Core uses the flat ten-button
+  menu documented in core-navigation.md, with no intermediate submenu. AppModal exposes a shared
+  measured scroll context for revealing the selected reading within its sheet.
+  Cards top-align their fixed-size artwork so labels of different lengths do
+  not shift image positions. Labels sit beneath with a 16 px gap and tighter
+  20 px line height; this treatment is shared by all section-widget consumers.
+- `AppModal`: themed, safe-area-aware detail sheet with fixed title and Close
+  control. Headers use the shared 28/36 px Candara Bold `modalTitle` role and
+  the darker `backgroundElement` surface above the accent divider, including
+  the safe-area surround; scrolling content retains the teal page background.
+  The header treatment applies to all shared modals, including calculator reuse.
+  Titles stay left aligned, with Close on the right, following the owner's
+  preferred header layout.
+  It has independent vertical scrolling. Reuse it for chart/calculator
+  details and full summaries. Optional backToTopLabel adds fixed navigation beneath the title,
+  returning to the round section buttons without resetting selected content.
+  Show this control only while the modal is scrolled more than 24 px down;
+  hide it at the top, including after using it to return.
+  Keep subsection navigation inside one sheet.
+  Scroll-to-target reserves sufficient trailing space through measured content
+  minHeight (target offset plus viewport height), so even short panels reach
+  the top below fixed navigation. The modal waits for layout before scrolling;
+  consumers target the detail itself, excluding any submenu buttons.
 - `AppDisclosure`: optional subtitle explains the content before opening; it
   starts collapsed unless explicitly controlled. Related panels can share an
   8 px stack gap when appropriate; Core Energies and Extended Profile use the normal 24 px panel gap.

@@ -1,4 +1,4 @@
-import type { ChartReading, PersonalChart } from './personal-chart';
+import type { ChartEnergy, ChartReading, PersonalChart } from './personal-chart';
 
 export const ChartEnergyLabels: Record<string, { title: string; hint: string }> = {
   core: { title: 'Core', hint: 'Your underlying nature' },
@@ -30,6 +30,8 @@ const groups: Record<string, GroupDefinition[]> = {
 };
 
 export type ChartDetail = {
+  isSixteenOrOver?: boolean;
+  energy: ChartEnergy;
   key: string; title: string; reading: ChartReading;
   groups: { title: string; readings: (ChartReading & { title: string })[] }[];
 };
@@ -43,7 +45,7 @@ export function selectChartDetail(chart: PersonalChart, key: string): ChartDetai
     unavailableMessage: energy.descriptionBlocks.length ? undefined : 'A detailed reading for this energy is not included in your current chart.',
   };
   return {
-    key, title, reading,
+    key, title, reading, energy, isSixteenOrOver: chart.isSixteenOrOver,
     groups: (groups[key] ?? []).flatMap((group) => {
       const readings = group.keys.flatMap(([sectionKey, sectionTitle]) => {
         const section = chart.readings.find((item) => item.key === sectionKey);

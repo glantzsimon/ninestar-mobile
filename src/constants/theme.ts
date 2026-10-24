@@ -83,6 +83,7 @@ export const BrandFonts = {
 } as const;
 
 export const Typography = {
+  modalTitle: { fontSize: 28, lineHeight: 36, fontFamily: BrandFonts.bold },
   title: { fontSize: 34, lineHeight: 42, fontFamily: BrandFonts.light },
   subtitle: { fontSize: 24, lineHeight: 32, fontFamily: BrandFonts.regular },
   sectionTitle: { fontSize: 22, lineHeight: 28, fontFamily: BrandFonts.bold },

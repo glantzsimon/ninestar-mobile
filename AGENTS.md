@@ -1,6 +1,28 @@
 This is an Expo/React Native mobile application. Prioritize mobile-first patterns, performance, and cross-platform compatibility.
 
+## Documentation continuity
+
+Keep documentation current as work proceeds. Record lasting app conventions in this file; app-specific decisions, implementation progress and outstanding work belong in `docs/`. Update the relevant validation report with exact results, verification limits, unresolved blockers and the next concrete step. Distinguish proposed, implemented and verified behavior, and replace superseded guidance rather than leaving contradictory current instructions. Never record credentials, authentication tokens or session cookies.
+
+The shared API contract remains authoritative in `D:/Workspace/ninestar/docs/mobile-api.md`. Keep app consumption notes here, and flag proposed contract changes to the owner before implementing them; do not silently redefine the backend contract in mobile documentation.
+
+Public artwork uses the shared per-environment catalogue store and ArtworkImage resolver; see `docs/artwork-integration.md`. Use returned domain artwork IDs and exact revision-bearing catalogue URLs, choosing dark/default variants without constructing paths. Download visible images on demand with shared URL cache keys. Preserve legacy/bundled fallbacks and last-good catalogue on failure. Artwork is account-independent and must never mutate session, entitlements or account drafts.
+
+Reuse EnergyFacts as the element-info widget for chart/calculator details: Energy, Yin/Yang, Element, Group and Trigram form one ordered row of equal-width columns with proportional square artwork. Labels/values may wrap without splitting symbols into multiple rows. The fact table is a collapsed More Details disclosure directly beneath, inside the same owning panel. Omit unavailable server facts rather than inferring them.
+
+SectionWidgets are large rounded pressable cards with artwork above centred text. Every energy modal starts with buttons only and no selected detail. Core uses the flat ten-button menu below; other energies use their own sections. Use shared AppModal measured scrolling; reuse widgets for calculator results without stacked modals.
+
 ## NineStar visual system
+
+For in-flow content appearing/disappearing, use shared FadeCollapse so opacity and occupied height animate together; surrounding UI must slide smoothly rather than jump after a fade. Back to Menu and AppDisclosure use this by default. Hidden content is noninteractive and hidden from accessibility; measurement content remains mounted until its owning screen unmounts. Respect OS Reduce Motion, and never delay clearing account/session state for animation.
+
+Shared modal scroll-to-section behavior must top-align short and long detail panels alike. AppModal measures its viewport and selected target and extends content minimum height with empty space below as needed, waiting for content layout before scrolling. Target the actual detail panel, excluding submenu buttons. Do not add screen-specific fixed bottom spacers. Back to Menu returns to the button grid without resetting content.
+
+Core uses one flat menu in exactly this order: Overview, Essence, Intellectual Qualities, Interpersonal Qualities, Emotional Landscape, Relationships, Career, Finances, Health, Spirituality. Do not add The Pioneer/energy-title category or an intermediate Core submenu. Preserve website UI icons, server-owned readings and relationship age gates. See docs/core-navigation.md for API gaps.
+
+Appearing/disappearing UI uses shared FadeView transitions (180 ms in, 140 ms out), respecting OS Reduce Motion. Apply through shared components rather than per-screen animation values. Panels fade in; disclosures, reading-mode content and scroll navigation fade in/out. Do not delay clearing protected/account state to animate it away.
+
+Energy detail modals expose Back to Menu navigation beneath the title via AppModal's optional backToTopLabel only after scrolling more than 24 px from the top. Fade it in/out when changing visibility. It scrolls back to the round buttons without closing the sheet or resetting selected reading/full-text mode. Reuse this navigation for calculator details.
 
 Apply visual changes through shared components, typography and spacing tokens so they remain consistent across screens. Avoid local styling exceptions for headings, body text, inputs or panels when the same role exists elsewhere. Primary chart energies must each have a corresponding detail panel; unavailable server readings need an honest availability message, never invented interpretation or bypassed membership checks.
 
@@ -8,7 +30,7 @@ For subscription work, read `docs/app-subscriptions.md` and the authoritative sh
 
 Mobile UX should be simpler than the expert website: lead with the user's own chart and three main energies, group related readings, and reveal detail through accessible disclosures. Read `docs/mobile-chart.md` before chart/auth changes; use server-owned own-chart routes and preserve full/free access checks. Keep connection diagnostics out of the main reading flow.
 
-Chart header widgets select one detail section beneath the persistent energies/Extended Profile/summary, replacing the previous detail instead of showing all sections together. Keep related subsections collapsed and provide Back to My Energies. Reuse PersonalChart, ChartDetails and chart-sections selection ownership for future calculator results; do not implement a second chart interaction or infer missing server readings.
+Keep My Chart high level: header energy widgets open details in one closable, vertically scrolling AppModal sheet, never an inline reading below the chart. Keep the title and Close control outside the scrolling content. Navigate subsections inside the same sheet rather than stacking modals; default to summaries with optional full text. Summary Read More also opens a sheet. Closing preserves the underlying chart position and disclosures. Reuse PersonalChart, EnergyCard, ChartDetails, AppModal and chart-sections ownership for future profile calculator results; do not build duplicate widgets or infer missing server readings.
 
 Read `docs/mobile-account.md` for My Account. Prefill server-saved values, use metadata enum/timezone choices, retain independent birth/current zones and all calculation flags, and never invent missing saved preferences. Account saves are explicit CSRF-protected POSTs; uncertain outcomes require read-back before another save. Birth dates stay date-only and birth times stay separate. Missing chart details link to My Account in the app.
 

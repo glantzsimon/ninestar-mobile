@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import { ReadingContent } from '@/components/reading-content';
 import { ThemedText } from '@/components/themed-text';
-import { AppButton } from '@/components/ui/app-button';
+import { AppPanel } from '@/components/ui/app-panel';
+import { FadeView } from '@/components/ui/fade-view';
 import type { ChartReading as Reading } from '@/lib/personal-chart';
 import { readingPresentation } from '@/lib/reading-presentation';
 
-export function ChartReading({ reading }: { reading: Reading }) {
+export function ChartReading({ reading, title }: { reading: Reading; title: string }) {
   const [full, setFull] = useState(false);
   const presentation = readingPresentation(reading, full);
-  return <>
+  return <AppPanel title={title} headerAction={presentation.canToggle ? {
+    title: full ? 'View Summary' : 'View Full Text', expanded: full, onPress: () => setFull(!full),
+    icon: full ? 'summary' : 'fullText',
+  } : undefined}>
     {!!reading.unavailableMessage && <ThemedText>{reading.unavailableMessage}</ThemedText>}
-    {presentation.canToggle && <AppButton variant="secondary" title={full ? 'View Summary' : 'View Full Text'}
-      accessibilityState={{ expanded: full }} onPress={() => setFull(!full)} />}
-    <ReadingContent blocks={presentation.blocks} />
-  </>;
+    <FadeView key={full ? 'full' : 'summary'}><ReadingContent blocks={presentation.blocks} /></FadeView>
+  </AppPanel>;
 }

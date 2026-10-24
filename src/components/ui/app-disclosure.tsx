@@ -2,6 +2,7 @@ import { useState, type PropsWithChildren } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { FadeCollapse } from '@/components/ui/fade-collapse';
 import { ControlHeight, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -29,7 +30,7 @@ export function AppDisclosure({ title, subtitle, children, expanded, onExpandedC
         </View>
         <ThemedText accessibilityElementsHidden importantForAccessibility="no">{open ? '−' : '+'}</ThemedText>
       </Pressable>
-      {open && <View style={[styles.content, { backgroundColor: theme.backgroundElement }]}>{children}</View>}
+      <FadeCollapse visible={open}><View style={[styles.content, { backgroundColor: theme.backgroundElement }]}>{children}</View></FadeCollapse>
     </View>
   );
 }

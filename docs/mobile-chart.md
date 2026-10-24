@@ -24,14 +24,15 @@ in a shared stack with the normal 24 px panel gap. It matches the website `_Addi
 order: Day Star, Generational Energy, Epoch Energy (not Hour). Its disclosure
 header has the shared optional subtitle Day Star · Generation · Epoch. On open,
 compact cards use the same EnergyCard component/artwork/typography as the main
-energies. Find out more selects that energy in the single detail area below
-the header and summary; extended descriptions no longer expand inside the
-header. Numbers-only free responses do not acquire extra interpretations.
+energies. Find out more opens that energy in the shared modal sheet; extended
+descriptions do not expand inside the header. Numbers-only free responses do
+not acquire extra interpretations.
 Missing optional energies are omitted, with a simple message if none were
 returned. No calculation, new API call or backend change is introduced.
 
 Your Summary renders the API's narrative `summary` using shared ReadingContent.
-It starts as a short expandable preview above the selected detail, independent of selection.
+It stays a short preview on the chart; Read More opens the full narrative in
+the shared modal sheet, keeping the chart high level.
 It matches the website `_CoreEnergies.cshtml` Summary panel, including the
 server's adult/child choice. API `overview` is a separate main-energy
 Gifts/Challenges traits list and must not replace the narrative. Omit the summary
@@ -47,15 +48,17 @@ with a generic blue numeral. The nine original PNGs are bundled unchanged in
 fall back to its matching bundled image on failure or for numbers-only free
 responses. No API extension is required for these primary energy images.
 
-Tapping a header energy selects only its corresponding detail below the header
-and summary. Changing selection replaces the prior detail rather than mounting
-all chart sections. No detail is selected initially. Card selection has shared
-visual and accessibility states. The header and summary remain mounted on the
-page above the detail, not pinned over the reading viewport. Back to My Energies
-buttons above/below details scroll to the header without changing selection.
-The new detail is measured after mounting and scrolled into view; reselecting
-the current energy scrolls directly to it. No request or calculation is made
-on selection. Cards open either server content or its availability message.
+Tapping a header energy opens only its corresponding detail in AppModal.
+My Chart contains no inline detail or selection placeholder. The shared modal
+has a fixed title/Close header and its own vertical scroll, uses an iOS page
+sheet with swipe dismissal, and supports Android Back/accessibility escape.
+Closing clears selection and unmounts detail state. Every energy modal opens
+with rounded image buttons only, starting with Overview; no detail is selected.
+Readings use summary mode by default when opened. The underlying chart stays mounted at its original
+scroll position, with Extended Profile disclosure state preserved. No request
+or calculation is made on selection. Cards open either server content or its
+availability message. Reuse this same PersonalChart/EnergyCard/ChartDetails/
+AppModal flow for future profile calculator results, without duplicate widgets.
 All three primary energies have a detail panel. Social Expression is the third;
 its card selects its own panel without Core/Character content. The full response
 already provides sections.socialExpression. FreeProfile currently omits it;
@@ -69,8 +72,17 @@ overrides. Tests cover full Social Expression content and missing/free responses
 nature/intellectual/emotional/interpersonal, relationships, work/finances/
 spirituality and health sections. Character owns childhood/adult-child and all
 three stress-response sections, matching `_ProfileStressResponse.cshtml`.
-Only the selected energy's groups are mounted, initially collapsed, with
-individual readings disclosed inside them. Omit unavailable secondary sections.
+Only the selected energy's groups appear as selectors inside its sheet, with
+one selected reading displayed at a time. Omit unavailable secondary sections.
+Core uses one flat menu: Overview, Essence, Intellectual Qualities,
+Interpersonal Qualities, Emotional Landscape, Relationships, Career, Finances,
+Health and Spirituality. No energy-title category or intermediate Core submenu.
+Overview opens the reusable element-info
+widget. Missing/free content gets an availability message; age rules stay server-owned.
+See core-navigation.md for exact source mapping and the English-label fallback. Tapping
+a card renders one reading and scrolls to it inside the existing modal after
+layout; re-tapping the current card scrolls back to it. Other existing topic
+groups remain available and use the same shared rounded-card presentation.
 Do not return to the
 website's many nested tabs. Keep protocol details out of the main account flow;
 development connection controls have been removed after device validation.
@@ -112,10 +124,10 @@ The owner has verified iPhone login; this chart UI still needs actual iPhone
 comparison with the website's own chart, including membership/access variations,
 large text and long readings. Android and browser authentication are not validated.
 
-Artwork/navigation change: 45 automated tests pass; lint/typecheck pass. Native
-tap-to-expand/scroll, image appearance, VoiceOver and large text still require
-iPhone verification. AppScreen now provides its scroll context through an
-explicit native content View; other screens keep their existing spacing.
+Current chart modal validation: 71 automated tests, lint and typecheck pass.
+See [chart-modal-validation.md](chart-modal-validation.md) for exact scope and
+pending iPhone checks. AppScreen retains its shared scroll helpers for other
+consumers; chart details now scroll independently inside AppModal.
 
 Reading typography/spacing change: 47 tests pass, including indented website
 markup, heading/list preservation, CRLF plain text, explicit breaks and inert
@@ -126,7 +138,9 @@ between bullets/paragraphs, including larger accessibility text sizes.
 Detail topic widgets now select a group and then one reading within it. ChartReading
 shows available summary blocks by default and offers View Full Text / View Summary
 when distinct versions exist; the two versions are never appended together.
-SummaryPreview keeps the original narrative intact behind Read More / Show Less.
-Catalogue integration and illustrated facts are gated on backend validation; see
-[artwork-backend-validation.md](artwork-backend-validation.md).
+SummaryPreview keeps the original narrative intact; on My Chart, Read More opens
+the full summary in AppModal. Its standalone inline expansion remains reusable.
+Catalogue integration now uses the shared cache/resolver after deployed header
+validation passed. Available energy facts have an Overview section;
+see [artwork-integration.md](artwork-integration.md) for scope and device checks.
 

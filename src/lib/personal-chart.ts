@@ -6,6 +6,8 @@ export type ChartEnergy = {
   name: string;
   element: string;
   imageUrl?: string;
+  artworkId?: string;
+  facts?: { label: string; value: string; artworkId?: string }[];
   descriptionBlocks: ReadingBlock[];
 };
 export type ChartReading = {
@@ -13,6 +15,7 @@ export type ChartReading = {
   unavailableMessage?: string;
 };
 export type PersonalChart = {
+  isSixteenOrOver?: boolean;
   access: 'full' | 'free';
   name: string;
   summary: string;
@@ -37,6 +40,15 @@ export function parsePersonalChart(data: Record<string, unknown>, access: 'full'
     }
     return {
       key, number,
+      artworkId: typeof energy.artworkId === 'string' ? energy.artworkId : undefined,
+      facts: access === 'full' ? [
+        ['Yin / Yang', 'yinYang', 'yinYangArtworkId'], ['Element', 'element', 'elementArtworkId'],
+        ['Group', 'modality', 'modalityArtworkId'], ['Trigram', 'trigram', 'trigramArtworkId'],
+        ['Colour', 'colour'], ['Direction', 'direction'], ['Family Member', 'familyMember'],
+      ].flatMap(([label, field, artwork]) => {
+        const value = readingText(energy[field]);
+        return value ? [{ label, value, artworkId: artwork && typeof energy[artwork] === 'string' ? energy[artwork] as string : undefined }] : [];
+      }) : [],
       name: readingText(energy.name),
       element: readingText(energy.element),
       imageUrl: typeof energy.imageUrl === 'string' && energy.imageUrl.startsWith('https://')
@@ -62,6 +74,8 @@ export function parsePersonalChart(data: Record<string, unknown>, access: 'full'
         : 'This reading is temporarily unavailable. Please try again later.',
     });
   return {
+    isSixteenOrOver: typeof object(data.person).isSixteenOrOver === 'boolean'
+      ? object(data.person).isSixteenOrOver as boolean : undefined,
     access, energies, extendedEnergies, readings: [...primaryReadings,
       ...readings.filter((reading) => !primaryReadings.some((primary) => primary.key === reading.key))],
     name: readingText(object(data.person).name),

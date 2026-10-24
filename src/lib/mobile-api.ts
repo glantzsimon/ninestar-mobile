@@ -2,7 +2,7 @@ import { entitlementSnapshotsAgree, parseEntitlements } from './entitlements';
 import { session } from './session';
 import { requestDiagnostics } from './request-diagnostics';
 
-const API_BASE_URL = 'https://int.9starkiastrology.com/api/mobile/v1';
+export const API_BASE_URL = 'https://int.9starkiastrology.com/api/mobile/v1';
 
 export class MobileApiError extends Error {
   constructor(public readonly code: string, public readonly status?: number, public readonly endpoint?: string) {
