@@ -1,5 +1,19 @@
 This is an Expo/React Native mobile application. Prioritize mobile-first patterns, performance, and cross-platform compatibility.
 
+## NineStar visual system
+
+Apply visual changes through shared components, typography and spacing tokens so they remain consistent across screens. Avoid local styling exceptions for headings, body text, inputs or panels when the same role exists elsewhere. Primary chart energies must each have a corresponding detail panel; unavailable server readings need an honest availability message, never invented interpretation or bypassed membership checks.
+
+For subscription work, read `docs/app-subscriptions.md` and the authoritative shared contract in `D:/Workspace/ninestar/docs/mobile-api.md`. The owner's final direction is one existing account with shared website/app membership access and separate billing-provider records; the app-only identity proposal is superseded. Backend implementation belongs to the website chat. Never trust a client-paid flag, calculate access from local expiry dates, or fulfil Apple purchases through legacy methods that terminate website memberships. Keep proposed endpoints/product policies distinct from implemented support.
+
+Mobile UX should be simpler than the expert website: lead with the user's own chart and three main energies, group related readings, and reveal detail through accessible disclosures. Read `docs/mobile-chart.md` before chart/auth changes; use server-owned own-chart routes and preserve full/free access checks. Keep connection diagnostics out of the main reading flow.
+
+Chart header widgets select one detail section beneath the persistent energies/Extended Profile/summary, replacing the previous detail instead of showing all sections together. Keep related subsections collapsed and provide Back to My Energies. Reuse PersonalChart, ChartDetails and chart-sections selection ownership for future calculator results; do not implement a second chart interaction or infer missing server readings.
+
+Read `docs/mobile-account.md` for My Account. Prefill server-saved values, use metadata enum/timezone choices, retain independent birth/current zones and all calculation flags, and never invent missing saved preferences. Account saves are explicit CSRF-protected POSTs; uncertain outcomes require read-back before another save. Birth dates stay date-only and birth times stay separate. Missing chart details link to My Account in the app.
+
+Read `docs/design-system.md` before UI work. Reuse semantic tokens in `src/constants/theme.ts` and `AppScreen`, `AppPanel`, `AppButton`, `AppInput`, and `ThemedText`. The local Candara faces and original NineStar mark come from the website checkout; load fonts centrally in the root layout. Default to the owner's chosen dark blue/teal theme through the shared colour-scheme hook, preserve scalable text and 48 px controls, and keep the Style Guide tab current. Keep the website unchanged when adapting its design for mobile.
+
 ## Expo has changed — do not trust your training data
 
 Expo ships breaking changes every SDK release. APIs you remember are likely renamed, moved, or removed. Before writing any code that touches an Expo, EAS, or React Native API:
