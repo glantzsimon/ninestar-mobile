@@ -1,13 +1,9 @@
 import type { ChartDetail } from './chart-sections';
+import { uiCopy } from './ui-copy';
 
 export function coreMenu(detail: ChartDetail) {
-  return [{ key: 'energyFacts', title: 'Overview' }, { key: 'essence', title: 'Essence' },
-    { key: 'intellectualQualities', title: 'Intellectual Qualities' },
-    { key: 'interpersonalQualities', title: 'Interpersonal Qualities' },
-    { key: 'emotionalLandscape', title: 'Emotional Landscape' },
-    ...(detail.isSixteenOrOver === false ? [] : [{ key: 'relationships', title: 'Relationships' }]),
-    { key: 'career', title: 'Career' }, { key: 'finances', title: 'Finances' },
-    { key: 'health', title: 'Health' }, { key: 'spirituality', title: 'Spirituality' }];
+  return Object.entries(uiCopy.coreSections).filter(([key]) => key !== 'relationships' || detail.isSixteenOrOver !== false)
+    .map(([key, title]) => ({ key, title }));
 }
 
 export function coreReading(detail: ChartDetail, key: string) {

@@ -1,13 +1,7 @@
 import type { ChartEnergy, ChartReading, PersonalChart } from './personal-chart';
+import type { ContextualHelp } from './contextual-help';
 
-export const ChartEnergyLabels: Record<string, { title: string; hint: string }> = {
-  core: { title: 'Core', hint: 'Your underlying nature' },
-  character: { title: 'Character', hint: 'Your inner responses' },
-  socialExpression: { title: 'Social Expression', hint: 'How you meet the world' },
-  dayStar: { title: 'Day Star', hint: 'Your day-star influence' },
-  generation: { title: 'Generational Energy', hint: 'Your generation’s shared influence' },
-  epoch: { title: 'Epoch Energy', hint: 'Your wider era’s influence' },
-};
+const chartEnergyKeys = new Set(['core', 'character', 'socialExpression', 'dayStar', 'generation', 'epoch']);
 
 type GroupDefinition = { title: string; keys: [string, string][] };
 // Match the website's main-energy tabs and character/child/stress tabs.
@@ -21,15 +15,13 @@ const groups: Record<string, GroupDefinition[]> = {
       ['finances', 'Finances'], ['spirituality', 'Spirituality']] },
     { title: 'Wellbeing and Balance', keys: [['health', 'Health'], ['illnesses', 'Health Tendencies']] },
   ],
-  character: [
-    { title: 'Childhood and Growth', keys: [['childNature', 'Childhood Nature'],
-      ['adultChildRelationship', 'Your Adult and Child Energies']] },
-    { title: 'Stress and Balance', keys: [['stressResponse', 'Responding to Stress'],
-      ['natalHouseStressResponse', 'Natal House Stress Response'], ['childStressResponse', 'Childhood Stress Response']] },
-  ],
 };
 
 export type ChartDetail = {
+  navigation?: { key: string; title: string; heading: string; reading: ChartReading }[];
+  health?: PersonalChart['health'];
+  help?: ContextualHelp;
+  contextualHelp?: PersonalChart['help'];
   isSixteenOrOver?: boolean;
   energy: ChartEnergy;
   key: string; title: string; reading: ChartReading;
@@ -38,14 +30,17 @@ export type ChartDetail = {
 
 export function selectChartDetail(chart: PersonalChart, key: string): ChartDetail | null {
   const energy = [...chart.energies, ...chart.extendedEnergies].find((item) => item.key === key);
-  if (!energy || !ChartEnergyLabels[key]) return null;
-  const title = key === 'core' ? 'Core Nature' : ChartEnergyLabels[key].title;
+  if (!energy || !chartEnergyKeys.has(key)) return null;
+  const help = chart.help?.[key];
+  const title = help?.title ?? energy.name;
   const reading = chart.readings.find((item) => item.key === key) ?? {
     key, summary: '', body: '', summaryBlocks: [], bodyBlocks: energy.descriptionBlocks,
     unavailableMessage: energy.descriptionBlocks.length ? undefined : 'A detailed reading for this energy is not included in your current chart.',
   };
   return {
-    key, title, reading, energy, isSixteenOrOver: chart.isSixteenOrOver,
+    navigation: key === 'character' ? characterNavigation(chart, energy) : undefined,
+    key, title, reading, energy, help, health: key === 'core' ? chart.health : undefined,
+    contextualHelp: chart.help, isSixteenOrOver: chart.isSixteenOrOver,
     groups: (groups[key] ?? []).flatMap((group) => {
       const readings = group.keys.flatMap(([sectionKey, sectionTitle]) => {
         const section = chart.readings.find((item) => item.key === sectionKey);
@@ -54,4 +49,21 @@ export function selectChartDetail(chart: PersonalChart, key: string): ChartDetai
       return readings.length ? [{ title: group.title, readings }] : [];
     }),
   };
+}
+
+function characterNavigation(chart: PersonalChart, energy: ChartEnergy): NonNullable<ChartDetail['navigation']> {
+  return ['character', 'childNature', 'adultChildRelationship', 'stressResponse'].flatMap((key) => {
+    const reading = chart.readings.find((item) => item.key === key);
+    if (!reading?.title) return [];
+    if (key !== 'stressResponse') return [{ key, title: reading.title,
+      heading: key === 'character' ? energy.title ?? '' : reading.title, reading }];
+    const parts = ['stressResponse', 'natalHouseStressResponse', 'childStressResponse']
+      .flatMap((part) => chart.readings.filter((item) => item.key === part));
+    return [{ key, title: reading.title, heading: reading.title, reading: {
+      ...reading, body: parts.map((part) => part.body).filter(Boolean).join('\n\n'),
+      bodyBlocks: parts.flatMap((part) => part.bodyBlocks),
+      summary: parts.map((part) => part.summary || part.body).filter(Boolean).join('\n\n'),
+      summaryBlocks: parts.flatMap((part) => part.summaryBlocks.length ? part.summaryBlocks : part.bodyBlocks),
+    } }];
+  });
 }

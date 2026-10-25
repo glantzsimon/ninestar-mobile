@@ -95,14 +95,14 @@ export default function HomeScreen() {
     return () => subscription.remove();
   }, [refreshChart]));
 
-  async function handleSignIn(username: string, password: string) {
+  async function handleSignIn(username: string, password: string, rememberMe: boolean) {
     if (pending.current) return;
     pending.current = true;
     setBusy(true);
     setChart(null);
     setMessage('');
     try {
-      await signIn(username, password);
+      await signIn(username, password, rememberMe);
       await loadChart();
     } catch (error) {
       acceptError(error);

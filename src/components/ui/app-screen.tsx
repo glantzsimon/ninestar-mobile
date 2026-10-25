@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { AppBackground } from '@/components/ui/app-background';
 
 export type ScreenScrollTarget = ComponentRef<typeof View>;
 const ScreenScrollContext = createContext<(target: ScreenScrollTarget) => void>(() => {});
@@ -22,6 +23,7 @@ export function AppScreen({ children }: PropsWithChildren) {
   }, []);
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]} edges={['top', 'left', 'right']}>
+      <AppBackground />
       <KeyboardAvoidingView style={styles.fill} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView
           ref={scroll}

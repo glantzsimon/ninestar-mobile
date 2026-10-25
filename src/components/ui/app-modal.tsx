@@ -4,13 +4,17 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { AppButton } from '@/components/ui/app-button';
+import { AppBackground } from '@/components/ui/app-background';
 import { FadeCollapse } from '@/components/ui/fade-collapse';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { uiCopy } from '@/lib/ui-copy';
 
 type ScrollTarget = ComponentRef<typeof View>;
 const ModalScrollContext = createContext<(target: ScrollTarget) => void>(() => {});
 export const useModalScroll = () => useContext(ModalScrollContext);
+const ModalMenuContext = createContext<(target: ScrollTarget) => void>(() => {});
+export const useModalMenu = () => useContext(ModalMenuContext);
 
 // Presentation only: callers own selection/data so chart and calculator can share it.
 export function AppModal({ title, onClose, backToTopLabel, children }: PropsWithChildren<{
@@ -24,6 +28,15 @@ export function AppModal({ title, onClose, backToTopLabel, children }: PropsWith
   const pendingOffset = useRef<number | null>(null);
   const scroll = useRef<ComponentRef<typeof ScrollView>>(null);
   const content = useRef<ScrollTarget>(null);
+  const menuOffset = useRef(0);
+  const currentOffset = useRef(0);
+  const registerMenu = useCallback((target: ScrollTarget) => {
+    if (!content.current) return;
+    target.measureLayout(content.current, (_x, y) => {
+      menuOffset.current = Math.max(0, y - Spacing.three);
+      setScrolledDown(currentOffset.current > menuOffset.current + Spacing.four);
+    }, () => {});
+  }, []);
   const scrollTo = useCallback((target: ScrollTarget) => {
     if (!content.current) return;
     target.measureLayout(content.current, (_x, y) => {
@@ -45,14 +58,16 @@ export function AppModal({ title, onClose, backToTopLabel, children }: PropsWith
         edges={['top', 'bottom', 'left', 'right']} accessibilityViewIsModal onAccessibilityEscape={onClose}>
         <View style={[styles.header, { borderColor: theme.primary }]}>
           <ThemedText type="modalTitle" accessibilityRole="header" style={styles.title}>{title}</ThemedText>
-          <AppButton title="Close" variant="secondary" accessibilityLabel={`Close ${title}`} onPress={onClose} />
+          <AppButton title={uiCopy.close} variant="secondary" accessibilityLabel={`${uiCopy.close} ${title}`} onPress={onClose} />
         </View>
         {!!backToTopLabel && <FadeCollapse visible={scrolledDown}><View style={styles.navigation}>
           <AppButton title={`↑ ${backToTopLabel}`} variant="secondary"
-            accessibilityHint="Scrolls to the section buttons without closing the details"
-            onPress={() => scroll.current?.scrollTo({ y: 0, animated: true })} />
+            accessibilityHint={uiCopy.menuHint}
+            onPress={() => scroll.current?.scrollTo({ y: menuOffset.current, animated: true })} />
         </View></FadeCollapse>}
-        <ScrollView ref={scroll} style={[styles.fill, { backgroundColor: theme.background }]} contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled"
+        <View style={[styles.fill, { backgroundColor: theme.background }]}>
+        <AppBackground />
+        <ScrollView ref={scroll} style={styles.fill} contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled"
           onLayout={({ nativeEvent }) => { viewportHeight.current = nativeEvent.layout.height; }}
           onContentSizeChange={(_width, height) => {
             contentHeight.current = height;
@@ -63,11 +78,17 @@ export function AppModal({ title, onClose, backToTopLabel, children }: PropsWith
             }
           }}
           scrollEventThrottle={32}
-          onScroll={({ nativeEvent }) => setScrolledDown(nativeEvent.contentOffset.y > Spacing.four)}>
+          onScroll={({ nativeEvent }) => {
+            currentOffset.current = nativeEvent.contentOffset.y;
+            setScrolledDown(currentOffset.current > menuOffset.current + Spacing.four);
+          }}>
           <ModalScrollContext.Provider value={scrollTo}>
+            <ModalMenuContext.Provider value={registerMenu}>
             <View ref={content} collapsable={false} style={[styles.content, { minHeight: minimumHeight }]}>{children}</View>
+            </ModalMenuContext.Provider>
           </ModalScrollContext.Provider>
         </ScrollView>
+        </View>
       </SafeAreaView>
     </SafeAreaProvider>
   </Modal>;

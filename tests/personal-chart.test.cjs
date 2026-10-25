@@ -15,7 +15,61 @@ function moduleFromSource(name, imports = {}) {
   return exports;
 }
 const text = moduleFromSource('reading-text');
-const { parsePersonalChart } = moduleFromSource('personal-chart', { './reading-text': text });
+const help = moduleFromSource('contextual-help', { './reading-text': text });
+const health = moduleFromSource('chart-health', { './reading-text': text });
+const { parsePersonalChart } = moduleFromSource('personal-chart', { './reading-text': text, './contextual-help': help, './chart-health': health });
+
+const overviewMetadata = {
+  number: 3, colour: 'Bright Green', direction: 'East', familyMember: 'Eldest Son',
+  season: 'Early Spring', internalRepresentation: 'Liver, Feet, Muscles, Connective Tissue',
+  physiognomy: 'Vocal Anatomy', primaryAttributes: 'Rousing',
+  mostHarmoniousCombinations: '1 Water, 4 Tree, 9 Fire',
+  mostChallengingCombinations: '2 Earth, 5 Earth, 6 Metal, 7 Metal, 8 Earth',
+};
+test('full energy titles are retained verbatim for all primary and extended detail banners', () => {
+  const source = { core: { number: 3, title: '3 Tree / Thunder - The Pioneer' },
+    character: { number: 4, title: '4 Tree / Wind - The Influencer' },
+    socialExpression: { number: 5, title: '5 Earth / Core Earth - The Hub' },
+    dayStar: { number: 6, title: '6 Metal / Heaven - The Leader' } };
+  const chart = parsePersonalChart({ energies: source }, 'full');
+  for (const energy of [...chart.energies, ...chart.extendedEnergies]) {
+    assert.equal(energy.title, source[energy.key].title);
+  }
+});
+test('missing full energy titles are not generated from numbers or protocol role names', () => {
+  const chart = parsePersonalChart({ core: 3, character: 4, socialExpression: 5 }, 'free');
+  assert.ok(chart.energies.every((energy) => energy.title === undefined));
+});
+test('new free overview exposes all nine ordered rows without importing paid prose', () => {
+  const chart = parsePersonalChart({ core: 3, character: 4, socialExpression: 5,
+    energies: { core: { ...overviewMetadata, description: 'Must not be imported',
+      yinYang: 'Must not be imported', yinYangArtworkId: 'private.unexpected' } },
+  }, 'free');
+  const energy = chart.energies[0];
+  assert.equal(Array.from(energy.facts, (fact) => fact.label).join('|'),
+    'Colour|Direction|Family Member|Season|Internal Representation|Physiognomy|Primary Attributes|Most Harmonious Combinations|Most Challenging Combinations');
+  assert.equal(energy.facts[7].value, overviewMetadata.mostHarmoniousCombinations);
+  assert.equal(energy.facts[8].value, overviewMetadata.mostChallengingCombinations);
+  assert.equal(energy.descriptionBlocks.length, 0);
+});
+test('full energy keeps symbol facts and all new table rows', () => {
+  const chart = parsePersonalChart({ energies: { core: { ...overviewMetadata,
+    yinYang: 'Yang', yinYangArtworkId: 'ninestar.yinyang.yang', element: 'Tree',
+    modality: 'Dynamic', trigram: 'Chen' }, character: { number: 4 }, socialExpression: { number: 5 } } }, 'full');
+  const facts = chart.energies[0].facts;
+  assert.equal(facts.length, 13);
+  assert.equal(facts[0].artworkId, 'ninestar.yinyang.yang');
+  assert.equal(facts.find((fact) => fact.label === 'Season').value, 'Early Spring');
+});
+test('older or partial overview metadata omits missing/non-string rows gracefully', () => {
+  const chart = parsePersonalChart({ core: 3, character: 4, socialExpression: 5,
+    energies: { core: { number: 3, colour: 'Bright Green', season: null,
+      primaryAttributes: ['not a display string'], mostHarmoniousCombinations: '<b>1 Water, 4 Tree</b>' },
+      character: null } }, 'free');
+  assert.equal(chart.energies[0].facts.length, 2);
+  assert.equal(chart.energies[0].facts[1].value, '1 Water, 4 Tree');
+  assert.equal(chart.energies[1].facts.length, 0);
+});
 
 test('authored markup becomes inert text with paragraphs, bullets and entities', () => {
   assert.equal(text.readingText('<p>Calm &amp; clear</p><ul><li>Listen</li><li>Reflect</li></ul><script>bad()</script>'),

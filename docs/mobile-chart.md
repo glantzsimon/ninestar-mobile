@@ -19,10 +19,34 @@ All settings, birth details, timezone handling, age gates and prose remain serve
 
 ## Presentation
 
-Extended Profile is collapsed by default, immediately below Your Core Energies
-in a shared stack with the normal 24 px panel gap. It matches the website `_AdditionalEnergies`
+Every primary/extended energy screen now has a full-width EnergyBanner before
+its round section buttons (after the introduction where present). It uses the
+exact energies[role].title plus catalogue/legacy/bundled artwork, with rounded
+section-widget surfaces and normal shared spacing. Reuse the same banner for
+calculator details. Missing title is omitted, never built from number/element
+or a JSON key; the existing free overview projection needs a title addition for
+complete banner parity. No API contract changes were made here.
+
+Core's main energy card and detail modal now use the API's help.core.title.
+Its help.core introduction appears
+as an expandable preview above the ten section buttons, separate from Essence
+and all personalised readings. See contextual-help.md for behavior and checks.
+Relationships also displays help.relationships above its personal reading when
+supplied and age-eligible. Menu return targets the button grid below help.
+
+Overview More Details now consumes all nine contract table strings from full
+and free energies entries, including the six additive fields. See
+[energy-metadata-validation.md](energy-metadata-validation.md) for deployed
+verification, exact keys, backward compatibility and pending iPhone comparison.
+
+Main chart order is Your Core Energies, Your Summary, then Extended Profile,
+with the normal shared panel spacing. Guidance uses the central translation
+resource: Tap an energy to explore its meaning in more depth.
+Extended Profile starts expanded and can still be collapsed. Its heading is
+only Extended Profile, using the shared medium panel-title style with no subtitle.
+It matches the website `_AdditionalEnergies`
 order: Day Star, Generational Energy, Epoch Energy (not Hour). Its disclosure
-header has the shared optional subtitle Day Star · Generation · Epoch. On open,
+header retains the shared disclosure interaction. Inside,
 compact cards use the same EnergyCard component/artwork/typography as the main
 energies. Find out more opens that energy in the shared modal sheet; extended
 descriptions do not expand inside the header. Numbers-only free responses do
@@ -30,9 +54,10 @@ not acquire extra interpretations.
 Missing optional energies are omitted, with a simple message if none were
 returned. No calculation, new API call or backend change is introduced.
 
-Your Summary renders the API's narrative `summary` using shared ReadingContent.
-It stays a short preview on the chart; Read More opens the full narrative in
-the shared modal sheet, keeping the chart high level.
+Your Summary renders the API's narrative `summary` in the same ContextualHelp
+expandable widget as section introductions: three-line faded preview, text-tap
+or Read More/Show Less toggling, rich content and smooth height/opacity motion.
+It expands in place on the chart; it no longer opens a summary modal.
 It matches the website `_CoreEnergies.cshtml` Summary panel, including the
 server's adult/child choice. API `overview` is a separate main-energy
 Gifts/Challenges traits list and must not replace the narrative. Omit the summary
@@ -88,6 +113,9 @@ website's many nested tabs. Keep protocol details out of the main account flow;
 development connection controls have been removed after device validation.
 
 The app displays authored HTML as inert native blocks using `readingBlocks`;
+strong/b emphasis is retained as inline spans by shared ReadingContent, with
+normal text/dashes preserving their surrounding style. See
+reading-formatting-validation.md for tests and the pending iPhone comparison.
 `readingText` remains the plain-text normaliser. Heading tags become accessible
 22 px Candara Bold section titles (for example Gifts, Challenges and Supportive
 Strategies), paragraphs use body typography, and bullets are individual rows.
@@ -138,8 +166,9 @@ between bullets/paragraphs, including larger accessibility text sizes.
 Detail topic widgets now select a group and then one reading within it. ChartReading
 shows available summary blocks by default and offers View Full Text / View Summary
 when distinct versions exist; the two versions are never appended together.
-SummaryPreview keeps the original narrative intact; on My Chart, Read More opens
-the full summary in AppModal. Its standalone inline expansion remains reusable.
+Your Summary keeps the original narrative intact through the shared ContextualHelp
+preview/expansion widget; Read More expands in place. The older standalone
+SummaryPreview helper is no longer used by PersonalChart.
 Catalogue integration now uses the shared cache/resolver after deployed header
 validation passed. Available energy facts have an Overview section;
 see [artwork-integration.md](artwork-integration.md) for scope and device checks.

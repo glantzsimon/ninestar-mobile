@@ -129,14 +129,14 @@ async function getCsrfToken() {
   return data.requestToken;
 }
 
-export async function signIn(username: string, password: string) {
+export async function signIn(username: string, password: string, rememberMe = true) {
   session.change('changing');
   const generation = session.getSnapshot().generation;
   try {
     const csrfToken = await getCsrfToken();
     if (generation !== session.getSnapshot().generation) throw new MobileApiError('session_changed');
     const { data, status } = await mobileApiRequest('account/login', {
-      body: { username: username.trim(), password, rememberMe: false },
+      body: { username: username.trim(), password, rememberMe },
       csrfToken,
     });
     if (data.authenticated !== true) throw new MobileApiError('invalid_response', status);

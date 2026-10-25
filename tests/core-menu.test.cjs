@@ -30,3 +30,8 @@ test('free response retains core reading without acquiring paid topics', () => {
   assert.equal(coreReading(d, 'essence').body, 'Free core reading');
   assert.equal(coreReading(d, 'relationships').body, '');
 });
+test('relationship navigation does not use the longer explanatory help title', () => {
+  const d = detail();
+  d.contextualHelp = { relationships: { title: '9 Star Ki Relationships & Intimacy', culture: 'en-GB', blocks: [] } };
+  assert.equal(coreMenu(d).find((item) => item.key === 'relationships').title, 'Relationships');
+});

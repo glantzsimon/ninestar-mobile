@@ -47,8 +47,21 @@ test('login sends CSRF and credentials once, refreshes CSRF, then verifies the s
   assert.equal(login.headers['X-CSRF-Token'], 'before-login');
   assert.equal(login.headers['Content-Type'], 'application/json');
   assert.deepEqual(JSON.parse(login.body), {
-    username: 'test-user', password: ' password with spaces ', rememberMe: false,
+    username: 'test-user', password: ' password with spaces ', rememberMe: true,
   });
+});
+
+test('login honours opting out of a persistent session without changing CSRF verification', async () => {
+  const api = client([
+    success({ requestToken: 'before-login' }), success({ authenticated: true }),
+    success({ requestToken: 'after-login' }),
+    success({ emailAddress: 'test@example.test', entitlements: snapshot() }),
+  ]);
+  await api.signIn('user', 'password', false);
+  assert.equal(JSON.parse(api.calls[1].options.body).rememberMe, false);
+  assert.equal(api.calls[1].options.headers['X-CSRF-Token'], 'before-login');
+  assert.equal(api.calls.length, 4);
+  assert.equal(api.session.getSnapshot().status, 'signed-in');
 });
 
 test('failed login is not retried or followed by authenticated requests', async () => {

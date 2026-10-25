@@ -53,7 +53,8 @@ remain device/browser checks; automated public requests do not log in as a user.
 
 Cycles/planners, knowledge base, numerology and moon screens are not implemented
 in the mobile app; their returned IDs can use the same resolver when added.
-Website-only fact rows (season text, organs/internal representation, physiognomy,
-primary attributes and compatible/challenging combinations) still need explicit
-API fields before display; flag additions before implementation. There is no
+The six additional website table facts are now provided by the agreed contract
+and connected to the shared Overview table for full/free charts; see
+energy-metadata-validation.md. Free symbol labels/artwork IDs remain a separate
+contract gap. There is no
 change to purchasing, memberships, account saving, authentication or entitlements.

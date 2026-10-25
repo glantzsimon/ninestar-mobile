@@ -1,5 +1,38 @@
 # Chart detail modal validation
 
+Character Essence help refinement: display help.character at the selected
+Essence section top, before personalised prose, with normal shared panel spacing.
+Use existing expandable rich-text widget and exact API title; no new request,
+fallback introduction or entitlement change. Missing help omits the panel.
+Next device check: open Character → Essence and verify introduction and reading
+remain separate, including bold formatting and expansion/collapse.
+
+Energy-banner refinement: every primary/extended energy detail now renders shared
+EnergyBanner before its round buttons, after introductory help where present.
+It uses exact API full title, artwork fallbacks, full-width rounded widget styling
+and normal shared spacing. No title is inferred if an older/free projection omits
+it. Seventeen chart-parser tests pass, including full-title retention across
+roles and missing-title fallback. Next iPhone check: open Constitution and an
+Extended Profile energy, confirm their own titles/images and that Back to Menu
+still targets the buttons below the banner. Device appearance remains pending.
+Lint and typecheck passed. No endpoint, membership, timeout or account changes.
+
+Main chart layout refinement: energies first, summary second, Extended Profile
+last and initially expanded. Its heading is just Extended Profile, with shared
+AppPanel-style sectionTitle typography. Guidance is shortened in central ui-copy
+to Tap an energy to explore its meaning in more depth. AppDisclosure now supports
+defaultExpanded while retaining controlled state and smooth collapse. Next
+iPhone check: reload My Chart and confirm order, heading/no subtitle, initial
+expansion and subsequent collapse/reopen. No API or account-state changes.
+Lint and typecheck passed; visual iPhone layout verification remains pending.
+
+Current overview table status: the six additional metadata fields are deployed
+and connected for both full/free chart energies, superseding the table-field
+blockers recorded below. Public knowledge-base checks verified all six string
+fields across all nine energies; anonymous own-chart routes remain protected.
+78 app tests, lint and typecheck passed; authenticated iPhone row comparison pending.
+See energy-metadata-validation.md. Free symbol fields remain a separate gap.
+
 Latest motion refinement: Back to Menu and all shared disclosures now animate
 occupied height and opacity together via FadeCollapse. Content moves continuously
 as the control collapses/expands; no end-of-fade unmount causes a layout jump.

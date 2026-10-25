@@ -6,8 +6,8 @@ import { FadeView } from '@/components/ui/fade-view';
 import type { ChartReading as Reading } from '@/lib/personal-chart';
 import { readingPresentation } from '@/lib/reading-presentation';
 
-export function ChartReading({ reading, title }: { reading: Reading; title: string }) {
-  const [full, setFull] = useState(false);
+export function ChartReading({ reading, title, initialFull = false }: { reading: Reading; title: string; initialFull?: boolean }) {
+  const [full, setFull] = useState(initialFull);
   const presentation = readingPresentation(reading, full);
   return <AppPanel title={title} headerAction={presentation.canToggle ? {
     title: full ? 'View Summary' : 'View Full Text', expanded: full, onPress: () => setFull(!full),

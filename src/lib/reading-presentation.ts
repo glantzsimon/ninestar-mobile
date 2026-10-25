@@ -20,7 +20,15 @@ export function summaryPreview(blocks: ReadingBlock[]): { blocks: ReadingBlock[]
     } else {
       const candidate = block.text.slice(0, remaining);
       const boundary = candidate.lastIndexOf(' ');
-      preview.push({ ...block, text: `${candidate.slice(0, boundary > 0 ? boundary : remaining).trimEnd()}…` });
+      const clipped = candidate.slice(0, boundary > 0 ? boundary : remaining).trimEnd();
+      let spanLength = clipped.length;
+      const spans = block.spans?.flatMap((span) => {
+        const text = span.text.slice(0, Math.max(0, spanLength));
+        spanLength -= text.length;
+        return text ? [{ ...span, text }] : [];
+      });
+      preview.push({ ...block, text: `${clipped}…`,
+        ...(spans ? { spans: [...spans, { text: '…', bold: false }] } : {}) });
       return { blocks: preview, shortened: true };
     }
   }

@@ -11,7 +11,8 @@ const icons: Record<string, string> = {
   essence: 'ui.fundamental-nature', energyFacts: 'ui.overview',
   'Your Nature': 'ui.fundamental-nature', 'People and Relationships': 'ui.relationships',
   'Work and Direction': 'ui.career', 'Wellbeing and Balance': 'ui.health',
-  'Childhood and Growth': 'ui.inner-child', 'Stress and Balance': 'ui.stress-response',
+  character: 'ui.fundamental-nature', childNature: 'ui.inner-child',
+  adultChildRelationship: 'ui.adult-child-relationship', stressResponse: 'ui.stress-response',
   intellectualQualities: 'ui.intellectual-qualities', interpersonalQualities: 'ui.interpersonal-qualities',
   emotionalLandscape: 'ui.emotional-energy', relationships: 'ui.relationships',
   career: 'ui.career', finances: 'ui.finances', health: 'ui.health', spirituality: 'ui.spirituality',
@@ -28,7 +29,7 @@ export function SectionWidgets({ items, selected, onSelect, energy }: {
       backgroundColor: pressed || selected === item.key ? theme.backgroundSelected : theme.panelHeader,
       borderColor: selected === item.key ? theme.primary : theme.border,
     }]}>
-    {item.key === 'personality' && energy ? <ArtworkImage artworkId={energy.artworkId} legacyUrl={energy.imageUrl}
+    {(item.key === 'personality' || item.key === 'character') && energy ? <ArtworkImage artworkId={energy.artworkId} legacyUrl={energy.imageUrl}
       fallback={EnergyArtwork[energy.number]} style={styles.icon} contentFit="contain" accessible={false} />
       : !!icons[item.key] && <ArtworkImage artworkId={icons[item.key]} style={styles.icon} contentFit="contain" accessible={false} />}
     <ThemedText type="smallBold" style={styles.label}>{item.title}</ThemedText>

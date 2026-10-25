@@ -63,6 +63,14 @@ relying on colour alone. Fonts and mark add roughly 0.6 MB before compression.
 
 ## Reusable screen template
 
+`ContextualHelp` renders API-owned section introductions above their widgets.
+It uses AppPanel and rich ReadingContent, with up to three preview lines and a
+themed gradient fading the bottom edge. Full rich blocks expand/collapse through
+measured-height/opacity animation with OS Reduce Motion respected. Current
+consumers are help.core and help.relationships. Omit unavailable help gracefully.
+Back to Menu targets the registered button grid below help, and disappears above
+that grid rather than requiring the user to reach the help at absolute scroll top.
+
 ```tsx
 <AppScreen>
   <ThemedText type="title">Screen Title</ThemedText>
@@ -90,6 +98,10 @@ relying on colour alone. Fonts and mark add roughly 0.6 MB before compression.
   Selected cards share an accent border/background and selected accessibility
   state. Chart header cards open their reading in the shared AppModal sheet;
   reuse these cards for profile calculator results.
+- `EnergyBanner`: full-width rounded section-widget surface with energy artwork
+  and the exact API full title in shared sectionTitle typography. Display before
+  section buttons on every primary/extended energy screen with standard gaps.
+  It has no button action; images use the existing shared artwork fallbacks.
 - `EnergyFacts`: reusable element-info widget. Five available symbols share one
   equal-column row, with artwork scaling to column width; labels/values wrap.
   Its fact table is a collapsed More Details disclosure below the symbols,
@@ -120,7 +132,9 @@ relying on colour alone. Fonts and mark add roughly 0.6 MB before compression.
   the top below fixed navigation. The modal waits for layout before scrolling;
   consumers target the detail itself, excluding any submenu buttons.
 - `AppDisclosure`: optional subtitle explains the content before opening; it
-  starts collapsed unless explicitly controlled. Related panels can share an
+  starts collapsed unless defaultExpanded or explicitly controlled. Its heading
+  uses the same sectionTitle role as AppPanel. Extended Profile starts expanded,
+  without a subtitle, after Your Summary on the main chart. Related panels can share an
   8 px stack gap when appropriate; Core Energies and Extended Profile use the normal 24 px panel gap.
 - `AppButton`: primary/secondary, pressed, disabled and loading states.
 - `AppInput`: visible and accessible label, focus border, theme and ref forwarding.
@@ -132,6 +146,10 @@ relying on colour alone. Fonts and mark add roughly 0.6 MB before compression.
   `sectionTitle` is a 22/28 px Candara Bold heading, used for authored reading
   headings with the header accessibility role. `ReadingContent` renders safe
   native heading/paragraph/bullet blocks with compact, explicit spacing.
+  ReadingContent preserves inline strong/b emphasis as nested Candara Bold Text
+  at the surrounding body size/leading. Use the shared parser/renderer rather
+  than stripping bold locally or rendering executable HTML. Rich summary
+  previews clip spans together with text; see reading-formatting-validation.md.
 - `AppSelect`: selected values use the same 16 px horizontal inset as text inputs,
   including Yes/No fields, enum selectors and timezone selectors.
 

@@ -31,21 +31,41 @@ export function readingText(value: unknown): string {
     .trim();
 }
 
-export type ReadingBlock = { kind: 'heading' | 'paragraph' | 'list-item'; text: string };
+export type ReadingSpan = { text: string; bold: boolean };
+export type ReadingBlock = { kind: 'heading' | 'paragraph' | 'list-item'; text: string; spans?: ReadingSpan[] };
 
 export function readingBlocks(value: unknown): ReadingBlock[] {
   if (typeof value !== 'string') return [];
-  const source = value.replace(/<!--[\s\S]*?-->/g, '')
-    .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, '');
+  const source = value.replace(/[\uE000\uE001]/g, '').replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, '')
+    .replace(/<(\/?)(?:strong|b)\b[^>]*>/gi, (_tag, closing) => closing ? '\uE001' : '\uE000');
   const blocks: ReadingBlock[] = [];
+  let boldDepth = 0;
+  function append(kind: ReadingBlock['kind'], marked: string) {
+    const spans: ReadingSpan[] = [];
+    for (const part of marked.split(/([\uE000\uE001])/)) {
+      if (part === '\uE000') boldDepth++;
+      else if (part === '\uE001') boldDepth = Math.max(0, boldDepth - 1);
+      else if (part) {
+        const bold = boldDepth > 0;
+        const last = spans[spans.length - 1];
+        if (last?.bold === bold) last.text += part;
+        else spans.push({ text: part, bold });
+      }
+    }
+    if (spans.length) { spans[0].text = spans[0].text.trimStart(); spans[spans.length - 1].text = spans[spans.length - 1].text.trimEnd(); }
+    const nonempty = spans.filter((span) => span.text);
+    const text = nonempty.map((span) => span.text).join('');
+    if (text) blocks.push({ kind, text, ...(nonempty.some((span) => span.bold) ? { spans: nonempty } : {}) });
+  }
   function appendBody(html: string) {
     for (const paragraph of readingText(html).split(/\n{2,}/).filter(Boolean)) {
       // Keep each bullet compact without inserting blank native text lines.
       if (paragraph.startsWith('• ')) {
         for (const item of paragraph.split(/\n(?=• )/)) {
-          blocks.push({ kind: 'list-item', text: item.replace(/^• /, '').trim() });
+          append('list-item', item.replace(/^• /, '').trim());
         }
-      } else blocks.push({ kind: 'paragraph', text: paragraph });
+      } else append('paragraph', paragraph);
     }
   }
   const headings = /<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1\s*>/gi;
@@ -54,7 +74,7 @@ export function readingBlocks(value: unknown): ReadingBlock[] {
   while ((match = headings.exec(source)) !== null) {
     appendBody(source.slice(cursor, match.index));
     const text = readingText(match[2]).replace(/\s+/g, ' ').trim();
-    if (text) blocks.push({ kind: 'heading', text });
+    if (text) append('heading', text);
     cursor = headings.lastIndex;
   }
   appendBody(source.slice(cursor));

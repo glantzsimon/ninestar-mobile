@@ -6,8 +6,9 @@ import { EnergyArtwork } from '@/constants/energy-artwork';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { type ChartEnergy } from '@/lib/personal-chart';
+import { uiCopy } from '@/lib/ui-copy';
 
-export function EnergyCard({ energy, title, hint, compact = false, selected = false, onPress, actionLabel = 'Find out more' }: {
+export function EnergyCard({ energy, title, hint, compact = false, selected = false, onPress, actionLabel = uiCopy.findOutMore }: {
   energy: ChartEnergy; title: string; hint: string; compact?: boolean;
   selected?: boolean; onPress?: () => void; actionLabel?: string;
 }) {
@@ -15,7 +16,7 @@ export function EnergyCard({ energy, title, hint, compact = false, selected = fa
   return (
     <Pressable accessible accessibilityRole={onPress ? 'button' : 'text'}
       accessibilityLabel={`${title}, ${energy.number}${energy.name ? `, ${energy.name}` : ''}`}
-      accessibilityHint={onPress ? 'Opens the details for this energy' : undefined}
+      accessibilityHint={onPress ? uiCopy.energyDetailsHint : undefined}
       accessibilityState={onPress ? { selected } : undefined}
       disabled={!onPress} onPress={onPress}
       style={({ pressed }) => [styles.card, compact && styles.compact, {
@@ -26,9 +27,9 @@ export function EnergyCard({ energy, title, hint, compact = false, selected = fa
         style={[styles.art, compact && styles.compactArt]}
         contentFit="contain" accessible={false} />
       <View style={styles.text}>
-        <ThemedText type="smallBold">{title}</ThemedText>
+        {!!title && <ThemedText type="smallBold">{title}</ThemedText>}
         {!!energy.name && <ThemedText>{energy.name}{energy.element ? ` · ${energy.element}` : ''}</ThemedText>}
-        <ThemedText type="small" themeColor="textSecondary">{hint}</ThemedText>
+        {!!hint && <ThemedText type="small" themeColor="textSecondary">{hint}</ThemedText>}
         {!!onPress && <ThemedText type="small" themeColor="primary">{actionLabel}</ThemedText>}
       </View>
     </Pressable>

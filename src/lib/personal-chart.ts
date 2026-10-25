@@ -1,6 +1,9 @@
 import { readingBlocks, readingText, type ReadingBlock } from './reading-text';
+import { parseContextualHelp, type ContextualHelp } from './contextual-help';
+import { parseChartHealth, type ChartHealth } from './chart-health';
 
 export type ChartEnergy = {
+  title?: string;
   key: string;
   number: number;
   name: string;
@@ -11,10 +14,13 @@ export type ChartEnergy = {
   descriptionBlocks: ReadingBlock[];
 };
 export type ChartReading = {
+  title?: string;
   key: string; summary: string; body: string; summaryBlocks: ReadingBlock[]; bodyBlocks: ReadingBlock[];
   unavailableMessage?: string;
 };
 export type PersonalChart = {
+  health?: ChartHealth;
+  help?: Record<string, ContextualHelp>;
   isSixteenOrOver?: boolean;
   access: 'full' | 'free';
   name: string;
@@ -40,15 +46,22 @@ export function parsePersonalChart(data: Record<string, unknown>, access: 'full'
     }
     return {
       key, number,
+      title: readingText(energy.title) || undefined,
       artworkId: typeof energy.artworkId === 'string' ? energy.artworkId : undefined,
-      facts: access === 'full' ? [
-        ['Yin / Yang', 'yinYang', 'yinYangArtworkId'], ['Element', 'element', 'elementArtworkId'],
-        ['Group', 'modality', 'modalityArtworkId'], ['Trigram', 'trigram', 'trigramArtworkId'],
+      facts: [
+        ...(access === 'full' ? [
+          ['Yin / Yang', 'yinYang', 'yinYangArtworkId'], ['Element', 'element', 'elementArtworkId'],
+          ['Group', 'modality', 'modalityArtworkId'], ['Trigram', 'trigram', 'trigramArtworkId'],
+        ] : []),
         ['Colour', 'colour'], ['Direction', 'direction'], ['Family Member', 'familyMember'],
+        ['Season', 'season'], ['Internal Representation', 'internalRepresentation'],
+        ['Physiognomy', 'physiognomy'], ['Primary Attributes', 'primaryAttributes'],
+        ['Most Harmonious Combinations', 'mostHarmoniousCombinations'],
+        ['Most Challenging Combinations', 'mostChallengingCombinations'],
       ].flatMap(([label, field, artwork]) => {
         const value = readingText(energy[field]);
         return value ? [{ label, value, artworkId: artwork && typeof energy[artwork] === 'string' ? energy[artwork] as string : undefined }] : [];
-      }) : [],
+      }),
       name: readingText(energy.name),
       element: readingText(energy.element),
       imageUrl: typeof energy.imageUrl === 'string' && energy.imageUrl.startsWith('https://')
@@ -63,7 +76,7 @@ export function parsePersonalChart(data: Record<string, unknown>, access: 'full'
   });
   const readings = Object.entries(object(data.sections)).map(([key, value]) => {
     const section = object(value);
-    return { key, summary: readingText(section.summary), body: readingText(section.body),
+    return { key, title: readingText(section.title) || undefined, summary: readingText(section.summary), body: readingText(section.body),
       summaryBlocks: readingBlocks(section.summary), bodyBlocks: readingBlocks(section.body) };
   }).filter((section) => section.summary || section.body);
   const primaryReadings: ChartReading[] = ['core', 'character', 'socialExpression'].map((key) =>
@@ -76,6 +89,8 @@ export function parsePersonalChart(data: Record<string, unknown>, access: 'full'
   return {
     isSixteenOrOver: typeof object(data.person).isSixteenOrOver === 'boolean'
       ? object(data.person).isSixteenOrOver as boolean : undefined,
+    help: parseContextualHelp(data.help),
+    health: parseChartHealth(data, access),
     access, energies, extendedEnergies, readings: [...primaryReadings,
       ...readings.filter((reading) => !primaryReadings.some((primary) => primary.key === reading.key))],
     name: readingText(object(data.person).name),

@@ -6,10 +6,10 @@ import { FadeCollapse } from '@/components/ui/fade-collapse';
 import { ControlHeight, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-export function AppDisclosure({ title, subtitle, children, expanded, onExpandedChange }: PropsWithChildren<{
-  title: string; subtitle?: string; expanded?: boolean; onExpandedChange?: (expanded: boolean) => void;
+export function AppDisclosure({ title, subtitle, children, expanded, defaultExpanded = false, onExpandedChange }: PropsWithChildren<{
+  title: string; subtitle?: string; expanded?: boolean; defaultExpanded?: boolean; onExpandedChange?: (expanded: boolean) => void;
 }>) {
-  const [localOpen, setLocalOpen] = useState(false);
+  const [localOpen, setLocalOpen] = useState(defaultExpanded);
   const open = expanded ?? localOpen;
   const theme = useTheme();
   return (
@@ -25,7 +25,7 @@ export function AppDisclosure({ title, subtitle, children, expanded, onExpandedC
           backgroundColor: pressed ? theme.backgroundSelected : theme.panelHeader,
         }]}>
         <View style={styles.title}>
-          <ThemedText type="smallBold">{title}</ThemedText>
+          <ThemedText type="sectionTitle" accessibilityRole="header">{title}</ThemedText>
           {!!subtitle && <ThemedText type="small" themeColor="textSecondary">{subtitle}</ThemedText>}
         </View>
         <ThemedText accessibilityElementsHidden importantForAccessibility="no">{open ? '−' : '+'}</ThemedText>

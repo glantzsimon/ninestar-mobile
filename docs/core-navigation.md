@@ -23,11 +23,16 @@ Data comes from existing GET personal-chart/me section fields; Essence uses core
 while the other readings use their matching protocol keys. Overview uses energy
 metadata. No separate endpoint per button, local interpretations or access grants.
 Explicit isSixteenOrOver=false hides Relationships. Missing free-response readings
-show an availability message. The free-response symbol/fact metadata addition
-remains proposed, unimplemented and owned by the backend contract workflow.
+show an availability message. The nine free overview table facts are now
+implemented and connected; see energy-metadata-validation.md. Free symbol
+labels/artwork references remain a separate unimplemented API extension.
 The descriptive-title map is removed because this menu no longer uses those labels.
 
 Validation: four targeted menu/order/access/content tests, lint and typecheck
 passed. Next concrete step: reopen Core on iPhone, verify order/icons, and tap
 Overview to confirm direct scrolling/top alignment. Device validation is pending.
 No API, membership, purchasing, timeout or account-save changes.
+
+Health now renders the website's five panels in order within its selected detail
+area, using new full-response organ/expansion projections. See health-api-review.md
+for deployed checks, labels, safeguards and pending signed-in iPhone verification.

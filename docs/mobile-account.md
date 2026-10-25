@@ -1,5 +1,11 @@
 # My Account
 
+Login persistence and OS autofill: see login-persistence.md. Stay signed in now
+passes the user's choice to existing rememberMe (default enabled). Access still
+comes from fresh server checks; no password or entitlement persistence in app
+storage. Native restart/logout validation and standalone domain association are
+tracked separately from account editing.
+
 The mobile account screen edits the same account as the website, through the
 existing `GET account/me` and `POST account/update` contract. No backend changes
 or alternative account store are introduced. Personal, birth and calculation
