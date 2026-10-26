@@ -1,6 +1,10 @@
 import type { ChartEnergy, ChartReading, PersonalChart } from './personal-chart';
 import type { ContextualHelp } from './contextual-help';
 
+export function energyRoleTitle(energy: ChartEnergy): string {
+  return energy.roleLabel ?? '';
+}
+
 const chartEnergyKeys = new Set(['core', 'character', 'socialExpression', 'dayStar', 'generation', 'epoch']);
 
 type GroupDefinition = { title: string; keys: [string, string][] };
@@ -32,7 +36,7 @@ export function selectChartDetail(chart: PersonalChart, key: string): ChartDetai
   const energy = [...chart.energies, ...chart.extendedEnergies].find((item) => item.key === key);
   if (!energy || !chartEnergyKeys.has(key)) return null;
   const help = chart.help?.[key];
-  const title = help?.title ?? energy.name;
+  const title = energyRoleTitle(energy);
   const reading = chart.readings.find((item) => item.key === key) ?? {
     key, summary: '', body: '', summaryBlocks: [], bodyBlocks: energy.descriptionBlocks,
     unavailableMessage: energy.descriptionBlocks.length ? undefined : 'A detailed reading for this energy is not included in your current chart.',

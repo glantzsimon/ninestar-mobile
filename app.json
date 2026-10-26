@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "ninestar-mobile",
+    "name": "NineStar",
     "slug": "ninestar-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,9 +8,11 @@
     "scheme": "ninestarmobile",
     "userInterfaceStyle": "dark",
     "ios": {
+      "bundleIdentifier": "com.ninestarkiastrology.mobile",
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "com.ninestarkiastrology.mobile",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -33,7 +35,8 @@
           "imageWidth": 76
         }
       ],
-      "expo-video"
+      "expo-video",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -1,5 +1,51 @@
 # Localisation and API label gaps
 
+Main chart page heading is separate from overview About helper title. Owner
+explicitly requests Your Personal Chart for own-chart view; Home supplies this
+central translatable uiCopy value. Reusable PersonalChart defaults to neutral
+Personal Chart for calculator hosts. No separate page-title API field is currently
+documented; flag that gap rather than stripping About from the helper. This
+owner-approved local wording does not replace API roleLabels or help titles.
+
+## Resolved: six short role labels
+
+Latest shared contract now exposes data.roleLabels for core, character,
+socialExpression, dayStar, generation and epoch in full/free responses and full
+embedded profiles. Client parses each into ChartEnergy.roleLabel and uses the
+same shared resolver for card and destination title. Temporary local labels have
+been removed. Missing/invalid values omit the role caption/title without deriving
+labels from keys, energy names, full titles or help. Existing number/name artwork
+content remains available. No seventh/hour label added. This supersedes all
+missing-role-label proposals and local fallback notes below. Detailed validation
+and live verification limits: role-label-validation.md.
+
+## Extended Profile role labels (owner request)
+
+Website _ProfilePills.cshtml uses Dictionary.DayStarLabel (Day Star),
+Dictionary.GenerationalEnergyLabel (Generational Ki) and Dictionary.EpochEnergyLabel
+(Epoch Ki). Current DTO/contract does not expose these short role labels separately
+from About help or individual energy titles. Owner explicitly requires API-sourced
+9 Star Ki labels; no additional local role fallback added. Request an additive
+documented role-label map/projection covering all six roles (including Constitution,
+Character and Social Expression) from the backend owner. Exact field name/shape
+must be agreed in shared mobile-api.md before implementation. Then replace primary
+local fallbacks and use identical API labels on cards/modal title bars. Do not
+infer labels from keys, strip About prefixes or repurpose energies[role].title,
+which labels the full energy banner. Next: backend contract addition/verification.
+
+Latest About-heading contract review: adult/child helper now uses About Adult /
+Child Relationship while its navigation/details use Adult / Child Relationship;
+current client already consumes these separately. No “Your Adult Child relationship”
+field is documented. Core/Character/other help titles now likewise use About
+phrases. Corrected main energy cards/modals to stop reusing those help titles.
+Shared energyRoleTitle uses central website Dictionary wording for the three
+primary roles: Constitution, Character Nature / Inner Child, Social Expression.
+These are explicit local translation-resource fallbacks, not API-backed role
+labels. Other roles use API energy names rather than About help titles. Dedicated
+Dictionary-backed role navigation labels remain a proposed additive API gap; no
+contract field was invented or implemented. Do not strip About from API text.
+Keep explanatory titles as supplied. This supersedes older help-title reuse notes.
+
 ## Adult/child personalised reading heading
 
 Owner's latest decision supersedes the personalised-title proposal below:

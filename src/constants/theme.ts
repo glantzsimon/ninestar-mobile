@@ -95,6 +95,13 @@ export const Typography = {
 export const Radius = { panel: 8, control: 6, pill: 99 } as const;
 export const ControlHeight = 48;
 
+// Website tiers are 1/.62/.38 and .62/.38/.24. Keep the hierarchy gentler
+// on small screens so secondary artwork remains legible.
+export const EnergyInfluenceScale = {
+  primary: [1, 0.78, 0.6],
+  additional: [0.72, 0.6, 0.5],
+} as const;
+
 export const Spacing = {
   half: 2,
   one: 4,

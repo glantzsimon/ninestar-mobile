@@ -9,6 +9,286 @@ Never record credentials, tokens or cookies.
 
 ## Current priorities (2026-10-25)
 
+My Predictions first native screen implemented at owner's request: own title,
+expandable API moreOnCycles introduction, Primary Cycles (year/month/day), expanded
+Additional Cycles (generation/epoch/hour), shared energy/artwork cards and detail
+modal with per-period help and separate scope readings. No summary, second login,
+credit POSTs or calculator submission. Reusable Predictions component supports
+future calculator hosts. API reading titles are shown verbatim; short period labels
+remain unavailable and must not be claimed as implemented. Existing enum metadata
+supplies scope disclosure labels; no guessed cycleLabels field.
+Live validation blocked: Integration predictions/me, readings/predictions/me/free
+and metadata/options all returned HTTP 500 HTML ASP.NET Runtime Error, not JSON.
+Recheck also hit the 15-second timeout on each endpoint. Local validation: 129 tests,
+lint, typecheck and targeted whitespace check all passed. No signed-in live or
+iPhone result is claimed.
+Source issue also identified: FreePredictions calls FreeYear(global year) without
+global=true, selecting personal CycleDescription. Free global reading is withheld
+in UI pending backend correction/verification. Full global prose stays distinct.
+Next: backend restores Integration and confirms labels/global-text fix, then owner
+opens My Predictions for the first signed-in device check. Detailed handover and
+validation in my-predictions.md. Retained day variants are not yet exposed as UI
+choices pending proper API labels; no variants are merged into another reading.
+
+Calculator help implemented using owner's clarified source/flow: data.help.overview,
+not personalised data.overview. Existing GET personal-chart/me/free supplies generic
+help before any arbitrary-person POST; discard its readings/numbers. ContextualHelp
+appears below form title, preserves authored headings/emphasis/API title, and is
+hidden when results show. Edit Calculation restores it with retained inputs.
+Optional help failure never blocks/resets the form; session generation/alive guards
+reject stale updates. No new content route or backend change is required for this
+signed-in flow. This supersedes the previous lightweight-endpoint blocker below.
+Validation: 122 tests passed; lint, typecheck and targeted whitespace check passed.
+Next: owner reloads calculator and expands introduction, then calculates to confirm
+it disappears; My Predictions follows after this check. See calculator report.
+
+Owner flagged missing calculator help again. Rechecked Integration on 2026-10-25:
+GET content/personal-chart returns HTTP 404 content_not_found. Local shared
+contract and MobileContentController also still lack this content page. Therefore
+the requested pre-calculation helper remains unimplemented, not a rendering bug.
+Existing knowledge-base content is available but its 719 KB graph/title mismatch
+remain documented. Next concrete backend handover: expose the proposed lightweight
+content page with Dictionary-backed About 9 Star Ki Personal Chart title, existing
+Dictionary.personal_chart HTML and culture, without calculation or membership
+changes; document the agreed route before mobile wiring. No speculative client
+route, hardcoded prose or backend edits introduced during this recheck.
+
+Owner confirmed next feature after Personal Chart Calculator help: My Predictions,
+with page title, expandable API help, Primary Cycles and Additional Cycles in
+that order, following My Chart's shared widgets and detail modals. No summary.
+Reuse the same prediction results for the later calculator. See my-predictions.md
+for the outstanding cycle-label contract check; do not invent labels. Next: finish
+calculator help when lightweight content is exposed, then recheck latest prediction
+contract/Integration and implement the native own-predictions screen.
+
+Calculator default correction: never prefill account name/DOB/time/gender. First
+use has blank name, local today minus 22 calendar years, time 00:00 with birth time
+unknown, and random selection among API gender options. February 29 clamps to
+February 28. Calculation preferences/current timezone still seed options, with
+current zone initially used for birth zone. Shared input memory retains edits
+and submitted inputs across reopen/restart, isolated by environment/account/feature;
+no automatic recalculation. This follows website calculatorMemory.js input/change
+and submit retention and supersedes initial own-details prefill/memory-only notes.
+Uses existing Expo FileSystem app-private documents, no dependency additions.
+No credentials, chart results, tokens, access or My Account drafts retained.
+Pending device check: fresh default, change inputs, leave/reopen and restart.
+119 automated tests passed, including defaults, leap day, restart restoration,
+latest-write ordering and account/environment isolation. First defaults are
+remembered immediately, so reopening without edits also keeps the chosen gender.
+See personal-chart-calculator.md for automated results and limitations.
+
+Calculator heading changed to Personal Chart Calculator; removed introductory
+sentence at owner's request. Requested expandable About 9 Star Ki Personal Chart
+help before the form: exact body already exists as Dictionary.personal_chart.
+Integration GET knowledge-base verified HTTP 200, help.personalChart has matching
+opening and strong HTML, culture en-GB, but title Personal Chart and whole response
+719,203 bytes. Chart help.overview exposes the same body only with a chart result,
+title About Your Personal Chart. Proposed (not implemented) small public content
+route content/personal-chart with Dictionary-backed About 9 Star Ki Personal Chart
+title and existing body/culture, avoiding a full knowledge-base fetch or calculation
+solely for help. Backend owner to agree/expose lightweight content, then mobile
+consumes it with ContextualHelp above form. No backend contract/code edits made.
+
+Personal Chart calculator is now the owner's first native Explore feature.
+Inspected the website's shared NineStarKi calculator form, Personal Chart and
+Predictions wrappers, and mobile request/controller contract. Added shared
+CalculationForm and CalculationDraft/buildCalculation with optional selected-date
+extension; Explore has a nested native stack and Personal Chart form/results.
+Starts from a separate copy of server-saved details; edit/recalculate keeps that
+draft without saving account data. Full results reuse PersonalChart and all
+existing energy details. Fresh CSRF, 15-second deadline and session cancellation
+remain shared. No automatic preview, own/free substitution or credit redemption.
+Integration metadata 200, synthetic public preview 200, anonymous full calculate
+401 authentication_required. Signed-in full calculation needs owner iPhone check.
+Final automated validation: 114 tests passed; lint/typecheck passed. Initial
+effect-lint issue fixed and stale generated Router types refreshed locally.
+See personal-chart-calculator.md for results, limitations and next step. This
+supersedes the previous next-feature priority below; Predictions remains pending.
+
+Explicit owner architecture decision: every feature screen will be built in the
+app and talk to the API. No website screens, browser wrappers or website fallback
+for any Explore/My Predictions feature. One shared app sign-in. This supersedes
+all earlier website-access proposals and implementation history. Current website
+fallback already removed. Next: finish native My Predictions after documented
+cycle labels, then implement remaining native feature flows one by one using
+shared result components. Added lasting rule to AGENTS.md.
+
+Owner rejected website fallback/second sign-in: app features must share one native
+authenticated session. Removed website notice, Opens website captions, redirects,
+browser hook and URL configuration. Other Explore text/grouping unchanged.
+Unbuilt feature buttons now open native Coming soon panels; My Predictions also
+stays in-app pending actual cycle UI. Supersedes website-access implementation
+and checks below. Next: implement native features against existing API, starting
+with cycle-label contract for predictions; no browser login workaround.
+
+Explore validation: 108 tests, lint and typecheck passed. All eight public website
+feature GETs returned 200 at expected paths; own-predictions URL redirected to
+login anonymously as expected. HEAD initially timed out, so do not claim HEAD
+success. Browser/iPhone presentation and separate sign-in still need owner check.
+
+Explore hub and four visible tabs implemented at owner's request to see other
+features. Order Explore, My Chart, My Predictions, My Account. Existing native
+chart/account preserved. Other feature cards explicitly open their website views
+through system browser, with separate browser authentication; no claim of native
+feature completion. My Predictions temporarily offers website access while cycle
+labels/native UI are pending. Style Guide moved to hidden /style-guide. See
+explore-navigation.md. Next: owner checks Explore and one website feature on iPhone.
+
+Account naming consistency: bottom navigation remains My Account; account page
+heading now Your Account across signed-out, native form and web fallback states,
+matching My Chart / Your Personal Chart convention. Central uiCopy resource;
+no changes to account drafts, login or entitlements. Pending visual confirmation.
+
+Main My Chart title correction: owner explicitly wants Your Personal Chart,
+not About Your Personal Chart. Home now passes that central resource to reusable
+PersonalChart; generic calculator default is Personal Chart. Never reuse API
+help.overview.title as the page heading. Dedicated API page titles remain missing;
+these explicit owner-approved strings live in uiCopy pending that addition.
+Next: owner checks main heading on iPhone. Other widget headings stay neutral.
+
+Owner clarified “Update buttons also” means energy/cycle buttons inside result
+screens, not bottom navigation. Existing energy buttons already use neutral
+API roleLabels verbatim and match destination headings. Keep My Chart/My
+Predictions/My Account for personal top-level destinations. Apply the same
+neutral API cycle-label behavior to prediction/calculator buttons once the
+pending cycle-label contract exists; do not strip Your/About from server strings
+or fabricate a client cycleLabels field. No additional UI mutation needed for
+existing energy buttons after inspection.
+
+My Predictions development begun: owner specifies Primary Cycles / Additional
+Cycles, no summary, and same reusable result UI for calculators without Your
+headings. Extracted ReadingGroups and connected My Chart; headings now Core
+Energies and Summary. Added read-only own-predictions client with membership-only
+free yearly fallback; tests verify no credit POSTs. Prediction tab/result UI awaits
+short cycle-period labels missing from API (About help is not navigation). Exact
+proposed backend handover in my-predictions.md; no guessed contract fields or
+backend edits. Next: backend adds documented labels, then finish prediction UI.
+
+Owner's latest navigation preference: Explore first. Proposed bottom order is
+Explore, My Chart, My Predictions, My Account, superseding earlier ordering.
+Explore is the grouped feature hub. Order preference recorded; initial launch
+route and implementation have not yet changed. Do not infer an explicit default
+landing-screen decision solely from tab ordering.
+
+Navigation expansion discussion: screenshot lists Personal Chart, Compatibility,
+Predictions, I Ching, Karmic Numerology, AI Astrologer, Knowledge Base and Articles.
+Recommend four bottom destinations: My Chart, My Predictions, Explore, My Account.
+Explore is a proposed hub (broader than Calculators) with grouped reusable cards:
+reading/calculation tools, AI Astrologer, and learning content (Knowledge Base,
+Articles). Personal own-chart/predictions stay direct; calculators for other people
+can live in Explore without duplicating the main personal destinations. Feature
+names should retain API labels; group names are UX proposals, not API contract
+changes. Proposal awaiting agreement; no navigation/routes implemented yet.
+
+New feature request: My Predictions as a main destination. Owner asks whether
+bottom buttons scroll horizontally and can scale to many features. Current
+native bottom tabs do not implement horizontal scrolling; keep top-level
+destinations few. Proposed (not yet agreed/implemented): My Chart, My Predictions,
+My Account now; later a Tools hub for calculators/other less frequent functions,
+avoiding an overflowing bottom tab bar. Before implementation read predictions
+contract, preserve grants/entitlements and reuse chart/help/detail components.
+Next: agree navigation and implement My Predictions against existing API content.
+
+Extended Profile helpers added consistently: Day Star, Generation and Epoch now
+use the same ContextualHelp widget beneath the title bar, above energy banner
+and menu, matching all primary energies. API content only; omit absent help.
+Next: owner verifies placement/expand-collapse on those three screens.
+
+Role-label gap resolved in latest contract and implemented: six API roleLabels
+now name energy cards and destination title bars. Temporary local labels removed;
+About help and full energy headings remain separate. All 103 tests, lint and
+typecheck passed. Next: owner checks Extended Profile labels and matching
+screen title on iPhone. Authenticated Integration payload not inspected by agent.
+Supersedes older unresolved role-label proposals below.
+
+Extended Profile owner request: Day Star/Generation/Epoch role labels must come
+from API and match destination title bars. Website resources are DayStarLabel
+(Day Star), GenerationalEnergyLabel (Generational Ki), EpochEnergyLabel (Epoch Ki).
+Current contract exposes About help titles and individual energy titles/names,
+but not these short role labels. Do not add local 9 Star Ki wording or strip About.
+Next: backend exposes Dictionary-backed short role labels for all six energies,
+then shared resolver uses one API label for cards and screens. No speculative
+client/contract field added in this review. Existing primary local fallbacks should
+also be replaced when this field is available.
+
+About-title correction implemented: shared primary energy card/modal labels no
+longer reuse About help titles. Use central website labels pending distinct API
+role labels. Constitution/Character retain helper panels; Social Expression now
+also shows its API help above banner/menu. Next: owner checks three modal title
+bars and Social Expression help. See contextual-help.md; API role-label gap is
+still open in localisation.md.
+
+Owner confirmed Health looks good on iPhone and is reviewing Character next.
+Owner reports backend heading update ready. Latest contract separates About Adult
+/ Child Relationship helper from Adult / Child Relationship navigation/details;
+existing client already consumes those fields. This differs from earlier proposed
+“Your Adult Child relationship”; keep server wording and flag difference, not
+hardcode it. New About titles for all contextual help reveal another semantic
+gap: main card/modal titles currently reuse help titles. Need separate generic
+energy-role navigation labels from API rather than stripping About or deriving
+keys. No speculative client label replacement made. Owner refreshing app hit a
+problem; first diagnostic restart Metro with Ctrl+C then npm start (Expo Go).
+
+Owner confirms Apple membership still pending (Apple advised up to 48 hours) and
+explicitly parks signed-build work until activation. Local identity/config/SDK
+preparation is complete and checked; no need to repeat it. Do not keep prompting
+for membership status during unrelated work. Continue Expo Go chart/content/UI
+review. Next proposed step: verify Core Health's five panels and artwork, then
+review remaining chart sections one by one. Adult/Child heading still awaits
+owner's API update notification. Resume signing when owner reports activation.
+
+SDK alignment completed via Expo CLI install --fix. Online compatibility check,
+public config (NineStar and agreed iOS/Android IDs), all 100 tests, lint and
+typecheck passed. Supersedes earlier pending patch-alignment notes. No cloud
+build/signing attempted; still awaiting active Apple membership and EAS setup.
+
+App identity agreed and configured: displayed name NineStar; iOS bundle ID and
+Android package com.ninestarkiastrology.mobile. Expo slug unchanged. Supersedes
+earlier unconfirmed-identifier notes. SDK patch alignment in progress; next gate
+remains active Apple membership and EAS project/signing setup.
+
+Build preparation checks: local config, lint and typecheck passed. Online Expo
+compatibility check found seven SDK patch alignments needed before cloud build;
+recorded in development-build.md, not applied yet. Identifier discussion remains
+open: owner asks about simple ninestar name versus internal app-store bundle ID.
+
+Own build preparation: owner enrolled as Individual, Apple membership pending.
+Installed SDK-compatible dev client and prepared internal EAS development profile;
+npm start keeps Expo Go, npm run start:dev targets own build. Await identifier
+choice and activation before provisioning/build. See development-build.md. Earlier
+payment/login trouble and deferral notes are superseded by pending enrollment.
+
+Apple enrollment purchase currently blocked: owner reports sign-in submit hangs.
+Inspected supplied response title: Page Not Found - Apple (HTML, not evidence of
+invalid credentials or a successful purchase). No membership/payment completion
+confirmed. Next diagnostic: fresh normal Edge window, start from developer account
+and resume enrollment rather than reusing the checkout redirect. Do not store
+checkout URLs, session values, credentials or payment data in project docs.
+
+Apple setup resumed: owner intends to pay for Individual Developer enrollment
+through the browser and requests our own build. Previous payment deferral is
+revoked. Enrollment/active membership not yet confirmed. Next: owner completes
+official Apple enrollment; then agree app identifier and configure EAS development
+build plus website association. No purchase or membership status assumed.
+
+Owner deferred paid Apple Developer enrollment until funds are available.
+Standalone signed iPhone build and website-linked password autofill are deferred
+with it; do not repeatedly prompt for payment. Existing Expo Go development can
+continue. Remembered session and logout restart checks passed on iPhone. Proposed
+next no-cost step: verify the five Core Health panels and organ images, then
+continue section-by-section chart review. Adult/Child heading awaits owner API
+notification; Apple purchasing remains deferred.
+
+Login device progress: explicit logout also survived Expo Go restart (sign-in
+required). Session persistence and logout checks now passed on iPhone. Owner had
+to reenter username/password; password-manager autofill is a separate open item.
+Next: check system Passwords/key option when password input is focused.
+
+Login device progress: owner confirmed auto sign-in after fully closing/reopening
+Expo Go with Stay signed in enabled. iPhone restart persistence passed. Next:
+sign out and repeat restart to confirm logout persists. Standalone, Android and
+expiry behavior remain unverified.
+
 | Item | Current status | Next step |
 | --- | --- | --- |
 | Remembered login | Stay signed in control implemented, default on; OS autofill hints configured; 100 tests passed. Device persistence not yet verified. | Owner signs out/in with option enabled; then check full app restart and logout. See login-persistence.md. |

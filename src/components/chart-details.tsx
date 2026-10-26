@@ -91,7 +91,7 @@ function OtherDetails({ detail }: { detail: ChartDetail }) {
   }
   return (
     <View style={styles.content}>
-      {detail.key === 'character' && detail.help
+      {detail.help
         && <ContextualHelp key={`${detail.help.culture}:${detail.help.title}`} help={detail.help} />}
       <EnergyBanner energy={detail.energy} />
       <View ref={menu} collapsable={false} onLayout={() => { if (menu.current) registerMenu(menu.current); }}>

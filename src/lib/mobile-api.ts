@@ -1,6 +1,7 @@
 import { entitlementSnapshotsAgree, parseEntitlements } from './entitlements';
 import { session } from './session';
 import { requestDiagnostics } from './request-diagnostics';
+import { parseContextualHelp } from './contextual-help';
 
 export const API_BASE_URL = 'https://int.9starkiastrology.com/api/mobile/v1';
 
@@ -16,7 +17,8 @@ function isObject(value: unknown): value is Record<string, unknown> {
 
 type Endpoint = 'metadata/options' | 'metadata/timezones' | 'account/me' | 'account/csrf' |
   'account/login' | 'account/logout' | 'account/update' | 'membership/entitlements' |
-  'personal-chart/me' | 'personal-chart/me/free';
+  'personal-chart/me' | 'personal-chart/me/free' | 'personal-chart/calculate' |
+  'predictions/me' | 'readings/predictions/me/free';
 type Post = { body: Record<string, unknown>; csrfToken: string };
 
 const activeRequests = new Map<number, () => void>();
@@ -229,6 +231,35 @@ export async function getOwnChart() {
     const result = await mobileApiRequest('personal-chart/me/free');
     return { ...result, access: 'free' as const };
   }
+}
+
+export async function getOwnPredictions() {
+  try {
+    const result = await mobileApiRequest('predictions/me');
+    return { ...result, access: 'full' as const };
+  } catch (error) {
+    if (!(error instanceof MobileApiError) || error.status !== 403 || error.code !== 'membership_required') throw error;
+    if (session.getSnapshot().entitlements?.mobileAccess) {
+      session.clearEntitlements(session.getSnapshot().generation);
+    }
+    const result = await mobileApiRequest('readings/predictions/me/free');
+    return { ...result, access: 'free' as const };
+  }
+}
+
+export async function getPersonalChartIntroduction() {
+  // The existing own/free GET supplies the generic introduction before an
+  // arbitrary-person calculation. Never substitute its personalised overview.
+  const { data } = await mobileApiRequest('personal-chart/me/free');
+  return parseContextualHelp(data.help).overview ?? null;
+}
+
+// A full arbitrary-person calculation, never a complementary-credit purchase.
+export async function calculatePersonalChart(body: Record<string, unknown>) {
+  const generation = session.getSnapshot().generation;
+  const csrfToken = await getCsrfToken();
+  if (generation !== session.getSnapshot().generation) throw new MobileApiError('session_changed');
+  return mobileApiRequest('personal-chart/calculate', { body, csrfToken });
 }
 
 export async function updateOwnAccount(body: Record<string, unknown>) {

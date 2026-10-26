@@ -105,3 +105,30 @@ chart title also uses help.overview.title unless the reusable caller supplies on
 Touched remaining interface copy is in ui-copy.ts pending API labels; no complete
 UI localisation is claimed. Native three-line/gradient/anchor behavior remains
 an iPhone check, not verified by the parser tests.
+# About title separation follow-up
+
+All six energy screens now render the same ContextualHelp widget immediately
+below the fixed modal title bar and above EnergyBanner/menu whenever help exists.
+Removed the Character/Social Expression-only guard from shared OtherDetails, so
+Day Star, Generation and Epoch follow the same format. API title/body, three-line
+fade, tap/header expansion and missing-help omission unchanged. No new copy or
+access rules. Next: owner opens the three Extended Profile screens on iPhone and
+checks helper placement/expansion. Lint and typecheck passed.
+
+Superseding role-label update: data.roleLabels now supplies card/modal names for
+all six roles; temporary central role labels and energy-name fallbacks removed.
+Help titles remain in explanatory panels only. See role-label-validation.md.
+
+2026-10-25: API About titles are correct for introductions, but the client reused
+them for modal and card titles. Shared energyRoleTitle now supplies Constitution,
+Character Nature / Inner Child and Social Expression from central uiCopy website
+labels. Do not parse/strip help prose to obtain a name; distinct API role labels
+remain missing and flagged in localisation.md. Other roles fall back to energy
+name, not About help titles.
+
+Social Expression now displays ContextualHelp above its banner/menu, matching
+Constitution and Character. Absent help omits it; API title, rich text, preview,
+expansion and access rules remain unchanged. All 101 tests, lint and typecheck
+passed. Next: owner checks modal titles and Social Expression
+help on iPhone.
+

@@ -3,6 +3,7 @@ import { parseContextualHelp, type ContextualHelp } from './contextual-help';
 import { parseChartHealth, type ChartHealth } from './chart-health';
 
 export type ChartEnergy = {
+  roleLabel?: string;
   title?: string;
   key: string;
   number: number;
@@ -46,6 +47,8 @@ export function parsePersonalChart(data: Record<string, unknown>, access: 'full'
     }
     return {
       key, number,
+      roleLabel: typeof object(data.roleLabels)[key] === 'string'
+        ? readingText(object(data.roleLabels)[key]) || undefined : undefined,
       title: readingText(energy.title) || undefined,
       artworkId: typeof energy.artworkId === 'string' ? energy.artworkId : undefined,
       facts: [

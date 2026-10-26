@@ -9,7 +9,7 @@ function chart() {
     'interpersonalQualities', 'relationships', 'relationshipsStraight', 'relationshipsLgbtq', 'career',
     'occupations', 'finances', 'spirituality', 'health', 'illnesses', 'childNature',
     'adultChildRelationship', 'stressResponse', 'natalHouseStressResponse', 'childStressResponse'];
-  return parsePersonalChart({ help: { core: { title: 'Constitution', htmlBody: '<p>Introduction.</p>', culture: 'en-GB' } }, summary: '<p>Persistent chart summary.</p>', energies: {
+  return parsePersonalChart({ roleLabels: { core: 'Constitution' }, help: { core: { title: 'Constitution', htmlBody: '<p>Introduction.</p>', culture: 'en-GB' } }, summary: '<p>Persistent chart summary.</p>', energies: {
     core: { number: 1 }, character: { number: 2 }, socialExpression: { number: 3 },
     dayStar: { number: 4, description: '<p>Day-star reading.</p>' },
     generation: { number: 5, description: '<p>Generation reading.</p>' }, epoch: { number: 6 },

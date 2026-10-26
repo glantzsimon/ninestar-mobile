@@ -29,6 +29,59 @@ const failure = (status, code) => ({
   status, body: { success: false, data: null, error: { code } },
 });
 
+test('calculator introduction uses generic help.overview from the existing own/free GET, preserving HTML', async () => {
+  const api = client([success({ overview: '<p>Personalised reading, never the introduction.</p>', help: {
+    overview: { title: 'About Your Personal Chart', culture: 'en-GB',
+      htmlBody: '<h5>First Number - Core Energy</h5><p>Born in <strong>a particular year</strong>.</p>' },
+  } })]);
+  const help = await api.getPersonalChartIntroduction();
+  assert.equal(api.calls.length, 1);
+  assert.ok(api.calls[0].url.endsWith('/personal-chart/me/free'));
+  assert.equal(api.calls[0].options.method, 'GET');
+  assert.equal(help.title, 'About Your Personal Chart');
+  assert.equal(help.blocks[0].kind, 'heading');
+  assert.ok(help.blocks[1].spans.some((span) => span.bold && span.text === 'a particular year'));
+  assert.equal(JSON.stringify(help).includes('Personalised reading'), false);
+});
+
+test('missing calculator help stays absent and never falls back to personalised overview', async () => {
+  const api = client([success({ overview: '<p>Personalised text only.</p>' })]);
+  assert.equal(await api.getPersonalChartIntroduction(), null);
+});
+
+test('failed introduction request does not retry or run a calculator/credit POST', async () => {
+  const api = client([failure(409, 'birth_details_required')]);
+  await assert.rejects(api.getPersonalChartIntroduction(), (error) => error.code === 'birth_details_required');
+  assert.equal(api.calls.length, 1);
+  assert.equal(api.calls[0].options.method, 'GET');
+});
+
+test('personal chart calculation posts once with fresh CSRF, using the existing session', async () => {
+  const api = client([success({ requestToken: 'calculation-token' }), success({ energies: {} })]);
+  const body = { person: { dateOfBirth: '1980-06-15' }, selectedDateTime: null };
+  await api.calculatePersonalChart(body);
+  assert.equal(api.calls.length, 2);
+  assert.ok(api.calls[0].url.endsWith('/account/csrf'));
+  assert.ok(api.calls[1].url.endsWith('/personal-chart/calculate'));
+  assert.equal(api.calls[1].options.headers['X-CSRF-Token'], 'calculation-token');
+  assert.deepEqual(JSON.parse(api.calls[1].options.body), body);
+});
+
+test('calculator access failures never post a credit-consuming reading or retry', async () => {
+  for (const [status, code] of [[403, 'membership_required'], [401, 'authentication_required'], [500, 'server_error']]) {
+    const api = client([success({ requestToken: 'token' }), failure(status, code)]);
+    await assert.rejects(api.calculatePersonalChart({}), (error) => error.status === status && error.code === code);
+    assert.equal(api.calls.length, 2);
+  }
+});
+
+test('account switch during calculator CSRF prevents posting old birth details', async () => {
+  let api;
+  api = client([async () => { api.session.change('changing'); return success({ requestToken: 'obsolete' }); }]);
+  await assert.rejects(api.calculatePersonalChart({}), (error) => error.code === 'session_changed');
+  assert.equal(api.calls.length, 1);
+});
+
 test('login sends CSRF and credentials once, refreshes CSRF, then verifies the session', async () => {
   const api = client([
     success({ requestToken: 'before-login' }),
@@ -99,6 +152,42 @@ test('own chart reads the protected full route without posting calculation input
   assert.equal(api.calls.length, 1);
   assert.equal(api.calls[0].options.method, 'GET');
   assert.ok(api.calls[0].url.endsWith('/personal-chart/me'));
+});
+
+test('own predictions use a read-only full snapshot without calculation or credit POSTs', async () => {
+  const api = client([success({ personal: { year: { description: 'Reading' } } })]);
+  const result = await api.getOwnPredictions();
+  assert.equal(result.access, 'full');
+  assert.equal(api.calls.length, 1);
+  assert.ok(api.calls[0].url.endsWith('/predictions/me'));
+  assert.equal(api.calls[0].options.method, 'GET');
+});
+
+test('own predictions fall back only on membership_required to the existing free yearly GET', async () => {
+  const api = client([failure(403, 'membership_required'), success({ year: { description: 'Granted yearly reading' } })]);
+  const result = await api.getOwnPredictions();
+  assert.equal(result.access, 'free');
+  assert.equal(api.calls.length, 2);
+  assert.ok(api.calls[1].url.endsWith('/readings/predictions/me/free'));
+  assert.ok(api.calls.every(({ options }) => options.method === 'GET'));
+});
+
+test('prediction membership denial clears a stale paid snapshot before falling back', async () => {
+  const api = client([success({ emailAddress: 'test@example.test', entitlements: snapshot() }),
+    failure(403, 'membership_required'), success({ year: { number: 1 } })]);
+  await api.getOwnAccount();
+  assert.equal(api.session.getSnapshot().entitlements.mobileAccess, true);
+  const result = await api.getOwnPredictions();
+  assert.equal(result.access, 'free');
+  assert.equal(api.session.getSnapshot().entitlements, null);
+});
+
+test('prediction authentication and server failures never acquire a free fallback or consume credits', async () => {
+  for (const [status, code] of [[401, 'authentication_required'], [403, 'access_denied'], [500, 'server_error']]) {
+    const api = client([failure(status, code)]);
+    await assert.rejects(api.getOwnPredictions(), (error) => error.status === status && error.code === code);
+    assert.equal(api.calls.length, 1);
+  }
 });
 
 test('only explicit membership denial selects the free own chart route', async () => {

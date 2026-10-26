@@ -35,6 +35,16 @@ No backend dependencies, settings, deployments or memberships changed.
 
 ## Standalone password-manager integration still required
 
+Current enrollment status: owner enrolled, membership pending. Local dev-client
+and EAS profile preparation done; see development-build.md. Earlier payment
+deferral below is historical. App identifiers, signing and website association
+remain unconfigured pending owner details/Apple activation.
+
+Owner deferred Apple Developer membership payment on 2026-10-25. Defer signed
+iPhone build/domain-autofill completion until enrollment resumes; continue Expo
+Go development. Persistent-login and logout restart behavior already passed on
+the owner's iPhone; this dependency does not block chart/UI work.
+
 app.json currently has no ios.bundleIdentifier or android.package. Do not invent
 permanent identifiers, Apple Team ID or signing certificate fingerprints. Before
 website-linked autofill can be completed, agree those identifiers and obtain
@@ -57,6 +67,13 @@ References consulted: SDK 58 docs/config, React Native TextInput/Switch,
 
 ## Validation and next checks
 
+Second owner iPhone result: after explicit sign-out and fully closing/reopening
+Expo Go, the app required sign-in. Logout restart check passed. Owner reported
+empty username/password fields and manual re-entry; OS credential autofill is
+not yet verified. Do not describe persistent-session success as password saving.
+Next diagnostic: focus password input and check for the system Passwords/key
+autofill option. Standalone app/domain association remains outstanding.
+
 Owner iPhone result (2026-10-25): signed out, signed in with Stay signed in
 enabled, fully closed Expo Go, reopened it and opened ninestar-mobile. Chart
 auto-signed in without credential entry. Persistent-login restart check passed
@@ -73,4 +90,10 @@ tests. Lint and typecheck both passed.
 First iPhone step: sign out, then sign back in with Stay signed in enabled.
 Next, fully close/reopen Expo Go and reopen this project, with no new login; verify
 the chart loads via server authentication. Then sign out and repeat the restart
-to verify it stays s
+to verify it stays signed out. Test opt-out separately. If cookie persistence
+fails, capture only request status/session state, never passwords or cookie values;
+investigate native cookie handling before adding a storage dependency.
+
+Full website-password autofill remains blocked on agreed standalone app/build
+identifiers and website association configuration. No credentials are required
+in chat. No changes to billing/purchasing.

@@ -96,3 +96,9 @@ labels and generic organ explanations, then add shared health section widgets
 and organ rendering using the existing full DTO and artwork resolver. Preserve
 15-second timeout, authentication/entitlements and unavailable free states.
 No tests needed/run for this read-only review; no migrations/deployment/purchasing.
+# Owner device follow-up
+
+2026-10-25: owner confirmed Health is looking good after being asked to check the
+five panels and organ images. Treat as owner visual acceptance, not a new
+automated/private-response inspection. Continue Character review next.
+

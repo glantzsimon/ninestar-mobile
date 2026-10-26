@@ -7,7 +7,7 @@ const { selectChartDetail } = load('chart-sections');
 const introduction = { title: 'Constitution', culture: 'en-GB',
   htmlBody: '<h5>Our Core Energy</h5><p>The <strong>foundation</strong> of our adult self.</p><p>More explanation.</p>' };
 test('free chart help is separate from personal content and does not grant missing readings', () => {
-  const chart = parsePersonalChart({ core: 3, character: 4, socialExpression: 5,
+  const chart = parsePersonalChart({ core: 3, character: 4, socialExpression: 5, roleLabels: { core: 'Constitution' },
     help: { core: introduction }, sections: { core: { body: 'Personal reading.' } } }, 'free');
   const detail = selectChartDetail(chart, 'core');
   assert.equal(detail.title, 'Constitution');
@@ -24,12 +24,28 @@ test('preview keeps opening heading/paragraph and expansion supplies remaining a
   assert.equal(split.remainder.length, 1);
   assert.equal([...split.preview, ...split.remainder].map((block) => block.text).join('|'), parsed.blocks.map((block) => block.text).join('|'));
 });
-test('localized API titles are used; missing title is never invented from the role key', () => {
+test('missing role labels stay absent and localized help never becomes a role label', () => {
   const input = { core: 3, character: 4, socialExpression: 5 };
   assert.equal(selectChartDetail(parsePersonalChart(input, 'free'), 'core').help, undefined);
   assert.equal(selectChartDetail(parsePersonalChart(input, 'free'), 'core').title, '');
   const chart = parsePersonalChart({ ...input, help: { core: { ...introduction, title: 'Constitución', culture: 'es' } } }, 'free');
-  assert.equal(selectChartDetail(chart, 'core').title, 'Constitución');
+  assert.equal(selectChartDetail(chart, 'core').title, '');
+  assert.equal(selectChartDetail(chart, 'core').help.title, 'Constitución');
+});
+
+test('API role labels name main energy modals and shared cards, separate from About help', () => {
+  const chart = parsePersonalChart({ core: 3, character: 4, socialExpression: 5,
+    roleLabels: { core: 'Constitution', character: 'Character Nature / Inner Child', socialExpression: 'Social Expression' },
+    help: Object.fromEntries(['core', 'character', 'socialExpression'].map((key) =>
+      [key, { ...introduction, title: `About ${key}` }])) }, 'free');
+  const { energyRoleTitle } = load('chart-sections');
+  for (const [key, title] of [['core', 'Constitution'], ['character', 'Character Nature / Inner Child'],
+    ['socialExpression', 'Social Expression']]) {
+    const detail = selectChartDetail(chart, key);
+    assert.equal(detail.title, title);
+    assert.equal(energyRoleTitle(detail.energy), title);
+    assert.equal(detail.help.title, `About ${key}`);
+  }
 });
 test('absent/null/malformed/empty help is omitted and scripts do not execute', () => {
   for (const raw of [undefined, null, [], 'help', { core: null }, { core: {} },
@@ -41,7 +57,7 @@ test('absent/null/malformed/empty help is omitted and scripts do not execute', (
 });
 
 test('relationships help is retained separately with its Dictionary-backed title', () => {
-  const chart = parsePersonalChart({ core: 3, character: 4, socialExpression: 5,
+  const chart = parsePersonalChart({ core: 3, character: 4, socialExpression: 5, roleLabels: { core: 'Constitution' },
     help: { core: introduction, relationships: { title: 'Relaciones', culture: 'es', htmlBody: '<p>Generic introduction.</p>' } } }, 'free');
   const detail = selectChartDetail(chart, 'core');
   assert.equal(detail.title, 'Constitution');

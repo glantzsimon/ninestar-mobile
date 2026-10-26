@@ -173,3 +173,10 @@ Catalogue integration now uses the shared cache/resolver after deployed header
 validation passed. Available energy facts have an Overview section;
 see [artwork-integration.md](artwork-integration.md) for scope and device checks.
 
+# Main page heading correction
+
+Own-chart route supplies central Your Personal Chart title; reusable chart
+default is Personal Chart for other calculator contexts. About overview helper
+titles no longer drive page headings. Lint and typecheck passed; iPhone visual
+confirmation pending. API page-title transport gap is in localisation.md.
+

@@ -13,6 +13,7 @@ import { AppSelect } from '@/components/ui/app-select';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
+import { uiCopy } from '@/lib/ui-copy';
 import { accountDraft, accountOptions, buildAccountUpdate, type AccountDraft, type AccountOptions } from '@/lib/account';
 import { settleAccountLoad } from '@/lib/account-load';
 import { getOwnAccount, getTimezones, MobileApiError, mobileApiRequest, signOut, updateOwnAccount } from '@/lib/mobile-api';
@@ -47,7 +48,7 @@ export default function MyAccountScreen() {
     finally { setSigningOut(false); }
   }
   if (status === 'signed-out' || status === 'changing') return (
-    <AppScreen><ThemedText type="title">My Account</ThemedText>
+    <AppScreen><ThemedText type="title">{uiCopy.accountTitle}</ThemedText>
       <ThemedText>Please sign in on My Chart to open your account.</ThemedText>
       <AppButton title="Go to Sign In" onPress={() => router.navigate('/')} />
       {!!logoutError && <><ThemedText>{logoutError}</ThemedText><AppButton title="Try Signing Out Again" onPress={logout} loading={signingOut} /></>}
@@ -149,7 +150,7 @@ function AccountForm({ onSignOut }: { onSignOut: () => Promise<void> }) {
     } finally { pending.current = false; if (alive.current) setSaving(false); }
   }
 
-  if (Platform.OS === 'web') return <AppScreen><ThemedText type="title">My Account</ThemedText><ThemedText>Open the mobile app to edit your account.</ThemedText></AppScreen>;
+  if (Platform.OS === 'web') return <AppScreen><ThemedText type="title">{uiCopy.accountTitle}</ThemedText><ThemedText>Open the mobile app to edit your account.</ThemedText></AppScreen>;
   const disabled = loading || saving || uncertain;
   const dirty = draft !== null && baseline !== null &&
     (Object.keys(baseline) as (keyof AccountDraft)[]).some((key) => draft[key] !== baseline[key]);
@@ -161,7 +162,7 @@ function AccountForm({ onSignOut }: { onSignOut: () => Promise<void> }) {
   }
   return (
     <AppScreen>
-      <ThemedText type="title" accessibilityRole="header">My Account</ThemedText>
+      <ThemedText type="title" accessibilityRole="header">{uiCopy.accountTitle}</ThemedText>
       <ThemedText themeColor="textSecondary">Your details are shared with the NineStar website.</ThemedText>
       {draft && !signedOut && <MembershipStatus refreshOnFocus />}
       {loading && <ActivityIndicator size="large" color={theme.primary} accessibilityLabel="Loading account details" />}

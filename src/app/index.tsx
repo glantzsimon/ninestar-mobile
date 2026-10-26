@@ -15,6 +15,7 @@ import { useSession } from '@/hooks/use-session';
 import { getOwnChart, MobileApiError, refreshEntitlements, signIn } from '@/lib/mobile-api';
 import { session } from '@/lib/session';
 import { parsePersonalChart, type PersonalChart as Chart } from '@/lib/personal-chart';
+import { uiCopy } from '@/lib/ui-copy';
 
 const messages: Record<string, string> = {
   invalid_credentials: 'The username or password is incorrect.',
@@ -127,7 +128,7 @@ export default function HomeScreen() {
           <ThemedText accessibilityLiveRegion="polite">Opening your personal chart…</ThemedText>
         </AppPanel>
       )}
-      {!busy && chart && chartGeneration === generation && status === 'signed-in' && <PersonalChart chart={chart} />}
+      {!busy && chart && chartGeneration === generation && status === 'signed-in' && <PersonalChart chart={chart} title={uiCopy.ownPersonalChart} />}
       {signedOut && (
         <AppPanel title="Welcome Back">
           <ThemedText>Sign in to discover your personal chart.</ThemedText>

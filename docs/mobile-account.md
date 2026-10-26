@@ -1,5 +1,10 @@
 # My Account
 
+Naming convention: My Account remains the navigation destination; page heading
+is Your Account in every screen state, sourced from central uiCopy. This matches
+My Chart / Your Personal Chart. Account behavior and drafts are unchanged.
+Lint and typecheck passed after the heading change.
+
 Login persistence and OS autofill: see login-persistence.md. Stay signed in now
 passes the user's choice to existing rememberMe (default enabled). Access still
 comes from fresh server checks; no password or entitlement persistence in app
