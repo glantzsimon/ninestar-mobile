@@ -18,7 +18,8 @@ function isObject(value: unknown): value is Record<string, unknown> {
 type Endpoint = 'metadata/options' | 'metadata/timezones' | 'account/me' | 'account/csrf' |
   'account/login' | 'account/logout' | 'account/update' | 'membership/entitlements' |
   'personal-chart/me' | 'personal-chart/me/free' | 'personal-chart/calculate' |
-  'predictions/me' | 'readings/predictions/me/free';
+  'predictions/me' | 'predictions/calculate' | 'readings/predictions/me/free' | 'compatibility/calculate' | 'compatibility/help' | 'calendar/subscription' | 'calendar/revoke' |
+  'calendar/month' | `calendar/month?year=${number}&month=${number}`;
 type Post = { body: Record<string, unknown>; csrfToken: string };
 
 const activeRequests = new Map<number, () => void>();
@@ -255,11 +256,24 @@ export async function getPersonalChartIntroduction() {
 }
 
 // A full arbitrary-person calculation, never a complementary-credit purchase.
-export async function calculatePersonalChart(body: Record<string, unknown>) {
+async function calculate(endpoint: 'personal-chart/calculate' | 'predictions/calculate' | 'compatibility/calculate', body: Record<string, unknown>) {
   const generation = session.getSnapshot().generation;
   const csrfToken = await getCsrfToken();
   if (generation !== session.getSnapshot().generation) throw new MobileApiError('session_changed');
-  return mobileApiRequest('personal-chart/calculate', { body, csrfToken });
+  return mobileApiRequest(endpoint, { body, csrfToken });
+}
+export const calculatePersonalChart = (body: Record<string, unknown>) => calculate('personal-chart/calculate', body);
+export const calculatePredictions = (body: Record<string, unknown>) => calculate('predictions/calculate', body);
+export const calculateCompatibility = (body: Record<string, unknown>) => calculate('compatibility/calculate', body);
+
+export async function getPredictionsIntroduction() {
+  const { data } = await mobileApiRequest('readings/predictions/me/free');
+  return parseContextualHelp(data.help).overview ?? null;
+}
+
+export async function getCompatibilityIntroduction() {
+  const { data } = await mobileApiRequest('compatibility/help');
+  return parseContextualHelp(data.help).overview ?? null;
 }
 
 export async function updateOwnAccount(body: Record<string, unknown>) {
@@ -268,5 +282,26 @@ export async function updateOwnAccount(body: Record<string, unknown>) {
   if (generation !== session.getSnapshot().generation) throw new MobileApiError('session_changed');
   const result = await mobileApiRequest('account/update', { body, csrfToken });
   if (result.data.updated !== true) throw new MobileApiError('invalid_response', result.status);
+  return result;
+}
+
+export async function getCalendarMonth(year?: number, month?: number) {
+  if ((year === undefined) !== (month === undefined) ||
+    (year !== undefined && (!Number.isInteger(year) || year < 1900 || year > 2100 ||
+      !Number.isInteger(month) || month! < 1 || month! > 12))) throw new MobileApiError('invalid_calendar_month');
+  return mobileApiRequest(year === undefined ? 'calendar/month' : `calendar/month?year=${year}&month=${month!}`);
+}
+
+// Explicit user actions only: never create or revoke a feed during month loading.
+async function calendarAction(endpoint: 'calendar/subscription' | 'calendar/revoke') {
+  const generation = session.getSnapshot().generation;
+  const csrfToken = await getCsrfToken();
+  if (generation !== session.getSnapshot().generation) throw new MobileApiError('session_changed');
+  return mobileApiRequest(endpoint, { body: {}, csrfToken });
+}
+export const createCalendarSubscription = () => calendarAction('calendar/subscription');
+export async function revokeCalendarSubscription() {
+  const result = await calendarAction('calendar/revoke');
+  if (result.data.revoked !== true) throw new MobileApiError('invalid_response', result.status);
   return result;
 }

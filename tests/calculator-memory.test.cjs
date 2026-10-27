@@ -19,6 +19,17 @@ test('last used calculator inputs survive a store restart, isolated by account/e
   assert.equal(await reopened.read('integration', 'account-a', 'predictions'), null);
 });
 
+test('legacy Simple drafts retain all inputs while discarding the removed mode field', async () => {
+  const previous = { ...draft(), calculatorType: 'Simple', name: 'Retained name', calculationMethod: 'Traditional' };
+  const disk = { version: 1, entries: { '["int","a","chart"]': previous } };
+  const store = createCalculatorMemory({ read: async () => disk, write: async () => {} });
+  const restored = await store.read('int', 'a', 'chart');
+  assert.equal(restored.name, 'Retained name');
+  assert.equal(restored.calculationMethod, 'Traditional');
+  assert.equal(restored.dateOfBirth, previous.dateOfBirth);
+  assert.equal(restored.calculatorType, undefined);
+});
+
 test('queued rapid edits retain the latest values and do not overwrite another account', async () => {
   let disk = null;
   const store = createCalculatorMemory({ read: async () => clone(disk), write: async (value) => { disk = clone(value); } });

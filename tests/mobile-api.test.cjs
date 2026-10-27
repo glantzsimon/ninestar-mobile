@@ -29,6 +29,68 @@ const failure = (status, code) => ({
   status, body: { success: false, data: null, error: { code } },
 });
 
+test('compatibility introduction uses only the public read-only help endpoint and preserves API HTML/culture', async () => {
+  const api = client([success({ help: { overview: { title: 'API Compatibility introduction',
+    htmlBody: '<h3>API heading</h3><p>Generic <strong>introduction</strong>.</p>', culture: 'fr-FR' } } })]);
+  const help = await api.getCompatibilityIntroduction();
+  assert.equal(help.title, 'API Compatibility introduction');
+  assert.equal(help.culture, 'fr-FR');
+  assert.equal(help.blocks[0].kind, 'heading');
+  assert.ok(help.blocks[1].spans.some(span => span.bold && span.text === 'introduction'));
+  assert.equal(api.calls.length, 1);
+  assert.ok(api.calls[0].url.endsWith('/compatibility/help'));
+  assert.equal(api.calls[0].options.method, 'GET');
+  assert.equal(api.calls[0].options.body, undefined);
+  assert.equal(api.calls[0].options.headers['X-CSRF-Token'], undefined);
+});
+
+test('missing compatibility help stays absent and a failed help GET does not calculate or retry', async () => {
+  const api = client([success({}), success({ help: { overview: { title: 'Incomplete' } } }),
+    failure(503, 'temporarily_unavailable')]);
+  assert.equal(await api.getCompatibilityIntroduction(), null);
+  assert.equal(await api.getCompatibilityIntroduction(), null);
+  await assert.rejects(api.getCompatibilityIntroduction(), error => error.status === 503);
+  assert.equal(api.calls.length, 3);
+  assert.ok(api.calls.every(call => call.options.method === 'GET' && call.url.endsWith('/compatibility/help')));
+});
+
+test('calendar month is read-only, validates ranges and retains JSON membership errors without fallback', async () => {
+  const api = client([success({ entries: [] }), success({ entries: [] }), failure(403, 'membership_required')]);
+  await api.getCalendarMonth();
+  await api.getCalendarMonth(2026, 10);
+  await assert.rejects(api.getCalendarMonth(2026, 11), error => error.status === 403 && error.code === 'membership_required');
+  assert.ok(api.calls[0].url.endsWith('/calendar/month'));
+  assert.ok(api.calls[1].url.endsWith('/calendar/month?year=2026&month=10'));
+  assert.ok(api.calls.every(call => call.options.method === 'GET'));
+  for (const args of [[2026], [undefined, 10], [1899, 12], [2101, 1], [2026, 13], [2026, 1.5]]) {
+    await assert.rejects(api.getCalendarMonth(...args), error => error.code === 'invalid_calendar_month');
+  }
+  assert.equal(api.calls.length, 3);
+});
+
+test('calendar subscription and revoke are explicit CSRF-protected actions, without automatic replay', async () => {
+  const api = client([success({ requestToken: 'fixture-csrf-1' }), success({ url: 'https://example.test/feed' }),
+    success({ requestToken: 'fixture-csrf-2' }), success({ revoked: true })]);
+  await api.createCalendarSubscription();
+  await api.revokeCalendarSubscription();
+  assert.ok(api.calls[1].url.endsWith('/calendar/subscription'));
+  assert.ok(api.calls[3].url.endsWith('/calendar/revoke'));
+  assert.equal(api.calls[1].options.headers['X-CSRF-Token'], 'fixture-csrf-1');
+  assert.equal(api.calls[3].options.headers['X-CSRF-Token'], 'fixture-csrf-2');
+  assert.equal(api.calls[1].options.method, 'POST');
+  assert.equal(api.calls[3].options.method, 'POST');
+});
+
+test('account changes during calendar CSRF prevent feed mutation; uncertain failures are not retried', async () => {
+  let api;
+  api = client([async () => { api.session.change('changing'); return success({ requestToken: 'obsolete' }); }]);
+  await assert.rejects(api.createCalendarSubscription(), error => error.code === 'session_changed');
+  assert.equal(api.calls.length, 1);
+  const failed = client([success({ requestToken: 'fixture' }), failure(500, 'server_error')]);
+  await assert.rejects(failed.revokeCalendarSubscription(), error => error.code === 'server_error');
+  assert.equal(failed.calls.length, 2);
+});
+
 test('calculator introduction uses generic help.overview from the existing own/free GET, preserving HTML', async () => {
   const api = client([success({ overview: '<p>Personalised reading, never the introduction.</p>', help: {
     overview: { title: 'About Your Personal Chart', culture: 'en-GB',
@@ -54,6 +116,74 @@ test('failed introduction request does not retry or run a calculator/credit POST
   await assert.rejects(api.getPersonalChartIntroduction(), (error) => error.code === 'birth_details_required');
   assert.equal(api.calls.length, 1);
   assert.equal(api.calls[0].options.method, 'GET');
+});
+
+test('prediction introduction reads only generic overview from own/free without calculation or credits', async () => {
+  const api = client([success({ year: { description: 'Personal text must not appear in generic help' }, help: {
+    overview: { title: 'API Predictions introduction', htmlBody: '<p>Generic <strong>cycles</strong>.</p>', culture: 'en-GB' },
+  } }), success({ year: { description: 'Not a helper' } })]);
+  const help = await api.getPredictionsIntroduction();
+  assert.equal(help.title, 'API Predictions introduction');
+  assert.ok(help.blocks[0].spans.some(span => span.bold && span.text === 'cycles'));
+  assert.equal(JSON.stringify(help).includes('Personal text'), false);
+  assert.equal(await api.getPredictionsIntroduction(), null);
+  assert.ok(api.calls.every(call => call.url.endsWith('/readings/predictions/me/free') && call.options.method === 'GET'));
+});
+
+test('predictions calculation uses its own endpoint once with fresh CSRF and exact settings', async () => {
+  const api = client([success({ requestToken: 'prediction-fixture-token' }), success({ personal: { year: {} } })]);
+  const body = { person: { dateOfBirth: '1980-06-15' }, selectedDateTime: '2028-02-29T12:34:00',
+    userTimeZoneId: 'Europe/London', calculatorType: 'Advanced', calculationMethod: 'Traditional' };
+  await api.calculatePredictions(body);
+  assert.equal(api.calls.length, 2);
+  assert.ok(api.calls[0].url.endsWith('/account/csrf'));
+  assert.ok(api.calls[1].url.endsWith('/predictions/calculate'));
+  assert.equal(api.calls[1].options.method, 'POST');
+  assert.equal(api.calls[1].options.headers['X-CSRF-Token'], 'prediction-fixture-token');
+  assert.deepEqual(JSON.parse(api.calls[1].options.body), body);
+});
+
+test('predictions denial/failure never retries or requests complementary credits', async () => {
+  for (const [status, code] of [[403, 'membership_required'], [401, 'authentication_required'], [500, 'server_error']]) {
+    const api = client([success({ requestToken: 'prediction-fixture-token' }), failure(status, code)]);
+    await assert.rejects(api.calculatePredictions({}), error => error.code === code && error.status === status);
+    assert.equal(api.calls.length, 2);
+    assert.ok(api.calls[1].url.endsWith('/predictions/calculate'));
+  }
+});
+
+test('account switch during prediction CSRF prevents sending previous person inputs', async () => {
+  let api;
+  api = client([async () => { api.session.change('changing'); return success({ requestToken: 'obsolete-fixture-token' }); }]);
+  await assert.rejects(api.calculatePredictions({}), error => error.code === 'session_changed');
+  assert.equal(api.calls.length, 1);
+});
+
+test('compatibility uses the paid two-person endpoint with fresh CSRF and exact privacy settings', async () => {
+  const api = client([success({ requestToken: 'compatibility-fixture-token' }), success({ firstPerson: {}, secondPerson: {} })]);
+  const body = { firstPerson: { dateOfBirth: '1984-02-29' }, secondPerson: { dateOfBirth: '1990-01-01' },
+    calculationMethod: 'Chinese', calculatorType: 'Advanced', hideSexualChemistry: true };
+  await api.calculateCompatibility(body);
+  assert.equal(api.calls.length, 2);
+  assert.ok(api.calls[1].url.endsWith('/compatibility/calculate'));
+  assert.equal(api.calls[1].options.headers['X-CSRF-Token'], 'compatibility-fixture-token');
+  assert.deepEqual(JSON.parse(api.calls[1].options.body), body);
+});
+
+test('compatibility failures never retry or fall back to complementary-credit requests', async () => {
+  for (const [status, code] of [[403, 'membership_required'], [401, 'authentication_required'], [500, 'server_error']]) {
+    const api = client([success({ requestToken: 'fixture-token' }), failure(status, code)]);
+    await assert.rejects(api.calculateCompatibility({}), error => error.code === code && error.status === status);
+    assert.equal(api.calls.length, 2);
+    assert.ok(api.calls[1].url.endsWith('/compatibility/calculate'));
+  }
+});
+
+test('account switch during compatibility CSRF prevents submitting either person', async () => {
+  let api;
+  api = client([async () => { api.session.change('changing'); return success({ requestToken: 'obsolete-fixture-token' }); }]);
+  await assert.rejects(api.calculateCompatibility({}), error => error.code === 'session_changed');
+  assert.equal(api.calls.length, 1);
 });
 
 test('personal chart calculation posts once with fresh CSRF, using the existing session', async () => {

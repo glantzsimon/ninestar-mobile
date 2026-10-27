@@ -9,7 +9,7 @@ import { useSession } from '@/hooks/use-session';
 import { MobileApiError, refreshEntitlements } from '@/lib/mobile-api';
 
 export function MembershipStatus({ refreshOnFocus = false }: { refreshOnFocus?: boolean }) {
-  const { entitlements, status } = useSession();
+  const { status } = useSession();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const pending = useRef(false);
@@ -45,13 +45,12 @@ export function MembershipStatus({ refreshOnFocus = false }: { refreshOnFocus?: 
     return () => subscription.remove();
   }, [refresh, refreshOnFocus, status]));
 
-  return (
+  // Refresh access independently of account drafts. A normal membership panel
+  // awaits a server-authored display label; protocol enum keys are not UI copy.
+  return message ? (
     <AppPanel title="Your Membership">
-      <ThemedText accessibilityLiveRegion="polite">{entitlements
-        ? entitlements.mobileAccess ? 'Paid access is active across the website and app.' : 'Free access. Your membership is shared with the website.'
-        : 'Membership has not been confirmed.'}</ThemedText>
-      {!!message && <ThemedText type="small">{message}</ThemedText>}
-      {(!!message || (!entitlements && !busy)) && <AppButton title="Try Again" variant="secondary" onPress={refresh} loading={busy} disabled={status === 'changing'} />}
+      <ThemedText type="small" accessibilityLiveRegion="polite">{message}</ThemedText>
+      <AppButton title="Try Again" variant="secondary" onPress={refresh} loading={busy} disabled={status === 'changing'} />
     </AppPanel>
-  );
+  ) : null;
 }

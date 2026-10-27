@@ -13,8 +13,9 @@ const actionIcons = {
   summary: require('../../../assets/images/ui/view-summary.svg'),
 };
 
-export function AppPanel({ title, headerAction, children }: PropsWithChildren<{
+export function AppPanel({ title, headerAction, children, flush = false, joined = false }: PropsWithChildren<{
   title?: string;
+  flush?: boolean; joined?: boolean;
   headerAction?: { title: string; onPress: () => void; expanded?: boolean; icon?: keyof typeof actionIcons };
 }>) {
   const theme = useTheme();
@@ -22,8 +23,8 @@ export function AppPanel({ title, headerAction, children }: PropsWithChildren<{
     <Animated.View entering={EnterFade} style={[styles.panel, {
       backgroundColor: theme.backgroundElement,
       borderColor: theme.border,
-      boxShadow: `0 4px 10px ${theme.shadow}`,
-    }]}>
+      boxShadow: flush ? 'none' : `0 4px 10px ${theme.shadow}`,
+    }, flush && styles.flush, joined && styles.joined]}>
       {title && (
         <View style={[styles.header, { backgroundColor: theme.panelHeader, borderColor: theme.border }]}>
           <ThemedText type="sectionTitle" accessibilityRole="header" style={styles.title}>{title}</ThemedText>
@@ -45,6 +46,7 @@ export function AppPanel({ title, headerAction, children }: PropsWithChildren<{
 }
 
 const styles = StyleSheet.create({
+  flush: { borderRadius: 0 }, joined: { borderTopWidth: 0 },
   panel: { borderWidth: 1, borderRadius: Radius.panel, overflow: 'hidden' },
   header: { padding: Spacing.three, borderBottomWidth: 1, flexDirection: 'row',
     flexWrap: 'wrap', alignItems: 'center', gap: Spacing.two },

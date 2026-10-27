@@ -1,20 +1,20 @@
 import { useState, type ComponentProps } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, TextInput } from 'react-native';
 
-import { ThemedText } from '@/components/themed-text';
+import { AppField } from '@/components/ui/app-field';
 import { ControlHeight, Radius, Spacing, Typography } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-type AppInputProps = ComponentProps<typeof TextInput> & { label: string };
+type AppInputProps = ComponentProps<typeof TextInput> & { label: string; error?: string };
 
-export function AppInput({ label, style, onFocus, onBlur, ...props }: AppInputProps) {
+export function AppInput({ label, error, style, onFocus, onBlur, ...props }: AppInputProps) {
   const [focused, setFocused] = useState(false);
   const theme = useTheme();
   return (
-    <View style={styles.field}>
-      <ThemedText type="smallBold">{label}</ThemedText>
+    <AppField label={label} error={error}>
       <TextInput
         accessibilityLabel={label}
+        accessibilityHint={error}
         placeholderTextColor={theme.textSecondary}
         selectionColor={theme.primary}
         {...props}
@@ -23,16 +23,15 @@ export function AppInput({ label, style, onFocus, onBlur, ...props }: AppInputPr
         style={[styles.input, props.multiline && styles.multiline, {
           color: theme.text,
           backgroundColor: theme.input,
-          borderColor: focused ? theme.primary : theme.border,
+          borderColor: error ? theme.error : focused ? theme.primary : theme.border,
           opacity: props.editable === false ? 0.65 : 1,
         }, style]}
       />
-    </View>
+    </AppField>
   );
 }
 
 const styles = StyleSheet.create({
-  field: { gap: Spacing.one },
   input: {
     // Let the native single-line control centre its font metrics. Paragraph
     // lineHeight pushes the custom font's baseline down on iOS.

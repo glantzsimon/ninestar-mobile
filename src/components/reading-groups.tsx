@@ -10,9 +10,10 @@ export function ReadingGroups({ primaryTitle, additionalTitle, primary, addition
   primary: ReactNode; additional: ReactNode; between?: ReactNode;
 }) {
   return <View style={styles.groups}>
-    <AppPanel title={primaryTitle}>{primary}</AppPanel>
+    {primary != null && <AppPanel title={primaryTitle}>{primary}</AppPanel>}
     {between}
-    <AppDisclosure title={additionalTitle} defaultExpanded>{additional}</AppDisclosure>
+    {additional != null && (additionalTitle ? <AppDisclosure title={additionalTitle} defaultExpanded>{additional}</AppDisclosure>
+      : <AppPanel>{additional}</AppPanel>)}
   </View>;
 }
 

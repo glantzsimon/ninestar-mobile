@@ -6,6 +6,10 @@ import { Platform } from 'react-native';
 
 export const DefaultColorScheme: 'light' | 'dark' = 'dark';
 
+// Website gauge palette; desirability changes colour, never needle position.
+export const GaugeColors = { low: '#FD0510', middle: '#FCDA14', high: '#08F321',
+  track: '#E0E0E0', needle: '#999999' } as const;
+
 export const Colors = {
   light: {
     text: '#444444',
@@ -33,7 +37,7 @@ export const Colors = {
     backgroundElement: '#091a22',
     backgroundSelected: '#1e5875',
     textSecondary: '#aeaeae',
-    border: '#ffffff',
+    border: '#b8b8b8',
     primary: '#63a0d4',
     primaryPressed: '#8cb9e0',
     onPrimary: '#0f1215',
@@ -89,10 +93,11 @@ export const Typography = {
   sectionTitle: { fontSize: 22, lineHeight: 28, fontFamily: BrandFonts.bold },
   body: { fontSize: 17, lineHeight: 27, fontFamily: BrandFonts.regular },
   small: { fontSize: 15, lineHeight: 23, fontFamily: BrandFonts.regular },
+  caption: { fontSize: 12, lineHeight: 16, fontFamily: BrandFonts.regular },
   label: { fontSize: 16, lineHeight: 24, fontFamily: BrandFonts.bold },
 } as const;
 
-export const Radius = { panel: 8, control: 6, pill: 99 } as const;
+export const Radius = { panel: 8, control: 6, modal: 4, pill: 99 } as const;
 export const ControlHeight = 48;
 
 // Website tiers are 1/.62/.38 and .62/.38/.24. Keep the hierarchy gentler
@@ -112,5 +117,8 @@ export const Spacing = {
   six: 64,
 } as const;
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
+export const LayoutSpacing = { relatedActions: Spacing.one, bottomClearance: Spacing.one } as const;
+// NativeTabs supplies native insets. The web tab bar overlays its screen.
+export const BottomTabInset = Platform.OS === 'web'
+  ? ControlHeight + Spacing.two * 2 + Spacing.three * 2 : 0;
 export const MaxContentWidth = 800;

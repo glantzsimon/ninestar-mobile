@@ -7,7 +7,452 @@ Add new requests as they arrive, keep unresolved work visible and update status
 after implementation and validation. Record superseding decisions explicitly.
 Never record credentials, tokens or cookies.
 
-## Current priorities (2026-10-25)
+## Current priorities (2026-10-27)
+
+System-wide input update: AppField places validation above controls and scrolls
+the invalid field into view. Account and all calculators carry field identities,
+including first/second Compatibility people; errors reveal relevant collapsed
+controls. Shared native date/time fields replace free-text entry throughout
+My Account and calculators, using the existing @expo/ui module, with browser
+controls on web. Cancel preserves drafts; API dates/clocks stay local strings.
+173 tests, lint/typecheck and iOS export passed; see native-input-validation.md.
+Next: on iPhone open My Account → Birth date, change the wheel and Cancel, checking
+the original value and unsaved edits remain. Then check invalid First name before
+any valid save. Native appearance and animated scroll need device confirmation.
+
+Compatibility first-visit introduction resolved: waited the requested three
+minutes, then verified public Integration GET compatibility/help returns 200
+JSON with help.overview title, HTML and culture. Shared calculator now loads it
+above the initial form and on Edit, hiding it on results. Optional failures do
+not block/reset the form; 15-second timeout/session protections remain. 167 tests,
+lint, typecheck and targeted whitespace checks passed. See
+compatibility-calculator.md. Next: reopen Explore → Compatibility on iPhone and
+check the expandable About panel above First Person. Supersedes the missing-help
+blocker in the earlier notes below.
+
+Compatibility result navigation/gauges follow-up: implemented direct shared
+section buttons (no energy-selection step/banner), measured flush-top detail
+scrolling and shared fading Back to Menu. Overview displays API numeric gauges;
+conflict reverses colour only, chemistry keeps privacy/age gates. New section
+labels, Strengths/Challenges subtitle and authored Yin/Yang body are consumed.
+Help is removed from results and retained for the form on Edit; first-visit help
+remains blocked by the missing read-only generic help source. Current contract
+read from GitHub master because local backend docs are older. 165 tests, lint,
+typecheck and iOS export passed; see compatibility-calculator.md. Next: calculate
+on iPhone and tap Overview; backend AI exposes/document generic help GET. This
+supersedes the first-pass display limitations below, not their historical checks.
+
+Compatibility calculator first pass implemented at Explore → Compatibility,
+sharing CalculatorScreen, extracted birth-field controls and person validation.
+Two independent remembered people, one method, Advanced mode and explicit chemistry
+privacy; paid CSRF-protected POST with no retry/credit fallback. Existing API
+overview/analysis HTML is rendered with safe rich text; both full personal charts
+reuse PersonalChart in disclosures. No name subtitles, flag-derived prose or score
+enum display added. All 161 tests, lint, typecheck and final whitespace checks
+passed; offline iOS export passed (1,675 modules, 46 assets). Website parity
+blockers: absent Dictionary-backed analysis/
+score labels, enum-only gauge values/scales, missing authored Yin/Yang prose,
+no generic help GET before the first calculation, and score access policy needing
+server-side parity. Backend handover: docs/compatibility-api-handover.md. Owner
+confirmed they will request the API additions; named analysis menus/gauges have
+not been invented. Next: test the two-person
+form on iPhone; backend AI documents additive display fields to finish parity.
+
+Predictions Calculator implemented at Explore → Predictions. Both calculator
+routes now use one CalculatorScreen and CalculationForm; results reuse the same
+PersonalChart / Predictions components as own readings. Separate remembered inputs
+per calculator; current-time default sends selectedDateTime null, custom local
+date requires both date/time. Advanced preferences remain collapsed by default.
+Fresh CSRF-protected predictions/calculate POST, no credit-consuming fallback or
+automatic retry. Generic introduction reads existing own/free help.overview.
+Back/Edit grouping, flush-top Edit and shared tab clearance retained. All 153
+tests, lint, typecheck and targeted whitespace checks passed. Offline iOS bundle
+export also passed (1,670 modules, 46 assets; ignored output). See
+docs/predictions-calculator.md. Next: on iPhone open Explore →
+Predictions and check the calculator form; authenticated calculation/results need
+device confirmation. No live account settings changed by tools.
+
+Reprocessed all five requests preceding the limit: My Chart hub now says Your
+Chart with Your Personal Chart / Your Predictions / Your Calendar cards. Shared
+CalculationForm preferences are collapsed by default; expanding exposes Advanced
+settings without changing API mode. Native AppScreen scrolls use automatic insets
+with a shared 4-point bottom clearance; Android keeps NativeTabs safe-area handling,
+web reserves its overlaid bar. Back to Explore / Edit Calculation reuse new
+AppActionGroup with a 4-point gap. Edit remounts the form inside AppScrollTarget,
+which measures and scrolls Birth Details flush top, preserving existing inputs.
+All 148 tests, final lint, typecheck and targeted whitespace checks passed. An
+initial refs lint failure was corrected with state. See
+docs/calculator-flow-refinement.md. Next: on iPhone open
+Personal Chart Calculator, scroll to the bottom and check Calculate clears the
+tab bar. Native clearance/scroll positioning remain device checks.
+
+Owner supplied Predictions page-label contract: data.labels.yourPredictions and
+data.labels.housesYouCurrentlyOccupy are now parsed in full/free results and used
+for the own page title and subtitle after help, respectively. Existing approved
+central wording remains only for loading/older responses. Navigation stays My
+Predictions. No extra reading access or backend fields inferred. All 11 Predictions
+tests, lint, typecheck and targeted whitespace checks passed. Next: reopen My
+Predictions on iPhone; authenticated live field presence
+remains a device check. Shared local API docs did not yet contain these two
+fields at inspection; backend owner should keep that contract current.
+
+Latest Predictions title correction: page title Your Predictions, navigation My
+Predictions; help then Houses You Currently Occupy subtitle order remains.
+Completed domain UI-label source audit in docs/ui-label-audit.md, distinguishing
+missing API labels, already-consumed labels, offline controls and inactive legacy
+names. Important risk: energy facts currently select symbols by English caption.
+No new API fields or broad UI changes implemented. Lint, typecheck and targeted
+whitespace checks passed. Next:
+backend AI reviews the inventory and documents page/menu/fact labels and the
+membership display name; mobile wiring follows that agreed contract.
+
+Predictions heading refinement supersedes prior page-title placement: My
+Predictions remains the page heading, followed by API overview help, then Houses
+You Currently Occupy as a shared sectionTitle above reading groups. Removed
+person-name subtitles from shared chart/prediction results in all hosts. Retain
+functional calculator/account/login name inputs and underlying data. Labels stay
+in central resources pending backend exposure. Lint, typecheck and targeted
+whitespace checks passed. Next: open
+My Predictions on iPhone and check this order and absence of the name subtitle.
+
+Removed the unrequested Your Account sentence about details being shared with
+the NineStar website. This follows the existing rule against adding explanatory
+UI copy without owner agreement. Lint, typecheck and targeted whitespace checks
+passed. Next: check the page
+heading now flows directly into account content on iPhone.
+
+Predictions naming: My Chart hub button now reuses central My Predictions label;
+destination page title is Houses You Currently Occupy, owner-specified wording.
+Source audit found Dictionary.HousesYouCurrentlyOccupy on the website, but neither
+this page label nor My Predictions is exposed by the current PredictionLabels
+projection/shared contract. Use central mobile resources temporarily; do not
+guess API properties. Flagged backend need for both labels before wiring a new
+contract. Routes/readings unchanged. Lint, typecheck and targeted whitespace checks
+passed. Next: reopen My Chart
+and check the button and destination heading on iPhone; backend AI to expose
+and document the labels.
+
+Account copy cleanup: removed unsolicited birth-details review and calculation
+preference save-guidance text; retained the approved birth-time explanation.
+Removed generic paid/free access membership copy. Backend source confirms
+account/me.membership lacks a name; entitlements.sources[].subscriptionType is
+an enum identifier, not a localised display label. Normal membership UI stays
+hidden pending an agreed backend label; focus/background entitlement refresh and
+error/retry remain. Do not invent display wording. Recorded owner requirement
+to check before adding explanatory UI copy. Lint, typecheck and targeted whitespace
+checks passed. Next: backend AI
+exposes/documents the website's membership display label, including no-membership
+state; then wire that agreed field. No backend changes made.
+
+Owner clarified mobile should always use Advanced calculation semantics: removed
+calculatorType from editable account/calculator drafts and remembered inputs;
+both request builders send the shared Advanced protocol value. Legacy Simple
+inputs retain all other fields. Replaced account/calculator preference disclosures
+with visible Advanced Calculation Preferences panels; removed mode selectors.
+Method/time-known behavior and host-specific settings remain. Existing website
+saved mode changes only on explicit account Save Changes, not by opening screens.
+All 147 tests, lint, typecheck and targeted whitespace checks passed. See
+docs/calculator-visibility-review.md. Next: open Personal Chart Calculator on
+iPhone and check the visible preferences, then calculate using the chosen method.
+
+Calendar detail typography: date already uses AppPanel's shared sectionTitle.
+Changed the year/month/day houses line from small grey metadata to sectionTitle
+(Candara Bold 22/28, theme heading colour), matching chart reading headings.
+Normal and expanded hosts share PersonalCalendar and ReadingContent; API text,
+prose, scrolling and cell layout are unchanged. Lint, typecheck and targeted
+whitespace checks passed. Next: tap a
+day on iPhone and compare the houses heading with chart detail headings.
+
+Calendar artwork moved down another 2 logical points (shared translation 3 to 5),
+preserving the date, cell dimensions and seven-column alignment in both hosts.
+Lint, typecheck and targeted whitespace checks passed. Next: inspect artwork
+position on iPhone; native visual confirmation remains pending.
+
+Sunday wrapping fix: replaced percentage-width wrapped calendar cells with
+explicit nonwrapping seven-column flex rows. Pad the final week with empty cells
+to retain alignment. Weekday labels are single-line with font fitting and full
+accessibility names. Both calendar hosts share the fix; cell height and artwork
+offsets remain. Lint, typecheck and targeted whitespace checks passed. Owner
+confirmed Sunday no longer wraps on iPhone. Separate confirmation of both normal
+and expanded views was not specified; next: include both in the next calendar
+visual pass. No remaining reported wrapping blocker.
+
+Almost-square modals: shared AppModal now uses Radius.modal = 4 and a clipped
+overFullScreen surface, replacing the system-rounded iOS pageSheet. Safe areas,
+Close, Android back, accessibility escape and scrolling remain; native swipe
+dismissal is unavailable. Panel/control corners are unchanged. Lint, typecheck
+and targeted whitespace checks passed. Next: open an energy detail on iPhone
+and check corners and Close; native visual confirmation remains pending.
+
+Calendar cell refinement: added 2 logical points to the square-based height via
+the shared artwork frame's top margin. Date remains at top zero; artwork keeps
+its bottom-relative placement and moves down 1 additional point (translation
+2 to 3). Applies to normal and expanded views without fixed column widths.
+Lint, typecheck and targeted whitespace checks passed. Next: inspect date/artwork
+separation on iPhone; native visual confirmation remains pending.
+
+Google Calendar link panel: consume data.labels.googleCalendarLink as its heading,
+separate from help.subscription.title (About Your Personal Calendar). Preserve
+the subscription HTML instructions and shared expandable presentation. Missing
+older-server labels stay absent, without invented fallback headings. Contract
+confirmed in ninestar/docs/mobile-api.md. Six calendar tests, lint and typecheck
+passed. Next: reopen My
+Calendar on iPhone and check the bottom panel heading.
+
+Screen real-estate refinement: reduced shared AppScreen side margins from 24
+to 16 logical points, matching normal modal bodies and Android compact-layout
+guidance. Panel interiors and vertical spacing remain unchanged; safe areas,
+control sizes, maximum reading width and expanded calendar edge-to-edge layout
+are preserved. See docs/design-system.md for sources and rationale. Lint,
+typecheck and targeted whitespace checks passed after regenerating stale ignored
+Expo route declarations. Next: inspect My Account and calendar width on iPhone;
+native appearance confirmation remains pending.
+
+Calendar refinement: date moved up 2 points and artwork down 2, retaining square
+auto-fit cells. Expanded calendar opts into shared AppModal edgeToEdge and flush
+AppPanel surfaces: full-width borders, square corners, no inter-panel gap/shadow,
+and a single joined border seam. Normal cards retain default presentation.
+Both calendar hosts request zero-inset detail scrolling. Shared AppScreen now
+supports opt-in minimum-content space, matching the modal's short-reading support;
+fresh native measurement avoids a previous longer reading's stale height. Default
+scroll padding elsewhere is unchanged. Lint, typecheck and targeted whitespace
+checks passed; ignored Expo route declarations regenerated before typecheck.
+Next: tap a short day
+reading in normal view and check its heading is flush with the viewport top,
+then check expanded edges/adjacency and the same scroll behavior.
+
+Calendar square taps now scroll selected-day details into view using the existing
+screen or modal scroll context, as appropriate. A newly selected date waits for
+its detail container layout; tapping the already-selected day scrolls again.
+Initial load/month refresh do not auto-scroll. Normal and expanded calendars
+share this behavior; no requests or selection data changed. Lint, typecheck and
+targeted whitespace checks passed; ignored Expo route declarations regenerated
+before typecheck. Next: tap a different square on iPhone, then repeat in expanded
+view. Native scroll-position confirmation remains pending.
+
+Calculator visibility implemented centrally from the audited website rules:
+Basic hides advanced options, Advanced exposes method and the host-appropriate
+hemisphere option; prediction-only controls remain Advanced-only. Gender hides
+for Advanced+Traditional; birth time/zone depend on time-known. FadeCollapse
+animates shared fields, preserving drafts and API validation. Basic selected-date
+hosts use server-current date; Advanced restores retained date/time. Website
+unlimited/trial/admin selector eligibility needs an explicit equivalent API
+capability for exact parity; existing mobile eligibility/access is unchanged.
+My Calendar now uses existing registry ID ui.monthly-planner. Calendar cells
+auto-fit seven columns with square proportions, centred proportional artwork and
+a floating top-left grey caption date. Removed horizontal minimum width/scroll;
+selected-day details stay below. Source confirms icon registration; the initial
+Integration catalogue check timed out at 15 seconds, then a single recheck
+confirmed ui.monthly-planner in the public catalogue. All 145 tests, final lint,
+typecheck and targeted whitespace checks passed; ignored route declarations were
+regenerated before typecheck. Native appearance/interaction checks remain pending.
+See docs/calculator-visibility-review.md and docs/personal-calendar.md.
+Next: test Basic/Advanced transitions on iPhone and inspect
+the calendar's full-width square grid and icon.
+
+Grey-border trial implemented centrally: dark theme border changed from white to
+light grey #b8b8b8 in Colors, inherited by shared panels, fields, disclosures,
+tables, section widgets and calendar cells. Semantic primary focus/selection
+accents remain distinct. No screen-specific border colours or width changes.
+Palette convention recorded in AGENTS.md/design-system.md. Lint, typecheck and
+targeted whitespace checks passed; ignored route declarations regenerated before
+typecheck. Next: inspect panel and form outlines on iPhone and adjust the one token
+if needed. Native brightness review remains pending.
+
+Processed three artwork/calendar requests: Personal Chart navigation uses the
+shared Constitution/Essence fundamental-nature artwork in both Explore and the
+My Chart hub; Karmic Numerology uses registry ID numerology.karmic-blueprint.
+Shared FeatureArtwork constants keep feature icons aligned with section icons.
+Calendar squares now show only the day-of-month and daily image; full year/month/
+day house information stays below on selection (numeric fallback for older data).
+Applied to the shared calendar, including expanded view. Data, accessibility
+labels, artwork fallback/cache, access and timeout unchanged. Validation: lint,
+typecheck and targeted whitespace checks passed. Ignored Expo route declarations
+regenerated before typecheck. Next: check Explore icons, then select a calendar
+day on iPhone; native artwork/layout confirmation remains pending.
+
+My Chart reorganised as a shared SectionWidgets hub: My Personal Chart, My Cycles,
+My Calendar. Separate Predictions tab removed; existing reading/auth logic reused,
+legacy routes redirect, My Account draft stays independent. Native calendar built
+against the existing month/subscription/revoke routes and the backend AI's newly
+documented presentation metadata. Includes month grid, day reading, Today,
+expanded view, API help, Google-compatible ICS URL copy and explicit link disable.
+No server calculation duplicated or automatic feed mutation. Expo Clipboard
+installed via SDK-aware installer. See docs/personal-calendar.md for audit,
+request/link protections, API mapping and limitations. All 142 tests passed;
+lint/typecheck and iOS bundle passed, including final cleanup rechecks. Anonymous
+month GETs return 401 JSON. Next: verify
+the three-button hub on iPhone before testing calendar actions one at a time.
+
+Personal Chart loading panel now uses shared AppLoadingPanel with centred 15 px
+small text and theme textSecondary (light grey in dark theme). Spinner and box
+remain; existing wording moved to central uiCopy. Shared convention recorded in
+AGENTS.md/design-system.md. No request or loading-state logic changed.
+Validation: lint, typecheck and targeted whitespace checks passed; ignored Expo
+route declarations regenerated before typecheck. Next switch back to My Chart on iPhone and
+check the loading message's alignment, size and colour.
+
+Global detail help corrected: period-specific About Yearly/Monthly/etc. panels
+are now personal-only. Global details use help.globalKi title/htmlBody through
+the existing rich-text renderer, with only the separate Epoch warning on Epoch.
+Owner confirms htmlBody now comes from Dictionary.GlobalKiIntroduction, replacing
+promotional text. No local substitute or resource-specific parsing required.
+Validation: lint, typecheck and targeted whitespace checks passed; regenerated
+stale ignored route declarations for typecheck. Next: refresh Predictions after backend deployment and open
+a global yearly card; verify one dedicated Global Ki introduction above reading.
+
+Owner still sees Year in fixed prediction modal heading after title-map wiring.
+Inspection confirms shared AppModal uses predictionTitles[period], with short
+period label only as old-response fallback. Route refetches on focus; this is not
+a hardcoded Year heading. Latest backend deployment/private payload remains
+unverified, and the local mapper/contract still lack the new map. Next diagnostic:
+close modal, switch to My Chart and back to My Predictions, then reopen yearly.
+If unchanged, inspect only returned labels in the user's signed-in session to
+distinguish absent/incorrect deployed data from stale app code; do not guess or
+request credentials. No code changes for this diagnostic.
+
+Prediction detail simplification implemented: the API descriptive cycle heading,
+energy image and reading share one ChartReading/AppPanel beneath existing helper
+panels. Removed standalone banner and Personal Houses wrapper; global detail uses
+the same single-panel treatment. Optional lunar reading remains separately
+accessible. Main widgets and chart details unchanged. Shared ChartReading accepts
+optional energy artwork with existing resolver/fallbacks; no duplicated prose.
+Validation: lint, typecheck and targeted whitespace checks passed. Regenerated
+stale ignored Expo route declarations to clear unrelated Explore type errors.
+Next: reopen a yearly prediction on iPhone
+and confirm one Harvest/image/reading panel beneath the introduction.
+
+Implemented separate Global Cycles (year/month/day) and global extended
+(epoch/generation) card groups below personal Additional Cycles, using the same
+ReadingGroups/EnergyCards controls. Personal detail no longer includes global;
+scope+period selection keeps titles, artwork and readings aligned. Global details
+start with help.globalKi; only Epoch uses globalKiWarning. Top introduction now
+uses help.overview; More On Predictions is not displayed. Missing help is omitted.
+Owner confirmed groups.extendedGlobal from Dictionary.ExtendedGlobalCycles.
+Connected it to the same expanded disclosure as Additional Cycles; old-server
+missing labels retain an unheaded panel, with no invented wording. The local
+backend contract copy does not yet contain this field; deployment is unverified.
+The explicit new global flow uses returned free globalYear too, superseding the
+old temporary free-global UI guard; no additional periods/access are granted.
+Latest help/label deployment and authenticated free global prose still require
+device verification. Validation: all 133 tests, lint, typecheck and targeted
+whitespace checks passed. Stale ignored route declarations were regenerated for
+typecheck. Next: check the refreshed Predictions introduction on iPhone after
+backend deployment. Extended Global Cycles follow-up: all ten prediction tests,
+lint, typecheck and whitespace checks passed. Regenerated stale ignored route
+declarations before the passing typecheck. Native heading/expansion check pending.
+
+Prediction modal headings now centrally consume owner-confirmed
+data.labels.predictionTitles for all six periods, in personal/global details and
+future calculator hosts. Older responses retain their API short period heading;
+no invented wording or help-title stripping. Main cards/access unchanged.
+Owner says rebuild/deploy still needed; local shared contract copy is not yet
+updated. All ten prediction tests, lint, typecheck and targeted whitespace checks
+passed; ignored route declarations regenerated before typecheck. Next: verify
+Yearly Prediction on iPhone after deployment, then another available period.
+
+Prediction detail banners now use the API cycle description (for example,
+Harvest / Abundance and Celebration), replacing the natal energy title there.
+Applied through shared Predictions for every period, including future calculator
+hosts. Main Predictions widgets and chart banners are unchanged. Missing cycle
+titles stay absent without a natal fallback. See docs/my-predictions.md.
+Validation: lint, typecheck and all eight existing prediction parser checks passed.
+Regenerated ignored Expo route declarations to clear stale generated types. Next:
+open the yearly prediction on iPhone and confirm the descriptive banner heading.
+
+Owner-approved compact affordance implemented system-wide in EnergyCard: removed
+Find out more text and placed a right-pointing chevron at the far right, vertically
+centred. Chart, Predictions and calculator results all inherit it. Entire card
+remains tappable with existing accessibility hint; icon is decorative, pointer-
+transparent and accessibility-hidden. No icon for noninteractive cards. Existing
+expo-symbols provides cross-platform icons without new dependencies. Next:
+reload My Predictions and check alignment/height on a longer-text card.
+Validation: lint, typecheck and targeted whitespace check passed. Device alignment
+and VoiceOver checks remain pending; API, session and account state are unchanged.
+
+Owner confirmed the unified image-beside-text energy/cycle card as the system-wide
+style. Recorded as a lasting AGENTS.md/design-system convention for all current
+and future own-reading/calculator hosts: reuse EnergyCards/EnergyCard, change
+styling centrally, and keep screen differences to API content/influence rank.
+No duplicate or screen-specific card variants. Existing shared implementation
+already follows this; this follow-up changes documentation only. Last code
+validation remains the passing lint/typecheck from the shared-control correction.
+
+Owner explicitly requires Predictions and My Chart to use the same control/style.
+Removed the separate stacked variant and 112 px Predictions image base from
+EnergyCard/EnergyCards. Both now use identical full-width image-beside-text rows,
+80 px base, influence ratios, frames, fonts, spacing and Find out more action.
+The generic row accepts API houseName and reading caption for Predictions; chart
+name/element display stays unchanged. This supersedes earlier cycle-only centered
+layout notes below. No API/access/timeout changes. Next: reload My Predictions
+and compare its card styling to My Chart, then continue label verification.
+Validation: lint, typecheck and targeted whitespace check passed; the separate
+stacked branch is gone. Native visual comparison remains pending.
+
+Layout regression corrected after owner flagged horizontal Profile energies.
+The influence-size change had incorrectly introduced a three-column grid.
+Shared EnergyCards is again a vertical list at every width/font size. Profile
+cards restore full-width image-beside-text rows; Predictions remain a vertical
+list with their requested label/house/image/caption order inside each card.
+Descending primary/additional image sizes are retained, with a shared image frame
+keeping profile text aligned. Removed grid width/heading measurements and related
+state. This supersedes previous horizontal/responsive-grid notes below.
+Next: owner reloads My Chart and confirms the vertical profile layout. The
+authenticated Predictions label diagnostic remains pending after this visual fix.
+Validation: lint, typecheck and targeted whitespace check passed. No data/API
+changes or new layout tests; iPhone visual confirmation remains pending.
+
+Owner has now confirmed Integration deployment. Next one-step missing-label check:
+switch My Chart > My Predictions to trigger a fresh own Predictions GET rather
+than viewing a pre-deployment in-memory snapshot. If still absent, inspect only
+the authenticated label map/house captions. No authenticated field values or
+free global prose verification claimed yet.
+
+Missing-label diagnostic after client wiring: local Predictions uses the exact
+labels.groups/cycleTitles/periods/scopes and cycle.houseName fields. Integration
+public recheck now passed metadata/options 200 JSON, predictions/me and free GET
+401 authentication_required JSON. Private field deployment remains unverified;
+owner last reported backend pending deployment. Asked whether the label/card
+addition has now deployed. Next depends on that answer: deploy if pending; if
+confirmed, refresh own Predictions and check only labels/house captions through
+the existing signed-in session. No app code changes or new credential requests.
+
+Predictions label/card contract now wired: data.labels.groups drives panels,
+cycleTitles drives card headings, periods drives modal navigation and scopes
+drives scope disclosures. Each reading's houseName is displayed verbatim above
+artwork; primary cycleDescriptiveName/free title follows it. Removed metadata
+request/enum-label workaround and local group-heading copy. Parser access is still
+based on full/free returned readings, never presence of labels. Old/malformed
+fields stay absent. Shared ReadingGroups handles absent group heading gracefully.
+Backend owner reports master commit a67fc0a3 and card additions, pending Integration
+deployment; shared contract/local source confirm mappings and free global prose
+fix. Previous label/house contract gaps are resolved in documentation/client,
+but no new authenticated live payload is verified yet. Keep free global UI guard
+until deployed correction is verified. Next: deploy backend, verify labels/house
+fields, JSON protections and authenticated failure/timeout behavior, then iPhone
+card order and modal/scope titles. Detailed status in my-predictions.md.
+Validation: 131 tests passed; lint and typecheck passed. New fixtures cover
+translated labels/house captions, separation from help/reading titles, older
+servers and all-labels-but-yearly-only free access. No new-field live verification
+or deployment claimed.
+
+2026-10-26 influence hierarchy/card order: audited website ninestar.less and
+_CoreEnergies/_AdditionalEnergies/_CycleTitle. Website artwork ratios are
+100/62/38 primary and 62/38/24 additional. Shared EnergyCards now adapts them to
+100/78/60 and 72/60/50 for mobile readability, without shrinking labels or full
+card touch targets. Applies to My Chart, My Predictions and shared calculator
+results. Three equal columns when available width >=280 and text scale <=1.3;
+otherwise vertical. Natural heading measurement aligns image tops; text wraps.
+Prediction card description (Harvest/...) now follows the image. Top slot is
+reserved for real API period labels, never replaced with reading descriptions.
+Number + translated API element sits above the image. Exact Yearly Ki/7 Metal
+House display parity still needs Dictionary-backed period labels and a localised
+house caption from backend; do not fabricate House or parse long energy.title.
+Next: owner reloads My Chart to check weight/spacing; finish cycle captions after
+the backend addition. See design-system.md and my-predictions.md for validation.
+Validation: 129 tests passed; lint, typecheck and targeted whitespace check passed.
+Native geometry/large-text checks remain pending; no live API outage recheck was
+performed for this styling change.
 
 My Predictions first native screen implemented at owner's request: own title,
 expandable API moreOnCycles introduction, Primary Cycles (year/month/day), expanded

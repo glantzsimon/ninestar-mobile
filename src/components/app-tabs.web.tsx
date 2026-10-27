@@ -24,11 +24,8 @@ export default function AppTabs() {
           <TabTrigger name="explore" href="/explore" asChild>
             <TabButton>{uiCopy.navigation.explore}</TabButton>
           </TabTrigger>
-          <TabTrigger name="home" href="/" asChild>
+          <TabTrigger name="home" href="/my-chart" asChild>
             <TabButton>{uiCopy.navigation.chart}</TabButton>
-          </TabTrigger>
-          <TabTrigger name="predictions" href="/predictions" asChild>
-            <TabButton>{uiCopy.navigation.predictions}</TabButton>
           </TabTrigger>
           <TabTrigger name="account" href="/account" asChild>
             <TabButton>{uiCopy.navigation.account}</TabButton>

@@ -21,8 +21,7 @@ export function PersonalChart({ chart, title }: { chart: Chart; title?: string }
     const roles = additional ? ['dayStar', 'generation', 'epoch'] : ['core', 'character', 'socialExpression'];
     return <EnergyCards additional={additional} items={energies.map((energy) => ({
       key: energy.key, energy, title: energyRoleTitle(energy), rank: roles.indexOf(energy.key),
-      subtitle: energy.element ? `${energy.number} ${energy.element}` : undefined,
-      caption: energy.name, selected: selected === energy.key, onPress: () => setSelected(energy.key),
+      selected: selected === energy.key, onPress: () => setSelected(energy.key),
     }))} />;
   }
 
@@ -31,7 +30,6 @@ export function PersonalChart({ chart, title }: { chart: Chart; title?: string }
       <View style={styles.header}>
         <View style={styles.intro}>
           <ThemedText type="title" accessibilityRole="header">{title ?? uiCopy.personalChart}</ThemedText>
-          {!!chart.name && <ThemedText type="subtitle">{chart.name}</ThemedText>}
           <ThemedText themeColor="textSecondary">{uiCopy.chartGuidance}</ThemedText>
         </View>
         <ReadingGroups primaryTitle={uiCopy.coreEnergies} additionalTitle={uiCopy.extendedProfile}

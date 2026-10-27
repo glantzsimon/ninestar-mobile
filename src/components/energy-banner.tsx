@@ -7,13 +7,13 @@ import { useTheme } from '@/hooks/use-theme';
 import type { ChartEnergy } from '@/lib/personal-chart';
 
 // Shared identity banner for every energy detail and future calculator results.
-export function EnergyBanner({ energy }: { energy: ChartEnergy }) {
+export function EnergyBanner({ energy, title = energy.title }: { energy: ChartEnergy; title?: string }) {
   const theme = useTheme();
   return <View style={[styles.banner, { backgroundColor: theme.panelHeader, borderColor: theme.border }]}>
     <ArtworkImage artworkId={energy.artworkId} legacyUrl={energy.imageUrl}
       fallback={EnergyArtwork[energy.number]} style={styles.image} contentFit="contain" accessible={false} />
-    {!!energy.title && <ThemedText type="sectionTitle" accessibilityRole="header" style={styles.title}>
-      {energy.title}
+    {!!title && <ThemedText type="sectionTitle" accessibilityRole="header" style={styles.title}>
+      {title}
     </ThemedText>}
   </View>;
 }

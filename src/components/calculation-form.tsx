@@ -1,48 +1,48 @@
+import { useState } from 'react';
 import { AppButton } from '@/components/ui/app-button';
 import { AppDisclosure } from '@/components/ui/app-disclosure';
-import { AppInput } from '@/components/ui/app-input';
-import { AppPanel } from '@/components/ui/app-panel';
+import { AppDateTimeField } from '@/components/ui/app-date-time-field';
+import { CalculationPersonFields } from '@/components/calculation-person-fields';
 import { AppSelect } from '@/components/ui/app-select';
 import type { AccountOptions } from '@/lib/account';
 import type { CalculationDraft } from '@/lib/calculation';
 import { uiCopy } from '@/lib/ui-copy';
+import type { FieldErrors } from '@/lib/field-validation';
 
 // One controlled form; hosts own their independent drafts and API/result flow.
 // Predictions can opt into local selected-date inputs without copying birth fields.
-export function CalculationForm({ draft, options, onChange, onSubmit, busy, includeSelectedDate = false }: {
+export function CalculationForm({ draft, options, onChange, onSubmit, busy, includeSelectedDate = false, errors = {} }: {
   draft: CalculationDraft; options: AccountOptions; onChange: (draft: CalculationDraft) => void;
-  onSubmit: () => void; busy: boolean; includeSelectedDate?: boolean;
+  onSubmit: () => void; busy: boolean; includeSelectedDate?: boolean; errors?: FieldErrors;
 }) {
   const copy = uiCopy.calculator;
+  const [preferencesOpen, setPreferencesOpen] = useState(false);
+  const preferenceError = Object.keys(errors).some(key =>
+    ['calculationMethod', 'userTimeZoneId', 'housesDisplay', 'selectedDate', 'selectedTime', 'invertNatal', 'invertCycles'].includes(key));
   const yesNo = [{ value: 'false', label: copy.no }, { value: 'true', label: copy.yes }];
-  function input(key: keyof CalculationDraft, label: string, maxLength: number) {
-    return <AppInput label={label} value={draft[key]} maxLength={maxLength} editable={!busy}
-      onChangeText={(value) => onChange({ ...draft, [key]: value })} autoCorrect={false} />;
-  }
   function select(key: keyof CalculationDraft, label: string, choices: { label: string; value: string }[]) {
-    return <AppSelect label={label} value={draft[key]} options={choices} disabled={busy}
-      onChange={(value) => onChange({ ...draft, [key]: value })} />;
+    return <AppSelect label={label} value={draft[key]} error={errors[key]} options={choices} disabled={busy}
+      onChange={(value) => { setPreferencesOpen(true); onChange({ ...draft, [key]: value }); }} />;
   }
   return <>
-    <AppPanel title={copy.birthDetails}>
-      {input('name', copy.name, 200)}
-      {input('dateOfBirth', copy.dateOfBirth, 10)}
-      {select('timeOfBirthKnown', copy.timeKnown, yesNo)}
-      {input('timeOfBirth', copy.timeOfBirth, 16)}
-      {select('birthTimeZoneId', copy.birthTimezone, options.timezones)}
-      {select('gender', copy.gender, options.genders)}
-    </AppPanel>
-    <AppDisclosure title={copy.preferences}>
-      {select('calculatorType', copy.calculatorType, options.calculatorTypes)}
-      {select('calculationMethod', copy.calculationMethod, options.calculationMethods)}
-      {select('userTimeZoneId', copy.currentTimezone, options.timezones)}
-      {select('housesDisplay', copy.housesDisplay, options.houseDisplays)}
-      {includeSelectedDate && <>
-        {input('selectedDate', copy.selectedDate, 10)}
-        {input('selectedTime', copy.selectedTime, 16)}
-      </>}
-      {select('invertNatal', copy.invertNatal, yesNo)}
-      {select('invertCycles', copy.invertCycles, yesNo)}
+    <CalculationPersonFields draft={draft} options={options} onChange={onChange} busy={busy} errors={errors} />
+    <AppDisclosure title={copy.preferences} expanded={preferencesOpen || preferenceError}
+      onExpandedChange={setPreferencesOpen}>
+        {select('calculationMethod', copy.calculationMethod, options.calculationMethods)}
+        {(includeSelectedDate || errors.userTimeZoneId || errors.housesDisplay) && <>
+          {select('userTimeZoneId', copy.currentTimezone, options.timezones)}
+          {select('housesDisplay', copy.housesDisplay, options.houseDisplays)}
+        </>}
+        {includeSelectedDate && <>
+          <AppDateTimeField label={copy.selectedDate} mode="date" value={draft.selectedDate} error={errors.selectedDate} allowClear
+            disabled={busy} onChange={value => { setPreferencesOpen(true); onChange({ ...draft, selectedDate: value }); }} />
+          <AppDateTimeField label={copy.selectedTime} mode="time" value={draft.selectedTime} error={errors.selectedTime} allowClear
+            disabled={busy} onChange={value => { setPreferencesOpen(true); onChange({ ...draft, selectedTime: value }); }} />
+        </>}
+        {includeSelectedDate ? select('invertCycles', copy.invertCycles, yesNo)
+          : select('invertNatal', copy.invertNatal, yesNo)}
+        {includeSelectedDate && !!errors.invertNatal && select('invertNatal', copy.invertNatal, yesNo)}
+        {!includeSelectedDate && !!errors.invertCycles && select('invertCycles', copy.invertCycles, yesNo)}
     </AppDisclosure>
     <AppButton title={copy.calculate} onPress={onSubmit} loading={busy} />
   </>;

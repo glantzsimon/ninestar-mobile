@@ -1,5 +1,11 @@
 # Shared calculator and Personal Chart
 
+2026-10-27: Personal Chart and the new Predictions Calculator now share
+CalculatorScreen for state/loading/submit/help/memory/Back/Edit flow, in addition
+to CalculationForm. Routes remain thin; results reuse PersonalChart or Predictions
+as the own-reading screens do. See predictions-calculator.md and
+calculator-flow-refinement.md for current behavior and device checks.
+
 Implemented 2026-10-25 against the existing shared contract in
 `ninestar/docs/mobile-api.md`; no backend edits or proposed transport fields.
 

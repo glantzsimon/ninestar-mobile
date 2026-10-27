@@ -18,7 +18,9 @@ export default function ExploreScreen() {
       <SectionWidgets selected=""
         items={exploreFeatures.filter((item) => item.group === group).map((item) => ({ ...item,
           fallbackArtwork: require('../../../assets/images/ninestar-mark.png') }))}
-        onSelect={(key) => key === 'personalChart' ? router.push('/explore/personal-chart') : setSelected(key)} />
+        onSelect={(key) => key === 'personalChart' ? router.push('/explore/personal-chart')
+          : key === 'predictions' ? router.push('/explore/predictions')
+          : key === 'compatibility' ? router.push('/explore/compatibility') : setSelected(key)} />
     </AppPanel>)}
     {feature && <AppModal title={feature.title} onClose={() => setSelected('')}>
       <AppPanel><ThemedText>{uiCopy.explore.unavailable}</ThemedText></AppPanel>

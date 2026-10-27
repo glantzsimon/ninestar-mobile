@@ -5,20 +5,20 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { AppButton } from '@/components/ui/app-button';
 import { AppBackground } from '@/components/ui/app-background';
-import { FadeCollapse } from '@/components/ui/fade-collapse';
-import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { AppMenuNavigation } from '@/components/ui/app-menu-navigation';
+import { MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { uiCopy } from '@/lib/ui-copy';
 
 type ScrollTarget = ComponentRef<typeof View>;
-const ModalScrollContext = createContext<(target: ScrollTarget) => void>(() => {});
+const ModalScrollContext = createContext<(target: ScrollTarget, options?: { topInset?: number }) => void>(() => {});
 export const useModalScroll = () => useContext(ModalScrollContext);
 const ModalMenuContext = createContext<(target: ScrollTarget) => void>(() => {});
 export const useModalMenu = () => useContext(ModalMenuContext);
 
 // Presentation only: callers own selection/data so chart and calculator can share it.
-export function AppModal({ title, onClose, backToTopLabel, children }: PropsWithChildren<{
-  title: string; onClose: () => void; backToTopLabel?: string;
+export function AppModal({ title, onClose, backToTopLabel, children, edgeToEdge = false }: PropsWithChildren<{
+  title: string; onClose: () => void; backToTopLabel?: string; edgeToEdge?: boolean;
 }>) {
   const theme = useTheme();
   const [scrolledDown, setScrolledDown] = useState(false);
@@ -37,13 +37,23 @@ export function AppModal({ title, onClose, backToTopLabel, children }: PropsWith
       setScrolledDown(currentOffset.current > menuOffset.current + Spacing.four);
     }, () => {});
   }, []);
-  const scrollTo = useCallback((target: ScrollTarget) => {
-    if (!content.current) return;
-    target.measureLayout(content.current, (_x, y) => {
-      const offset = Math.max(0, y - Spacing.three);
+  const scrollTo = useCallback((target: ScrollTarget, options?: { topInset?: number }) => {
+    const container = content.current;
+    if (!container) return;
+    target.measureLayout(container, (_x, y) => {
+      const offset = Math.max(0, y - (options?.topInset ?? Spacing.three));
       const requiredHeight = offset + viewportHeight.current;
       pendingOffset.current = offset;
       setMinimumHeight((previous) => Math.max(previous, requiredHeight));
+      if (options?.topInset === 0) {
+        container.measure((_left, _top, _width, height) => {
+          if (pendingOffset.current === offset && height >= requiredHeight) {
+            pendingOffset.current = null;
+            scroll.current?.scrollTo({ y: offset, animated: true });
+          }
+        });
+        return;
+      }
       // Short sections need layout space before native scrollTo can reach them.
       if (contentHeight.current >= requiredHeight) {
         pendingOffset.current = null;
@@ -51,20 +61,18 @@ export function AppModal({ title, onClose, backToTopLabel, children }: PropsWith
       }
     }, () => {});
   }, []);
-  return <Modal visible animationType="slide" presentationStyle="pageSheet"
-    allowSwipeDismissal onRequestClose={onClose}>
+  return <Modal visible transparent animationType="slide" presentationStyle="overFullScreen"
+    onRequestClose={onClose}>
     <SafeAreaProvider>
-      <SafeAreaView style={[styles.fill, { backgroundColor: theme.backgroundElement }]}
-        edges={['top', 'bottom', 'left', 'right']} accessibilityViewIsModal onAccessibilityEscape={onClose}>
-        <View style={[styles.header, { borderColor: theme.primary }]}>
+      <SafeAreaView style={styles.fill} edges={['top', 'left', 'right']}>
+      <SafeAreaView style={[styles.surface, { backgroundColor: theme.backgroundElement }]}
+        edges={['bottom']} accessibilityViewIsModal onAccessibilityEscape={onClose}>
+        <View style={[styles.header, edgeToEdge && styles.fullWidth, { borderColor: theme.primary }]}>
           <ThemedText type="modalTitle" accessibilityRole="header" style={styles.title}>{title}</ThemedText>
           <AppButton title={uiCopy.close} variant="secondary" accessibilityLabel={`${uiCopy.close} ${title}`} onPress={onClose} />
         </View>
-        {!!backToTopLabel && <FadeCollapse visible={scrolledDown}><View style={styles.navigation}>
-          <AppButton title={`↑ ${backToTopLabel}`} variant="secondary"
-            accessibilityHint={uiCopy.menuHint}
-            onPress={() => scroll.current?.scrollTo({ y: menuOffset.current, animated: true })} />
-        </View></FadeCollapse>}
+        {!!backToTopLabel && <AppMenuNavigation visible={scrolledDown} title={backToTopLabel}
+          onPress={() => scroll.current?.scrollTo({ y: menuOffset.current, animated: true })} />}
         <View style={[styles.fill, { backgroundColor: theme.background }]}>
         <AppBackground />
         <ScrollView ref={scroll} style={styles.fill} contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled"
@@ -84,24 +92,27 @@ export function AppModal({ title, onClose, backToTopLabel, children }: PropsWith
           }}>
           <ModalScrollContext.Provider value={scrollTo}>
             <ModalMenuContext.Provider value={registerMenu}>
-            <View ref={content} collapsable={false} style={[styles.content, { minHeight: minimumHeight }]}>{children}</View>
+            <View ref={content} collapsable={false} style={[styles.content, edgeToEdge && styles.edgeContent,
+              { minHeight: minimumHeight }]}>{children}</View>
             </ModalMenuContext.Provider>
           </ModalScrollContext.Provider>
         </ScrollView>
         </View>
+      </SafeAreaView>
       </SafeAreaView>
     </SafeAreaProvider>
   </Modal>;
 }
 
 const styles = StyleSheet.create({
+  fullWidth: { maxWidth: '100%' },
+  edgeContent: { maxWidth: '100%', padding: 0, gap: 0 },
   fill: { flex: 1 },
+  surface: { flex: 1, borderRadius: Radius.modal, overflow: 'hidden' },
   header: { width: '100%', maxWidth: MaxContentWidth, alignSelf: 'center',
     flexDirection: 'row', alignItems: 'center', gap: Spacing.three,
     padding: Spacing.three, borderBottomWidth: 1 },
   title: { flex: 1, minWidth: 0 },
-  navigation: { width: '100%', maxWidth: MaxContentWidth, alignSelf: 'center',
-    paddingHorizontal: Spacing.three, paddingVertical: Spacing.two },
   scroll: { flexGrow: 1 },
   content: { width: '100%', maxWidth: MaxContentWidth, alignSelf: 'center',
     padding: Spacing.three, gap: Spacing.three },

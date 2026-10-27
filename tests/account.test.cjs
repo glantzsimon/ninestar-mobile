@@ -1,23 +1,27 @@
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 const test = require('node:test');
-const vm = require('node:vm');
-const ts = require('typescript');
-
-const source = fs.readFileSync(path.join(__dirname, '../src/lib/account.ts'), 'utf8');
-const compiled = ts.transpileModule(source, {
-  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
-}).outputText;
-const exportsForTest = {};
-vm.runInNewContext(compiled, { exports: exportsForTest });
-const { accountDraft, accountOptions, buildAccountUpdate } = exportsForTest;
+const load = require('./load-library.cjs')();
+const { accountDraft, accountOptions, buildAccountUpdate } = load('account');
+const { FieldValidationError } = load('field-validation');
 const option = (value) => ({ value, label: value });
 const options = {
   genders: [option('Female')], timezones: [option('Europe/London'), option('Tokyo Standard Time')],
   calculationMethods: [option('Chinese')], calculatorTypes: [option('Advanced')],
   houseDisplays: [option('SolarHouse')],
 };
+
+test('account validation identifies the input without changing the draft or save body', () => {
+  const draft = accountDraft(savedAccount());
+  const before = JSON.stringify(draft);
+  for (const [field, value] of [['firstName', ''], ['lastName', ''], ['emailAddress', 'invalid'],
+    ['dateOfBirth', '1900-02-29'], ['timeOfBirth', '24:00'], ['birthTimeZoneId', 'invalid'],
+    ['gender', 'invalid'], ['userTimeZoneId', 'invalid'], ['calculationMethod', 'invalid'],
+    ['housesDisplay', 'invalid'], ['invertNatal', ''], ['invertCycles', '']]) {
+    assert.throws(() => buildAccountUpdate({ ...draft, [field]: value }, options),
+      error => error instanceof FieldValidationError && error.field === field && !!error.message);
+  }
+  assert.equal(JSON.stringify(draft), before);
+});
 function savedAccount() {
   return {
     firstName: 'Test', lastName: 'Person', emailAddress: 'test@example.test', phoneNumber: '',
@@ -56,9 +60,21 @@ test('missing calculation data remains explicit rather than inventing preference
   assert.equal(draft.dateOfBirth, '');
   assert.equal(draft.birthTimeZoneId, 'Tokyo Standard Time');
   assert.equal(draft.timeOfBirthKnown, '');
-  assert.equal(draft.calculatorType, '');
+  assert.equal(draft.calculatorType, undefined);
   assert.equal(draft.invertNatal, '');
   assert.throws(() => buildAccountUpdate(draft, options));
+});
+
+test('website Simple preference does not override explicit mobile settings or mutate the account', () => {
+  const account = savedAccount();
+  account.calculation.calculatorType = 'Simple';
+  const draft = accountDraft(account);
+  const update = buildAccountUpdate(draft, options);
+  assert.equal(update.settings.calculatorType, 'Advanced');
+  assert.equal(update.settings.calculationMethod, 'Chinese');
+  assert.equal(account.calculation.calculatorType, 'Simple');
+  assert.equal(draft.calculatorType, undefined);
+  assert.throws(() => buildAccountUpdate(draft, { ...options, calculatorTypes: [option('Simple')] }));
 });
 
 test('invalid dates fail without timezone conversion; valid date-only stays unchanged', () => {

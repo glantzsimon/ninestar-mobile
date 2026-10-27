@@ -4,7 +4,7 @@ import { BrandFonts, Fonts, ThemeColor, Typography } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 export type ThemedTextProps = TextProps & {
-  type?: 'default' | 'title' | 'modalTitle' | 'small' | 'smallBold' | 'subtitle' | 'sectionTitle' | 'link' | 'linkPrimary' | 'code';
+  type?: 'default' | 'title' | 'modalTitle' | 'small' | 'smallBold' | 'caption' | 'subtitle' | 'sectionTitle' | 'link' | 'linkPrimary' | 'code';
   themeColor?: ThemeColor;
 };
 
@@ -17,6 +17,7 @@ export function ThemedText({ style, type = 'default', themeColor, ...rest }: The
 }
 
 const styles = StyleSheet.create({
+  caption: { ...Typography.caption },
   modalTitle: { ...Typography.modalTitle },
   sectionTitle: { ...Typography.sectionTitle },
   small: {

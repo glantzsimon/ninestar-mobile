@@ -1,5 +1,24 @@
 # My Account
 
+Removed the unrequested sentence about sharing details with the website beneath
+the Your Account heading (2026-10-26). No replacement guidance added. Lint,
+typecheck and targeted whitespace checks passed; next: check the heading/content
+transition on iPhone.
+
+Copy cleanup (2026-10-26): removed birth-details review guidance and calculation
+preference save guidance; approved birth-time explanation remains. Do not add
+new explanatory copy without owner agreement. MembershipStatus no longer shows
+generic paid/free access prose. Its normal panel is hidden pending a proper
+API-authored membership label, while existing refresh/error/retry remain active.
+Source audit: MobileAccountController.Me membership projection has dates/flags/
+counters but no name; MobileEntitlementsMapper exposes subscriptionType as an enum.
+Neither is a localised display label. Proposed backend addition: expose the
+website's membership display label and define the no-membership display state;
+field location/contract must be agreed/documented before mobile wiring. No backend
+change or invented label implemented. Lint, typecheck and targeted whitespace
+checks passed. Next: inspect My
+Account cleanup on iPhone and obtain the documented backend label.
+
 Naming convention: My Account remains the navigation destination; page heading
 is Your Account in every screen state, sourced from central uiCopy. This matches
 My Chart / Your Personal Chart. Account behavior and drafts are unchanged.

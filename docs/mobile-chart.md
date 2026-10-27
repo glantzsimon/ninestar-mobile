@@ -1,6 +1,8 @@
 # First mobile chart slice
 
-Home restores the current cookie session through account/shared-entitlement GETs
+My Chart is now a hub; /my-chart/personal-chart hosts the existing own-chart/login
+screen through shared OwnChartScreen. See personal-calendar.md for navigation.
+The own-chart screen restores the current cookie session through account/shared-entitlement GETs
 before the protected own-chart GET. See [shared-entitlements.md](shared-entitlements.md).
 If signed out, it displays the login form. A successful login refreshes CSRF,
 checks account/me and then loads the chart. No login POST is replayed automatically.

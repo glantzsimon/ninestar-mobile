@@ -2,7 +2,7 @@ import type { CalculationDraft } from './calculation';
 
 type Storage = { read: () => Promise<unknown>; write: (value: unknown) => Promise<void> };
 const fields: (keyof CalculationDraft)[] = ['name', 'dateOfBirth', 'timeOfBirth', 'timeOfBirthKnown',
-  'gender', 'birthTimeZoneId', 'userTimeZoneId', 'calculationMethod', 'calculatorType',
+  'gender', 'birthTimeZoneId', 'userTimeZoneId', 'calculationMethod',
   'housesDisplay', 'invertNatal', 'invertCycles', 'selectedDate', 'selectedTime'];
 const object = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};

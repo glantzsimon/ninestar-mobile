@@ -17,7 +17,7 @@ export default function AppTabs() {
         <NativeTabs.Trigger.Label>{uiCopy.navigation.explore}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon src={require('@/assets/images/tabIcons/explore.png')} renderingMode="template" />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="index">
+      <NativeTabs.Trigger name="my-chart">
         <NativeTabs.Trigger.Label>{uiCopy.navigation.chart}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           src={require('@/assets/images/tabIcons/home.png')}
@@ -25,10 +25,8 @@ export default function AppTabs() {
         />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="predictions">
-        <NativeTabs.Trigger.Label>{uiCopy.navigation.predictions}</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="calendar" md="calendar_month" />
-      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="index" hidden />
+      <NativeTabs.Trigger name="predictions" hidden />
       <NativeTabs.Trigger name="account">
         <NativeTabs.Trigger.Label>{uiCopy.navigation.account}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="person.crop.circle" md="account_circle" />

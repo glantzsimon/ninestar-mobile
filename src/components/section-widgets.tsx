@@ -4,15 +4,16 @@ import { ArtworkImage } from '@/components/artwork-image';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { EnergyArtwork } from '@/constants/energy-artwork';
+import { FeatureArtwork } from '@/constants/feature-artwork';
 import type { ImageSource } from 'expo-image';
 import type { ChartEnergy } from '@/lib/personal-chart';
 
 // Stable public UI identifiers; URLs always come from the catalogue.
 const icons: Record<string, string> = {
-  essence: 'ui.fundamental-nature', energyFacts: 'ui.overview',
-  'Your Nature': 'ui.fundamental-nature', 'People and Relationships': 'ui.relationships',
+  essence: FeatureArtwork.personalChart, energyFacts: 'ui.overview',
+  'Your Nature': FeatureArtwork.personalChart, 'People and Relationships': 'ui.relationships',
   'Work and Direction': 'ui.career', 'Wellbeing and Balance': 'ui.health',
-  character: 'ui.fundamental-nature', childNature: 'ui.inner-child',
+  character: FeatureArtwork.personalChart, childNature: 'ui.inner-child',
   adultChildRelationship: 'ui.adult-child-relationship', stressResponse: 'ui.stress-response',
   intellectualQualities: 'ui.intellectual-qualities', interpersonalQualities: 'ui.interpersonal-qualities',
   emotionalLandscape: 'ui.emotional-energy', relationships: 'ui.relationships',
