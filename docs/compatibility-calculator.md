@@ -12,7 +12,13 @@ Results go straight to shared SectionWidgets, initially with no selected detail.
 There is no energy picker, energy-name banner or extra modal step. The page heading
 uses labels.results when supplied. Buttons use labels.sections[key].navigationTitle;
 panels use the corresponding title. Missing labels/content omit a button rather
-than inventing wording. Available analysis sections are flattened into this menu:
+than inventing wording.
+
+The short personalised sections.strengthsAndChallenges.subtitle appears directly
+under the page heading, using shared subtitle typography and related-heading
+spacing. It is also retained within its reading section; no text is inferred
+from scores or HTML. Missing subtitle simply omits that line.
+Available analysis sections are flattened into this menu:
 Overview, Strengths/Challenges, solar elements, lunar elements, all elements,
 Yin/Yang, birth month and permitted chemistry. The website's inDepth grouping label
 is parsed but does not become a duplicate empty reading.
@@ -38,6 +44,11 @@ Older responses without usable navigation metadata retain the previous prose and
 profile disclosures. No gauges or labels are manufactured from enum names.
 
 ## Native gauges
+
+Core/Character Elements now include their explicit API-selected catalogue diagrams,
+and Total Elements includes the API-segment native pie/legend. Embedded HTML images
+are suppressed while text remains intact. See compatibility-element-visuals.md
+for contract details, public media checks and the 178-test validation report.
 
 CompatibilityGauges draws live native SVG arcs and needles, using react-native-svg
 15.16.0 installed through Expo SDK 58's expo install. This module is bundled in

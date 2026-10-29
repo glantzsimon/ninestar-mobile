@@ -10,10 +10,11 @@ import type { ChartEnergy } from '@/lib/personal-chart';
 
 // Stable public UI identifiers; URLs always come from the catalogue.
 const icons: Record<string, string> = {
-  essence: FeatureArtwork.personalChart, energyFacts: 'ui.overview',
-  'Your Nature': FeatureArtwork.personalChart, 'People and Relationships': 'ui.relationships',
+  essence: FeatureArtwork.essence, energyFacts: 'ui.overview',
+  'Your Nature': FeatureArtwork.essence, 'People and Relationships': 'ui.relationships',
   'Work and Direction': 'ui.career', 'Wellbeing and Balance': 'ui.health',
-  character: FeatureArtwork.personalChart, childNature: 'ui.inner-child',
+  constitution: FeatureArtwork.constitution, core: FeatureArtwork.constitution,
+  character: FeatureArtwork.character, childNature: 'ui.inner-child',
   adultChildRelationship: 'ui.adult-child-relationship', stressResponse: 'ui.stress-response',
   intellectualQualities: 'ui.intellectual-qualities', interpersonalQualities: 'ui.interpersonal-qualities',
   emotionalLandscape: 'ui.emotional-energy', relationships: 'ui.relationships',
@@ -25,7 +26,12 @@ export function SectionWidgets({ items, selected, onSelect, energy, disabled = f
   selected: string; onSelect: (key: string) => void; energy?: ChartEnergy; disabled?: boolean;
 }) {
   const theme = useTheme();
-  return <View style={styles.grid}>{items.map((item) => <Pressable key={item.key}
+  const rows = Array.from({ length: Math.ceil(items.length / 2) }, (_, index) => items.slice(index * 2, index * 2 + 2));
+  return <View style={styles.grid}>{rows.map(row => {
+    const centred = items.length > 1 && row.length === 1;
+    return <View key={row[0].key} style={[styles.row, centred && styles.centredRow]}>
+    {centred && <View style={styles.halfCell} accessible={false} />}
+    {row.map((item) => <View key={item.key} style={styles.cell}><Pressable
     accessibilityRole="button" accessibilityLabel={item.title}
     accessibilityHint={item.hint} disabled={disabled}
     accessibilityState={{ selected: selected === item.key, disabled }} onPress={() => onSelect(item.key)}
@@ -40,12 +46,20 @@ export function SectionWidgets({ items, selected, onSelect, energy, disabled = f
         style={styles.icon} contentFit="contain" accessible={false} />}
     <ThemedText type="smallBold" style={styles.label}>{item.title}</ThemedText>
     {!!item.hint && <ThemedText type="small" themeColor="textSecondary" style={styles.label}>{item.hint}</ThemedText>}
-  </Pressable>)}</View>;
+    </Pressable></View>)}
+    {centred && <View style={styles.halfCell} accessible={false} />}
+    </View>;
+  })}</View>;
 }
 
 const styles = StyleSheet.create({
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-  item: { flexGrow: 1, flexBasis: '45%', minHeight: 144, alignItems: 'center',
+  grid: { gap: Spacing.two },
+  row: { flexDirection: 'row', gap: Spacing.two },
+  // Two half-width spacers plus half gaps preserve the exact paired-card width.
+  centredRow: { gap: Spacing.two / 2 },
+  halfCell: { flex: 0.5 },
+  cell: { flex: 1, minWidth: 0 },
+  item: { flex: 1, minWidth: 0, minHeight: 144, alignItems: 'center',
     justifyContent: 'flex-start', gap: Spacing.three, padding: Spacing.three,
     borderRadius: Radius.panel, borderWidth: 1 },
   label: { textAlign: 'center', lineHeight: 20 },

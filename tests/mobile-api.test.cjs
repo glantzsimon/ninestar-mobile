@@ -29,6 +29,68 @@ const failure = (status, code) => ({
   status, body: { success: false, data: null, error: { code } },
 });
 
+test('knowledge base uses one cookie-aware GET without CSRF, account writes or retries', async () => {
+  const data = { help: { origins: { title: 'Server origins', htmlBody: '<p>Introduction.</p>', culture: 'en-GB' } } };
+  const api = client([success(data)]);
+  api.session.change('signed-out');
+  const response = await api.mobileApiRequest('knowledge-base');
+  assert.equal(JSON.stringify(response.data), JSON.stringify(data));
+  assert.equal(api.calls.length, 1);
+  assert.ok(api.calls[0].url.endsWith('/knowledge-base'));
+  assert.equal(api.calls[0].options.method, 'GET');
+  assert.equal(api.calls[0].options.body, undefined);
+  assert.equal(api.session.getSnapshot().status, 'signed-out');
+});
+
+test('public I Ching cast uses fresh CSRF then one POST without requiring login, account or membership', async () => {
+  const api = client([success({ requestToken: 'fixture-csrf' }), success({ primary: {}, transformed: null })]);
+  api.session.change('signed-out');
+  const before = JSON.stringify(api.session.getSnapshot());
+  await api.castIChing();
+  assert.equal(api.calls.length, 2);
+  assert.ok(api.calls[0].url.endsWith('/account/csrf'));
+  assert.ok(api.calls[1].url.endsWith('/iching/cast'));
+  assert.equal(api.calls[1].options.method, 'POST');
+  assert.equal(api.calls[1].options.body, '{}');
+  assert.equal(api.calls[1].options.headers['X-CSRF-Token'], 'fixture-csrf');
+  assert.equal(JSON.stringify(api.session.getSnapshot()), before);
+});
+
+test('I Ching introduction makes one public help GET without casting or obtaining CSRF', async () => {
+  const api = client([success({ help: { overview: { title: 'API I Ching introduction',
+    htmlBody: '<h3>API heading</h3><p>Existing <strong>authored</strong> introduction.</p>', culture: 'fr-FR' } } })]);
+  api.session.change('signed-out');
+  const help = await api.getIChingIntroduction();
+  assert.equal(help.title, 'API I Ching introduction');
+  assert.equal(help.culture, 'fr-FR');
+  assert.equal(help.blocks[0].kind, 'heading');
+  assert.ok(help.blocks[1].spans.some(span => span.bold && span.text === 'authored'));
+  assert.equal(api.calls.length, 1);
+  assert.ok(api.calls[0].url.endsWith('/iching/help'));
+  assert.equal(api.calls[0].options.method, 'GET');
+  assert.equal(api.calls[0].options.body, undefined);
+  assert.equal(api.session.getSnapshot().status, 'signed-out');
+});
+
+test('missing or failed I Ching help never falls back to a cast or retries automatically', async () => {
+  const api = client([success({}), success({ help: { overview: { title: 'Incomplete' } } }), failure(503, 'temporarily_unavailable')]);
+  assert.equal(await api.getIChingIntroduction(), null);
+  assert.equal(await api.getIChingIntroduction(), null);
+  await assert.rejects(api.getIChingIntroduction(), error => error.status === 503);
+  assert.equal(api.calls.length, 3);
+  assert.ok(api.calls.every(call => call.options.method === 'GET' && call.url.endsWith('/iching/help')));
+});
+
+test('I Ching does not retry a failed cast or post after a session change during CSRF', async () => {
+  const failed = client([success({ requestToken: 'fixture-csrf' }), failure(503, 'temporarily_unavailable')]);
+  await assert.rejects(failed.castIChing(), error => error.status === 503);
+  assert.equal(failed.calls.length, 2);
+  let changed;
+  changed = client([() => { changed.session.change(); return success({ requestToken: 'fixture-csrf' }); }]);
+  await assert.rejects(changed.castIChing(), error => error.code === 'session_changed');
+  assert.equal(changed.calls.length, 1);
+});
+
 test('compatibility introduction uses only the public read-only help endpoint and preserves API HTML/culture', async () => {
   const api = client([success({ help: { overview: { title: 'API Compatibility introduction',
     htmlBody: '<h3>API heading</h3><p>Generic <strong>introduction</strong>.</p>', culture: 'fr-FR' } } })]);

@@ -18,8 +18,9 @@ first./second. prefixes so errors target the correct person. The first invalid
 field is reported on submission; editing clears the displayed field error. No
 request is sent for failed local validation. Account email_unavailable also maps
 to the email input. General transport/server errors without an authoritative
-field remain above the form rather than guessing a field or appearing beneath
-Calculate. Existing uncertain-account-save handling and read-back protections
+field are not attributed to a guessed input. Explicit submission failures use the shared warning
+dialog described in submission-error-feedback.md; field-specific errors remain
+inline. Existing uncertain-account-save handling and read-back protections
 remain intact.
 
 Advanced preferences reveal automatically for errors inside them. Hidden birth
@@ -74,7 +75,8 @@ calculation, backend edit, migration, purchasing or deployment was performed.
 Native picker appearance/cancellation, Android dialogs and scroll positioning
 through animated disclosures still require device verification. Server responses
 without field identities cannot safely be attributed to individual inputs; their
-existing general messages stay above the form. No backend contract changes are
+general submission messages now use the warning dialog; background-load messages
+remain inline. No backend contract changes are
 proposed or implemented in this task.
 
 Next concrete iPhone check: open My Account, tap Birth date, change the wheel and

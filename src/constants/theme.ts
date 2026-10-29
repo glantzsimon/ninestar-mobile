@@ -5,6 +5,8 @@ import '@/global.css';
 import { Platform } from 'react-native';
 
 export const DefaultColorScheme: 'light' | 'dark' = 'dark';
+// Website hexagram notation stays high-contrast in both app themes.
+export const HexagramColors = { paper: '#f9f9f9', ink: '#000000', changing: '#ffb74d' } as const;
 
 // Website gauge palette; desirability changes colour, never needle position.
 export const GaugeColors = { low: '#FD0510', middle: '#FCDA14', high: '#08F321',
@@ -117,7 +119,8 @@ export const Spacing = {
   six: 64,
 } as const;
 
-export const LayoutSpacing = { relatedActions: Spacing.one, bottomClearance: Spacing.one } as const;
+export const LayoutSpacing = { relatedActions: Spacing.one, bottomClearance: Spacing.one,
+  figureBottom: Spacing.half, chartBottom: Spacing.three } as const;
 // NativeTabs supplies native insets. The web tab bar overlays its screen.
 export const BottomTabInset = Platform.OS === 'web'
   ? ControlHeight + Spacing.two * 2 + Spacing.three * 2 : 0;

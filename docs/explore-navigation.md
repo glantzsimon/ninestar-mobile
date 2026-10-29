@@ -1,5 +1,11 @@
 # Explore navigation and native feature availability
 
+Current addition (2026-10-27): I Ching now opens /explore/iching, with public
+native casting and directly rendered results; see iching-calculator.md. Initial
+help now comes from public iching/help; final labels await API additions. Compatibility also has
+its implemented native calculator (compatibility-calculator.md). These supersede
+their older placeholder status below; remaining unbuilt features stay placeholders.
+
 Owner requested the remaining buttons/features after agreeing Explore first.
 Native/web tab order is now Explore, My Chart, My Account. My Chart contains its
 own Your Chart hub and stack for Your Personal Chart, Your Predictions and Your Calendar; see
@@ -8,12 +14,27 @@ This supersedes the earlier separate My Predictions tab. The old hidden Style
 Guide moved from /explore to /style-guide and stays hidden from native tabs.
 
 Explore uses AppScreen, AppPanel and SectionWidgets to group Personal Chart,
-Predictions, Compatibility, I Ching and Karmic Numerology under Readings; AI
+Predictions, Compatibility and I Ching under Readings; AI
 Astrologer under Ask; Knowledge Base and Articles under Learn. Existing catalogue
 artwork IDs are used where suitable, with bundled NineStar mark fallback; no
 bulk media download. Group/feature labels are central translatable uiCopy values
 matching owner-approved website names, not an invented API feature-label payload.
 An eventual API-provided feature catalogue/labels would replace these fallbacks.
+
+Karmic Numerology was temporarily removed on 2026-10-27 at the owner's request.
+AI Astrologer remains a placeholder while the proposed ChatGPT-plugin handoff is
+parked during plugin review; see ai-astrologer-handoff.md. No external AI link is wired yet.
+Knowledge Base now opens native /explore/knowledge-base; Articles is the owner's
+explicit website-link exception and opens /latest-articles using the API
+environment's origin. This supersedes their older placeholder status and the
+blanket no-browser instruction for Articles only. See knowledge-base.md.
+
+Knowledge Base now has its own nested stack: index plus [section] intermediary
+screens for grouped topics, sharing one stack-scoped API response. Element and
+transformation buttons moved under Five Elements, sexuality/intimacy under
+Relationships. Modalities, core/character energies and year/month readings use
+topic menus, then individual AppModal details. See knowledge-base.md; this
+supersedes the initial flat article/disclosure flow.
 
 Personal Chart opens /explore/personal-chart and Predictions opens
 /explore/predictions in Explore's nested Router stack. Both use shared

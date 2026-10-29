@@ -1,6 +1,10 @@
 // Existing mobile interface wording, centralised pending the API label contract.
 // Add locale resources here; never derive display names from protocol keys.
 export const uiCopy = {
+  knowledge: { back: 'Back to Knowledge Base', loading: 'Loading knowledge base…', unavailable: 'We could not load the knowledge base. Please try again.' },
+  externalLinkError: 'We could not open the link. Please try again.',
+  iching: { generate: 'Generate Hexagram', unavailable: 'We could not load the I Ching reading. Please try again.' },
+  feedback: { errorTitle: 'Unable to complete request', previewError: 'Preview error dialog' },
   dateTime: { chooseDate: 'Choose date', chooseTime: 'Choose time', done: 'Done', cancel: 'Cancel', clear: 'Clear' },
   accountValidation: {
     firstName: 'Enter your first name (up to 100 characters).', lastName: 'Enter your last name (up to 100 characters).',

@@ -4,11 +4,10 @@ import { FeatureArtwork } from '../constants/feature-artwork';
 const copy = uiCopy.explore;
 export const exploreFeatures = [
   { key: 'personalChart', title: copy.personalChart, group: 'readings', artworkId: FeatureArtwork.personalChart },
-  { key: 'predictions', title: copy.predictions, group: 'readings', artworkId: 'ui.sun' },
-  { key: 'compatibility', title: copy.compatibility, group: 'readings', artworkId: 'ui.relationships' },
+  { key: 'predictions', title: copy.predictions, group: 'readings', artworkId: FeatureArtwork.predictions },
+  { key: 'compatibility', title: copy.compatibility, group: 'readings', artworkId: FeatureArtwork.relationships },
   { key: 'iching', title: copy.iching, group: 'readings', artworkId: 'iching.iching' },
-  { key: 'numerology', title: copy.numerology, group: 'readings', artworkId: FeatureArtwork.numerology },
-  { key: 'ai', title: copy.ai, group: 'ask', artworkId: 'ui.intellectual-qualities' },
-  { key: 'knowledge', title: copy.knowledge, group: 'learn' },
-  { key: 'articles', title: copy.articles, group: 'learn' },
+  { key: 'ai', title: copy.ai, group: 'ask', artworkId: FeatureArtwork.aiAstrologer },
+  { key: 'knowledge', title: copy.knowledge, group: 'learn', artworkId: FeatureArtwork.knowledgeBase },
+  { key: 'articles', title: copy.articles, group: 'learn', artworkId: FeatureArtwork.articles },
 ] as const;

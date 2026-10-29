@@ -90,3 +90,45 @@ test('deadline bounds a fetch that ignores abort', async () => {
     fetcher: () => new Promise(() => {}), timeoutMs: 5 });
   assert.equal(await c.refresh('https://api'), null);
 });
+
+test('UI artwork uses exact default URLs in both themes, while diagram dark variants remain supported', () => {
+  const c = catalogue();
+  const url = 'https://media.example/gold.png?v=server-revision&size=original';
+  c.assets['ui.constitution'] = { group: 'ui', variants: {
+    default: variant(url), dark: variant('https://media.example/unused-dark.png') } };
+  for (const dark of [false, true]) {
+    assert.equal(resolveArtwork(c, 'ui.constitution', dark).uri, url);
+    assert.equal(resolveArtwork(c, 'ui.constitution', dark).cacheKey, url);
+  }
+  assert.match(resolveArtwork(c, 'energy', true).uri, /dark/);
+  assert.equal(resolveArtwork(c, 'ui.unregistered', true), undefined);
+});
+
+test('old catalogues retain UI fallbacks, then prefer deployed canonical assets without constructing URLs', () => {
+  const c = catalogue();
+  c.assets['ui.solar-nature'] = { group: 'ui', variants: { default: variant('https://old/solar.png?v=old') } };
+  c.assets['ui.lunar-nature'] = { group: 'ui', variants: { default: variant('https://old/lunar.png?v=old') } };
+  c.assets['company.logo-notext'] = { group: 'company', variants: { default: variant('https://old/logo.png?v=old') } };
+  assert.equal(resolveArtwork(c, 'ui.constitution', true).uri, 'https://old/solar.png?v=old');
+  assert.equal(resolveArtwork(c, 'ui.character', true).uri, 'https://old/lunar.png?v=old');
+  assert.equal(resolveArtwork(c, 'ui.origins', true).uri, 'https://old/logo.png?v=old');
+  c.assets['ui.constitution'] = { group: 'ui', variants: { default: variant('https://new/constitution.png?v=new') } };
+  assert.equal(resolveArtwork(c, 'ui.constitution', true).uri, 'https://new/constitution.png?v=new');
+  assert.equal(resolveArtwork(null, 'ui.constitution', true), undefined);
+});
+
+test('explicit post-deployment refresh retains the ETag and switches revision-bearing image cache keys', async () => {
+  const first = catalogue(), next = catalogue();
+  first.assets['ui.personal-chart'] = { group: 'ui', variants: { default: variant('https://media/chart.png?v=old') } };
+  next.version = 'b'.repeat(64);
+  next.assets['ui.personal-chart'] = { group: 'ui', variants: { default: variant('https://media/chart.png?v=new') } };
+  const f = fixture([response(200, first), response(200, next), response(304, next)]);
+  const old = await f.client.refresh('https://api');
+  const refreshed = await f.client.refresh('https://api', true);
+  assert.equal(f.calls[1].options.headers['If-None-Match'], 'W/"tag"');
+  assert.equal(f.calls[1].options.credentials, 'omit');
+  assert.notEqual(resolveArtwork(old, 'ui.personal-chart', true).cacheKey,
+    resolveArtwork(refreshed, 'ui.personal-chart', true).cacheKey);
+  assert.equal(await f.client.refresh('https://api', true), refreshed);
+  assert.equal(f.calls[2].options.headers['If-None-Match'], 'W/"tag"');
+});

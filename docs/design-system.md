@@ -1,5 +1,9 @@
 # NineStar mobile design system
 
+Submission failures use the shared warning dialog; field errors remain inline
+and scroll to the first invalid field. Success and background loading errors
+remain contextual. See [submission-error-feedback.md](submission-error-feedback.md).
+
 Shared field validation and native date/time conventions are documented in
 [native-input-validation.md](native-input-validation.md). Inputs display their
 errors above the control through AppField; AppDateTimeField owns native picker
@@ -19,9 +23,30 @@ Website files under `D:/Workspace/ninestar/webapp/WebApplication`:
 - `Content/less/main/style.less`: local Candara font registration and pale wells.
 - `Content/less/main/dark.less`: teal panels and light text.
 - `Content/less/controls/panel.less`: 8 px corners, tinted headings, borders and soft shadows.
-- `Images/company/logo-notext.png`: original multicolour yin-yang brand mark.
+- `Images/company/logo-notext.png`: current gold/blue yin-yang brand mark.
+  Bundled unchanged as assets/images/ninestar-mark.png, shared by the chart header
+  and all existing navigation/artwork fallbacks. Do not restore the older
+  multicolour mark. Origins now uses ui.origins; company.logo-notext remains its
+  older-catalogue fallback. See ui-artwork-refresh.md for current UI icon mappings.
+  Runtime logo replacement was visually inspected and its SHA-256 verified equal
+  to the website asset (517dd2ff186840307da5e7ecaf6435a8921de84e4a221595a598fb88ec414f76).
+  Lint, typecheck and whitespace checks passed for this asset-only change; no new
+  tests or native build were needed. iPhone header verification remains pending.
+  Native launcher icons and splash imagery remain separate build-time template
+  assets in app.json; they require their own final branding pass and a new build.
 
 ## Tokens
+
+SectionWidgets uses explicit two-card rows with equal flex widths and shared
+spacing. An odd final card after paired rows is centred between two half-flex
+spacers with half-size gaps, giving exactly the same width as paired cards:
+(available width minus the normal column gap) / 2. Single-card menus retain
+full width. This applies across every SectionWidgets host; no local margins or
+screen-width measurements are needed. Native text scaling and minimum touch
+targets are retained. Device visual check remains pending.
+Validation: project lint passed, followed by a focused lint check and final
+typecheck after the card-width wrapper refinement; whitespace check passed.
+No new tests or bundle export for this reversible layout-only adjustment.
 
 Calculator/navigation refinement (2026-10-27): related vertical actions reuse
 AppActionGroup with LayoutSpacing.relatedActions = 4 points. Shared AppScreen

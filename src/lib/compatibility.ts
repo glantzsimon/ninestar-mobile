@@ -5,6 +5,7 @@ import { parsePersonalChart, type PersonalChart } from './personal-chart';
 import { readingBlocks, readingText, type ReadingBlock } from './reading-text';
 import { uiCopy } from './ui-copy';
 import { FieldValidationError, withFieldPrefix } from './field-validation';
+import { parseElementBreakdown, type ElementSegment } from './element-breakdown';
 
 const object = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
@@ -31,7 +32,21 @@ export type CompatibilityReading = {
   labels: { results: string; firstPerson: string; secondPerson: string;
     sections: Record<string, { title: string; navigationTitle: string }> };
   strengths: { title: string; subtitle: string; blocks: ReadingBlock[] };
+  visuals: { fundamental: CompatibilityDiagram | null; character: CompatibilityDiagram | null; breakdown: ElementSegment[] };
 };
+
+export type CompatibilityDiagram = { artworkId: string; before: ReadingBlock[]; after: ReadingBlock[] };
+
+function parseDiagram(raw: unknown, transformationHtml: unknown, readingHtml: unknown): CompatibilityDiagram | null {
+  const { artworkId } = object(raw);
+  if (typeof artworkId !== 'string' || !/^[a-z\d][a-z\d._-]{0,255}$/i.test(artworkId)) return null;
+  const html = typeof transformationHtml === 'string' ? transformationHtml : '';
+  const image = /<img\b[^>]*>/i.exec(html);
+  // Split around the existing image's position. readingBlocks suppresses all
+  // HTML image tags; explicit artwork is drawn once between the surrounding text.
+  return { artworkId, before: readingBlocks(image ? html.slice(0, image.index) : html),
+    after: [...readingBlocks(image ? html.slice(image.index + image[0].length) : ''), ...readingBlocks(readingHtml)] };
+}
 
 export type CompatibilityGauge = { key: string; label: string; value: number; minValue: number; maxValue: number; isInverted: boolean };
 const gaugeKeys = new Set(['complementarity', 'conflict', 'harmony', 'spark', 'sexualChemistry',
@@ -68,10 +83,12 @@ export function compatibilityMenu(reading: CompatibilityReading) {
   };
   return ['overview', 'strengthsAndChallenges', 'solarElements', 'lunarElements', 'allElements', 'yinYang', 'birthMonth', 'sexualChemistry'].flatMap(key => {
     const label = reading.labels.sections[key], blocks = sources[key] ?? [];
-    const available = key === 'overview' ? reading.gauges.length > 0 : blocks.length > 0;
+    const diagram = key === 'solarElements' ? reading.visuals.fundamental : key === 'lunarElements' ? reading.visuals.character : null;
+    const breakdown = key === 'allElements' ? reading.visuals.breakdown : [];
+    const available = key === 'overview' ? reading.gauges.length > 0 : blocks.length > 0 || !!diagram || breakdown.length > 0;
     if (!label || !available) return [];
     return [{ key, title: key === 'strengthsAndChallenges' ? reading.strengths.title || label.title : label.title,
-      navigationTitle: label.navigationTitle, blocks,
+      navigationTitle: label.navigationTitle, blocks, diagram, breakdown,
       subtitle: key === 'strengthsAndChallenges' ? reading.strengths.subtitle : '' }];
   });
 }
@@ -99,6 +116,11 @@ export function parseCompatibility(data: Record<string, unknown>, hideSexualChem
   }
   const strengths = object(object(data.sections).strengthsAndChallenges);
   return { first, second, help: parseContextualHelp(data.help), overview: readingBlocks(data.fundamentalEnergiesCompatibility),
+    visuals: {
+      fundamental: parseDiagram(elements.fundamentalTransformation, elements.fundamentalElementsTransformationDetails, elements.fundamentalElementsCompatibilityDetails),
+      character: parseDiagram(elements.characterTransformation, elements.characterElementsTransformationDetails, elements.characterElementsCompatibilityDetails),
+      breakdown: parseElementBreakdown(elements.breakdown),
+    },
     gauges: parseCompatibilityGauges(data.gauges, chemistryAllowed),
     labels: { results: readingText(labels.results), firstPerson: readingText(labels.firstPerson),
       secondPerson: readingText(labels.secondPerson), sections },

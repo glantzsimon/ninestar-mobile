@@ -16,7 +16,7 @@ export default function MyChartHub() {
     <AppPanel>
       <SectionWidgets selected="" items={[
         { key: 'personalChart', title: uiCopy.myChart.personalChart, artworkId: FeatureArtwork.personalChart },
-        { key: 'cycles', title: uiCopy.predictions.ownTitle, artworkId: 'ui.sun' },
+        { key: 'cycles', title: uiCopy.predictions.ownTitle, artworkId: FeatureArtwork.predictions },
         { key: 'calendar', title: uiCopy.myChart.calendar, artworkId: FeatureArtwork.calendar },
       ].map(item => ({ ...item, fallbackArtwork: require('../../../assets/images/ninestar-mark.png') }))}
         onSelect={key => router.push(destinations[key as keyof typeof destinations])} />

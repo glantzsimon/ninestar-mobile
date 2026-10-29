@@ -1,4 +1,5 @@
 import { ArtworkImage } from '@/components/artwork-image';
+import type { ReactNode } from 'react';
 import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -10,11 +11,12 @@ import { type ChartEnergy } from '@/lib/personal-chart';
 import { uiCopy } from '@/lib/ui-copy';
 
 export function EnergyCard({ energy, title, hint, compact = false, selected = false, onPress,
-  artworkSize, artworkFrameSize, subtitle, caption }: {
+  artworkSize, artworkFrameSize, subtitle, caption, artwork }: {
   energy: ChartEnergy; title: string; hint: string; compact?: boolean;
   selected?: boolean; onPress?: () => void;
   artworkSize?: number; subtitle?: string; caption?: string;
   artworkFrameSize?: number;
+  artwork?: ReactNode;
 }) {
   const theme = useTheme();
   const secondary = subtitle !== undefined ? subtitle
@@ -30,9 +32,11 @@ export function EnergyCard({ energy, title, hint, compact = false, selected = fa
         borderColor: selected ? theme.primary : 'transparent',
       }]}>
       <View style={[styles.artworkFrame, artworkFrameSize !== undefined && { width: artworkFrameSize, height: artworkFrameSize }]}>
-        <ArtworkImage artworkId={energy.artworkId} legacyUrl={energy.imageUrl} fallback={EnergyArtwork[energy.number]}
+        {artwork ? <View style={[styles.art, compact && styles.compactArt,
+          artworkSize !== undefined && { width: artworkSize, height: artworkSize }]}>{artwork}</View>
+          : <ArtworkImage artworkId={energy.artworkId} legacyUrl={energy.imageUrl} fallback={EnergyArtwork[energy.number]}
         style={[styles.art, compact && styles.compactArt, artworkSize !== undefined && { width: artworkSize, height: artworkSize }]}
-        contentFit="contain" accessible={false} />
+        contentFit="contain" accessible={false} />}
       </View>
       <View style={styles.text}>
         {!!title && <ThemedText type="smallBold">{title}</ThemedText>}

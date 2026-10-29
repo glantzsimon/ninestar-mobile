@@ -160,3 +160,44 @@ test('menu uses exact navigation/panel labels, authored subtitle and Yin/Yang HT
   assert.equal(compatibilityMenu(older).length, 0);
   assert.equal(older.overview.length > 0, true);
 });
+
+test('transformation diagrams use independent API artwork IDs and retain rich text around embedded HTML images', () => {
+  const data = response();
+  data.details.elements.fundamentalTransformation = { type: 'Controls', kind: 'challenging', artworkId: 'ninestar.transformations.transformation-challenging' };
+  data.details.elements.characterTransformation = { type: 'Sibling', kind: 'same', artworkId: 'ninestar.transformations.transformation-same' };
+  data.details.elements.fundamentalElementsTransformationDetails = '<h4>API transformation</h4><img src="https://example.test/duplicate.png"><p>After <strong>diagram</strong>.</p>';
+  data.labels = { sections: {
+    solarElements: { title: 'API solar heading', navigationTitle: 'API solar nav' },
+    lunarElements: { title: 'API lunar heading', navigationTitle: 'API lunar nav' },
+  } };
+  const parsed = parseCompatibility(data), menu = compatibilityMenu(parsed);
+  assert.equal(parsed.visuals.fundamental.artworkId, 'ninestar.transformations.transformation-challenging');
+  assert.equal(parsed.visuals.character.artworkId, 'ninestar.transformations.transformation-same');
+  assert.equal(parsed.visuals.fundamental.before[0].text, 'API transformation');
+  assert.equal(parsed.visuals.fundamental.after[0].text, 'After diagram.');
+  assert.ok(parsed.visuals.fundamental.after[0].spans.some(span => span.bold && span.text === 'diagram'));
+  assert.equal(parsed.visuals.fundamental.after.at(-1).text, 'Core analysis.');
+  assert.equal(JSON.stringify(parsed.visuals).includes('duplicate.png'), false);
+  assert.equal(menu[0].diagram.artworkId, parsed.visuals.fundamental.artworkId);
+  assert.equal(menu[1].diagram.artworkId, parsed.visuals.character.artworkId);
+});
+
+test('visual-only labelled sections remain available; missing visuals never fabricate an artwork choice', () => {
+  const data = response(); data.details.elements = { fundamentalTransformation: { artworkId: 'ninestar.transformations.transformation-supportive' },
+    characterTransformation: { type: 'Controls', kind: 'challenging' }, breakdown: [
+      { key: 'supportive', label: 'API supportive', percentage: 33.333, value: 33, color: '#22BB44' },
+      { key: 'sibling', label: 'API sibling', percentage: 11.111, value: 11, color: '#0074E4' },
+      { key: 'challenging', label: 'API challenging', percentage: 55.556, value: 55, color: 'red' },
+    ] };
+  data.labels = { sections: { solarElements: { title: 'Solar', navigationTitle: 'Solar nav' },
+    allElements: { title: 'All', navigationTitle: 'All nav' } } };
+  const parsed = parseCompatibility(data), menu = compatibilityMenu(parsed);
+  assert.equal(menu.map(item => item.key).join(','), 'solarElements,allElements');
+  assert.equal(menu[1].breakdown[2].value, 55);
+  assert.equal(parsed.visuals.character, null);
+  const older = parseCompatibility(response());
+  assert.equal(older.visuals.fundamental, null);
+  assert.equal(older.visuals.character, null);
+  assert.equal(older.visuals.breakdown.length, 0);
+  assert.equal(older.details[0].blocks[0].text, 'Core transformation.');
+});

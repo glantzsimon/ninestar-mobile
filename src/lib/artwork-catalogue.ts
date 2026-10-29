@@ -1,3 +1,5 @@
+import { LegacyUiArtwork } from '../constants/feature-artwork';
+
 export type ArtworkVariant = { url: string; revision: string; contentType: string; width: number; height: number };
 export type ArtworkCatalogue = { version: string; assets: Record<string, { group: string; variants: Record<string, ArtworkVariant> }> };
 export type ArtworkCache = { catalogue: ArtworkCatalogue; etag?: string; checkedAt: number };
@@ -20,9 +22,15 @@ export function parseArtwork(value: unknown): ArtworkCatalogue {
 }
 
 export function resolveArtwork(catalogue: ArtworkCatalogue | null, id: string | undefined, dark: boolean) {
-  const variants = id ? catalogue?.assets[id]?.variants : undefined;
-  const variant = (dark ? variants?.dark : undefined) ?? variants?.default;
-  return variant ? { uri: variant.url, cacheKey: variant.url, width: variant.width, height: variant.height } : undefined;
+  for (const candidate of id ? [id, ...(LegacyUiArtwork[id] ?? [])] : []) {
+    const variants = catalogue?.assets[candidate]?.variants;
+    // UI medallions use the supplied transparent default in both themes.
+    // Existing non-UI diagrams retain their authored dark/default selection.
+    const variant = candidate.startsWith('ui.') ? variants?.default
+      : (dark ? variants?.dark : undefined) ?? variants?.default;
+    if (variant) return { uri: variant.url, cacheKey: variant.url, width: variant.width, height: variant.height };
+  }
+  return undefined;
 }
 
 export function createArtworkClient({ storage, fetcher = fetch, now = Date.now, timeoutMs = 15000 }: {

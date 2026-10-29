@@ -11,9 +11,11 @@ import { CompatibilityForm } from '@/components/compatibility-form';
 import { ThemedText } from '@/components/themed-text';
 import { AppButton } from '@/components/ui/app-button';
 import { AppActionGroup } from '@/components/ui/app-action-group';
+import { AppFieldErrors } from '@/components/ui/app-field';
 import { AppScreen, AppScrollTarget } from '@/components/ui/app-screen';
 import { useSession } from '@/hooks/use-session';
 import { useTheme } from '@/hooks/use-theme';
+import { useSubmissionError } from '@/hooks/use-submission-error';
 import { accountOptions, type AccountOptions } from '@/lib/account';
 import { settleAccountLoad } from '@/lib/account-load';
 import { buildCalculation, calculationDraft, type CalculationDraft } from '@/lib/calculation';
@@ -86,6 +88,7 @@ export function CalculatorScreen({ kind }: { kind: CalculatorKind }) {
 }
 
 function Calculator({ kind }: { kind: CalculatorKind }) {
+  const submissionError = useSubmissionError();
   const copy = uiCopy.calculator;
   const config = calculators[kind];
   const theme = useTheme();
@@ -175,10 +178,11 @@ function Calculator({ kind }: { kind: CalculatorKind }) {
       : buildCalculation(draft, options, kind === 'predictions'); }
     catch (error) {
       if (error instanceof FieldValidationError) { setFieldErrors({ [error.field]: error.message }); setMessage(''); }
-      else setMessage(error instanceof Error ? error.message : copy.errors.unavailable);
+      else submissionError.showError(error instanceof Error ? error.message : copy.errors.unavailable);
       return;
     }
     setFieldErrors({});
+    submissionError.dismiss();
     remember(draft);
     if (kind === 'compatibility' && secondDraft) remember(secondDraft, 'second');
     pending.current = true;
@@ -194,7 +198,7 @@ function Calculator({ kind }: { kind: CalculatorKind }) {
         : next.kind === 'predictions' ? next.predictions.help.overview : next.compatibility.help.overview;
       if (help) setIntroduction(help);
     } catch (error) {
-      if (alive.current && generation === session.getSnapshot().generation) setMessage(describeError(error, kind));
+      if (alive.current && generation === session.getSnapshot().generation) submissionError.showError(describeError(error, kind));
     } finally {
       pending.current = false;
       if (alive.current) setBusy(false);
@@ -202,6 +206,7 @@ function Calculator({ kind }: { kind: CalculatorKind }) {
   }
 
   return <AppScreen key={result ? 'result' : 'form'} backToTopLabel={result?.kind === 'compatibility' ? uiCopy.backToMenu : undefined}>
+    {submissionError.dialog}
     <AppActionGroup>
     <AppButton title={copy.back} variant="secondary" onPress={() => router.navigate('/explore')} />
     {result && <AppButton title={copy.edit} variant="secondary" onPress={() => { setEditing(true); setResult(null); }} />}
@@ -213,7 +218,7 @@ function Calculator({ kind }: { kind: CalculatorKind }) {
     {introduction && <ContextualHelp help={introduction} />}
     {!!message && <ThemedText accessibilityLiveRegion="polite">{message}</ThemedText>}
     {!draft && busy && <ActivityIndicator accessibilityLabel={copy.loading} color={theme.primary} />}
-    {draft && options && <AppScrollTarget scrollOnMount={editing}>
+    {draft && options && <AppFieldErrors errors={fieldErrors}><AppScrollTarget scrollOnMount={editing}>
       {kind === 'compatibility' && secondDraft ? <CompatibilityForm first={draft} second={secondDraft} options={options}
         onFirstChange={next => { setDraft(next); setFieldErrors({}); setMessage(''); remember(next); }}
         onSecondChange={next => { setSecondDraft(next); setFieldErrors({}); setMessage(''); remember(next, 'second'); }}
@@ -221,7 +226,7 @@ function Calculator({ kind }: { kind: CalculatorKind }) {
         busy={busy} onSubmit={calculate} errors={fieldErrors} /> : <CalculationForm draft={draft} options={options} errors={fieldErrors}
         onChange={(next) => { setDraft(next); setFieldErrors({}); setMessage(''); remember(next); }} onSubmit={calculate} busy={busy}
         includeSelectedDate={kind === 'predictions'} />}
-    </AppScrollTarget>}
+    </AppScrollTarget></AppFieldErrors>}
     {!draft && !busy && <AppButton title={copy.retry} onPress={load} />}
     </>}
   </AppScreen>;

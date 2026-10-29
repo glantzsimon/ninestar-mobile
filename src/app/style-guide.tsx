@@ -9,6 +9,7 @@ import { AppPanel } from '@/components/ui/app-panel';
 import { AppScreen } from '@/components/ui/app-screen';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useSubmissionError } from '@/hooks/use-submission-error';
 import { uiCopy } from '@/lib/ui-copy';
 
 const copy = {
@@ -34,6 +35,7 @@ const copy = {
 };
 
 export default function StyleGuideScreen() {
+  const submissionError = useSubmissionError();
   const theme = useTheme();
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
@@ -48,6 +50,7 @@ export default function StyleGuideScreen() {
 
   return (
     <AppScreen>
+      {submissionError.dialog}
       <View style={styles.intro}>
         <ThemedText type="title" accessibilityRole="header">{copy.title}</ThemedText>
         <ThemedText themeColor="textSecondary">{copy.introduction}</ThemedText>
@@ -79,6 +82,7 @@ export default function StyleGuideScreen() {
         <ThemedText type="small" accessibilityLiveRegion="polite">{status}</ThemedText>
       </AppPanel>
       <AppPanel title={copy.feedback}>
+        <AppButton title={uiCopy.feedback.previewError} variant="secondary" onPress={() => submissionError.showError(copy.error)} />
         <View style={[styles.feedback, { backgroundColor: theme.successBackground }]}>
           <ThemedText type="small" themeColor="success">{copy.success}</ThemedText>
         </View>

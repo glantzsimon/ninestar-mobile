@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useRef, useState, type ComponentRef, type PropsWithChildren } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ComponentRef, type PropsWithChildren } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -10,6 +10,8 @@ import { AppMenuNavigation } from '@/components/ui/app-menu-navigation';
 export type ScreenScrollTarget = ComponentRef<typeof View>;
 const ScreenScrollContext = createContext<(target: ScreenScrollTarget, options?: { topInset?: number; ensureSpace?: boolean }) => void>(() => {});
 export const useScreenScroll = () => useContext(ScreenScrollContext);
+const ScreenErrorContext = createContext<(target: ScreenScrollTarget) => () => void>(() => () => {});
+export const useScreenErrorScroll = () => useContext(ScreenErrorContext);
 const ScreenMenuContext = createContext<(target: ScreenScrollTarget) => void>(() => {});
 export const useScreenMenu = () => useContext(ScreenMenuContext);
 
@@ -36,6 +38,13 @@ export function AppScreen({ children, backToTopLabel }: PropsWithChildren<{ back
   const [scrolledDown, setScrolledDown] = useState(false);
   const menuOffset = useRef(0);
   const currentOffset = useRef(0);
+  const errorTargets = useRef(new Set<ScreenScrollTarget>());
+  const errorFrame = useRef<number | null>(null);
+  const errorBatch = useRef(0);
+  useEffect(() => () => {
+    if (errorFrame.current !== null) cancelAnimationFrame(errorFrame.current);
+    errorBatch.current++;
+  }, []);
   const registerMenu = useCallback((target: ScreenScrollTarget) => {
     if (!content.current) return;
     target.measureLayout(content.current, (_x, y) => {
@@ -65,6 +74,28 @@ export function AppScreen({ children, backToTopLabel }: PropsWithChildren<{ back
       scroll.current?.scrollTo({ y: offset, animated: true });
     }, () => {});
   }, []);
+  const registerError = useCallback((target: ScreenScrollTarget) => {
+    errorTargets.current.add(target);
+    if (errorFrame.current === null) errorFrame.current = requestAnimationFrame(() => {
+      errorFrame.current = null;
+      const container = content.current, batch = ++errorBatch.current;
+      const targets = [...errorTargets.current];
+      if (!container || !targets.length) return;
+      const positions: { target: ScreenScrollTarget; x: number; y: number }[] = [];
+      let remaining = targets.length;
+      const finish = () => {
+        if (--remaining || batch !== errorBatch.current) return;
+        const first = positions.filter(item => errorTargets.current.has(item.target)).sort((a, b) => a.y - b.y || a.x - b.x)[0];
+        if (first) scrollToView(first.target, { topInset: 0, ensureSpace: true });
+      };
+      // Batch all invalid fields and choose their actual visual order, rather
+      // than letting the last mounted field win competing scroll requests.
+      for (const item of targets) item.measureLayout(container, (x, y) => {
+        positions.push({ target: item, x, y }); finish();
+      }, finish);
+    });
+    return () => { errorTargets.current.delete(target); };
+  }, [scrollToView]);
   return (
     <SafeAreaView collapsable={false} style={[styles.screen, { backgroundColor: theme.background }]} edges={['top', 'left', 'right']}>
       <AppBackground />
@@ -92,9 +123,11 @@ export function AppScreen({ children, backToTopLabel }: PropsWithChildren<{ back
           }}
           contentContainerStyle={styles.scrollContent}>
           <ScreenScrollContext.Provider value={scrollToView}>
+            <ScreenErrorContext.Provider value={registerError}>
             <ScreenMenuContext.Provider value={registerMenu}>
             <View ref={content} collapsable={false} style={[styles.content, minimumHeight > 0 && { minHeight: minimumHeight }]}>{children}</View>
             </ScreenMenuContext.Provider>
+            </ScreenErrorContext.Provider>
           </ScreenScrollContext.Provider>
         </ScrollView>
       </KeyboardAvoidingView>

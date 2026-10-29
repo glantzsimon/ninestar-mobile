@@ -12,6 +12,7 @@ import { AppLoadingPanel } from '@/components/ui/app-loading-panel';
 import { AppScreen } from '@/components/ui/app-screen';
 import { Spacing } from '@/constants/theme';
 import { useSession } from '@/hooks/use-session';
+import { useSubmissionError } from '@/hooks/use-submission-error';
 import { getOwnChart, MobileApiError, refreshEntitlements, signIn } from '@/lib/mobile-api';
 import { session } from '@/lib/session';
 import { parsePersonalChart, type PersonalChart as Chart } from '@/lib/personal-chart';
@@ -40,12 +41,14 @@ function describeError(error: unknown) {
 }
 
 export default function HomeScreen() {
+  const submissionError = useSubmissionError();
   const { generation, status } = useSession();
   const [chart, setChart] = useState<Chart | null>(null);
   const [chartGeneration, setChartGeneration] = useState(-1);
   const [busy, setBusy] = useState(Platform.OS !== 'web' && status === 'unknown');
   const signedOut = Platform.OS === 'web' || status === 'signed-out' || status === 'changing';
   const [message, setMessage] = useState('');
+  const [submissionFailed, setSubmissionFailed] = useState(false);
   const pending = useRef(false);
   const alive = useRef(true);
 
@@ -53,6 +56,7 @@ export default function HomeScreen() {
     if (!alive.current) return;
     if (error instanceof MobileApiError && error.code === 'session_changed') return;
     setChart(null);
+    setSubmissionFailed(false);
     setMessage(describeError(error));
   }, []);
 
@@ -101,11 +105,14 @@ export default function HomeScreen() {
     setBusy(true);
     setChart(null);
     setMessage('');
+    setSubmissionFailed(false);
     try {
       await signIn(username, password, rememberMe);
       await loadChart();
     } catch (error) {
-      acceptError(error);
+      if (alive.current && !(error instanceof MobileApiError && error.code === 'session_changed')) {
+        setChart(null); setMessage(describeError(error)); setSubmissionFailed(true); submissionError.showError(describeError(error));
+      }
     } finally {
       pending.current = false;
       if (alive.current) setBusy(false);
@@ -114,6 +121,7 @@ export default function HomeScreen() {
 
   return (
     <AppScreen>
+      {submissionError.dialog}
       <AppButton title={uiCopy.myChart.back} variant="secondary" onPress={() => router.navigate('/my-chart')} />
       <View style={styles.brand}>
         <Image source={require('../../assets/images/ninestar-mark.png')} style={styles.logo} contentFit="contain" accessibilityLabel="NineStar" />
@@ -132,7 +140,7 @@ export default function HomeScreen() {
             : <AccountLogin busy={busy} onSubmit={handleSignIn} />}
         </AppPanel>
       )}
-      {!!message && <ThemedText accessibilityLiveRegion="polite">{message}</ThemedText>}
+      {!!message && !submissionFailed && <ThemedText accessibilityLiveRegion="polite">{message}</ThemedText>}
       {!signedOut && !busy && !!message && <AppButton title="Open My Account" onPress={() => router.navigate('/account')} />}
       {!signedOut && !busy && !chart && (
         <AppButton title="Try Again" variant="secondary" onPress={refreshChart} />

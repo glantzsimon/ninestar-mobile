@@ -6,6 +6,7 @@ import { ThemedText } from '@/components/themed-text';
 import { MembershipStatus } from '@/components/membership-status';
 import { AppButton } from '@/components/ui/app-button';
 import { AppInput } from '@/components/ui/app-input';
+import { AppFieldErrors } from '@/components/ui/app-field';
 import { AppDateTimeField } from '@/components/ui/app-date-time-field';
 import { AppPanel } from '@/components/ui/app-panel';
 import { AppScreen } from '@/components/ui/app-screen';
@@ -13,6 +14,7 @@ import { AppSelect } from '@/components/ui/app-select';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
+import { useSubmissionError } from '@/hooks/use-submission-error';
 import { uiCopy } from '@/lib/ui-copy';
 import { FieldValidationError, type FieldErrors } from '@/lib/field-validation';
 import { accountDraft, accountOptions, buildAccountUpdate, type AccountDraft, type AccountOptions } from '@/lib/account';
@@ -37,6 +39,7 @@ function messageFor(error: unknown) {
 }
 
 export default function MyAccountScreen() {
+  const submissionError = useSubmissionError();
   const { generation, status } = useSession();
   const [signingOut, setSigningOut] = useState(false);
   const [logoutError, setLogoutError] = useState('');
@@ -45,21 +48,25 @@ export default function MyAccountScreen() {
     setSigningOut(true);
     setLogoutError('');
     try { await signOut(); }
-    catch { setLogoutError('Your local details were cleared, but sign-out could not be confirmed. Please try again.'); }
+    catch {
+      const message = 'Your local details were cleared, but sign-out could not be confirmed. Please try again.';
+      setLogoutError(message); submissionError.showError(message);
+    }
     finally { setSigningOut(false); }
   }
   if (status === 'signed-out' || status === 'changing') return (
-    <AppScreen><ThemedText type="title">{uiCopy.accountTitle}</ThemedText>
+    <AppScreen>{submissionError.dialog}<ThemedText type="title">{uiCopy.accountTitle}</ThemedText>
       <ThemedText>Please sign in on My Chart to open your account.</ThemedText>
       <AppButton title="Go to Sign In" onPress={() => router.navigate('/my-chart/personal-chart')} />
-      {!!logoutError && <><ThemedText>{logoutError}</ThemedText><AppButton title="Try Signing Out Again" onPress={logout} loading={signingOut} /></>}
+      {!!logoutError && <AppButton title="Try Signing Out Again" onPress={logout} loading={signingOut} />}
     </AppScreen>
   );
   // Identity changes discard the previous account's form; access-only refreshes do not.
-  return <AccountForm key={generation} onSignOut={logout} />;
+  return <><AccountForm key={generation} onSignOut={logout} />{submissionError.dialog}</>;
 }
 
 function AccountForm({ onSignOut }: { onSignOut: () => Promise<void> }) {
+  const submissionError = useSubmissionError();
   const theme = useTheme();
   const [draft, setDraft] = useState<AccountDraft | null>(null);
   const [baseline, setBaseline] = useState<AccountDraft | null>(null);
@@ -130,10 +137,11 @@ function AccountForm({ onSignOut }: { onSignOut: () => Promise<void> }) {
     try { body = buildAccountUpdate(draft, options); }
     catch (error) {
       if (error instanceof FieldValidationError) { setFieldErrors({ [error.field]: error.message }); setMessage(''); }
-      else setMessage(error instanceof Error ? error.message : 'Check the fields and try again.');
+      else submissionError.showError(error instanceof Error ? error.message : 'Check the fields and try again.');
       return;
     }
     setFieldErrors({});
+    submissionError.dismiss();
     pending.current = true;
     setSaving(true);
     setMessage('');
@@ -146,15 +154,20 @@ function AccountForm({ onSignOut }: { onSignOut: () => Promise<void> }) {
     } catch (error) {
       if (!alive.current) return;
       if (writeSucceeded) {
-        setMessage('Your details were saved, but could not be checked. Check saved details before making more changes; this will replace your local edits.');
+        const message = 'Your details were saved, but could not be checked. Check saved details before making more changes; this will replace your local edits.';
+        setMessage(message); submissionError.showError(message);
         setUncertain(true);
       } else {
         if (error instanceof MobileApiError && error.code === 'email_unavailable') {
           setFieldErrors({ emailAddress: messageFor(error) }); setMessage('');
-        } else setMessage(messageFor(error));
+        } else {
+          const message = messageFor(error);
+          setMessage(''); submissionError.showError(message);
+        }
         if (error instanceof MobileApiError && (['network_error', 'request_timeout', 'invalid_response'].includes(error.code) || (error.status ?? 0) >= 500)) {
           setUncertain(true);
-          setMessage('We could not confirm whether your changes were saved. Check saved details before saving again; this will replace your local edits.');
+          const message = 'We could not confirm whether your changes were saved. Check saved details before saving again; this will replace your local edits.';
+          setMessage(message); submissionError.showError(message);
         }
         if (error instanceof MobileApiError && error.status === 401) { setDraft(null); setSignedOut(true); }
       }
@@ -174,6 +187,8 @@ function AccountForm({ onSignOut }: { onSignOut: () => Promise<void> }) {
   }
   return (
     <AppScreen>
+      <AppFieldErrors errors={fieldErrors}>
+      {submissionError.dialog}
       <ThemedText type="title" accessibilityRole="header">{uiCopy.accountTitle}</ThemedText>
       {!!message && <ThemedText accessibilityLiveRegion="polite" themeColor={saved ? 'success' : 'text'}>{message}</ThemedText>}
       {draft && !signedOut && <MembershipStatus refreshOnFocus />}
@@ -219,6 +234,7 @@ function AccountForm({ onSignOut }: { onSignOut: () => Promise<void> }) {
       {!loading && !signedOut && (uncertain || (!draft && !!message)) &&
         <AppButton title={uncertain ? 'Check Saved Details' : 'Try Again'} variant="secondary" onPress={reload} disabled={saving} />}
       {!signedOut && <AppButton title="Sign Out" variant="secondary" onPress={onSignOut} disabled={loading || saving} />}
+      </AppFieldErrors>
     </AppScreen>
   );
 }

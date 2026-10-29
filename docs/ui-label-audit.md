@@ -8,6 +8,12 @@ correction is the only product change in this audit; navigation stays My Predict
 
 ## Missing API labels used by visible UI
 
+I Ching note (2026-10-27): result name/info/interpretation text comes
+from the cast response. First-visit help now uses public iching/help. Dictionary-backed Generate, primary/
+transformed panel labels, Detailed Interpretation and a formatted hexagram heading
+are not exposed yet. Owner is requesting additions. Existing feature/action copy
+is central, no enum-derived labels; see iching-api-handover.md.
+
 | Area / local wording | App source | Backend status / next step |
 | --- | --- | --- |
 | Your Personal Chart, Personal Chart, Personal Chart Calculator, Predictions Calculator | ui-copy.ts; PersonalChart/CalculatorScreen hosts | Dedicated chart/calculator titles absent from current contract. Expose approved labels separately from About help. Predictions Calculator added 2026-10-27 as central mobile copy. |

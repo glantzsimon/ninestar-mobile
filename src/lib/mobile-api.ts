@@ -19,7 +19,7 @@ type Endpoint = 'metadata/options' | 'metadata/timezones' | 'account/me' | 'acco
   'account/login' | 'account/logout' | 'account/update' | 'membership/entitlements' |
   'personal-chart/me' | 'personal-chart/me/free' | 'personal-chart/calculate' |
   'predictions/me' | 'predictions/calculate' | 'readings/predictions/me/free' | 'compatibility/calculate' | 'compatibility/help' | 'calendar/subscription' | 'calendar/revoke' |
-  'calendar/month' | `calendar/month?year=${number}&month=${number}`;
+  'iching/cast' | 'iching/help' | 'knowledge-base' | 'calendar/month' | `calendar/month?year=${number}&month=${number}`;
 type Post = { body: Record<string, unknown>; csrfToken: string };
 
 const activeRequests = new Map<number, () => void>();
@@ -266,6 +266,15 @@ export const calculatePersonalChart = (body: Record<string, unknown>) => calcula
 export const calculatePredictions = (body: Record<string, unknown>) => calculate('predictions/calculate', body);
 export const calculateCompatibility = (body: Record<string, unknown>) => calculate('compatibility/calculate', body);
 
+// Public casting still requires the existing anti-forgery cookie/token pair.
+// One explicit cast only: no initial cast, automatic replay or membership route.
+export async function castIChing() {
+  const generation = session.getSnapshot().generation;
+  const csrfToken = await getCsrfToken();
+  if (generation !== session.getSnapshot().generation) throw new MobileApiError('session_changed');
+  return mobileApiRequest('iching/cast', { body: {}, csrfToken });
+}
+
 export async function getPredictionsIntroduction() {
   const { data } = await mobileApiRequest('readings/predictions/me/free');
   return parseContextualHelp(data.help).overview ?? null;
@@ -273,6 +282,11 @@ export async function getPredictionsIntroduction() {
 
 export async function getCompatibilityIntroduction() {
   const { data } = await mobileApiRequest('compatibility/help');
+  return parseContextualHelp(data.help).overview ?? null;
+}
+
+export async function getIChingIntroduction() {
+  const { data } = await mobileApiRequest('iching/help');
   return parseContextualHelp(data.help).overview ?? null;
 }
 

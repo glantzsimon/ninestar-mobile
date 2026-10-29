@@ -12,6 +12,7 @@ import { AppModal } from '@/components/ui/app-modal';
 import { AppPanel } from '@/components/ui/app-panel';
 import { AppScreen } from '@/components/ui/app-screen';
 import { useSession } from '@/hooks/use-session';
+import { useSubmissionError } from '@/hooks/use-submission-error';
 import { API_BASE_URL, createCalendarSubscription, getCalendarMonth, getOwnAccount,
   MobileApiError, revokeCalendarSubscription } from '@/lib/mobile-api';
 import { calendarSelection, calendarSubscriptionUrl, parseCalendarMonth, type CalendarMonth } from '@/lib/personal-calendar';
@@ -35,6 +36,7 @@ export default function CalendarScreen() {
 }
 
 function OwnCalendar() {
+  const submissionError = useSubmissionError();
   const [calendar, setCalendar] = useState<CalendarMonth | null>(null);
   const [selected, setSelected] = useState('');
   const [busy, setBusy] = useState(false);
@@ -101,12 +103,14 @@ function OwnCalendar() {
       if (!alive.current || !focused.current || generation !== session.getSnapshot().generation) return;
       setLink(value);
       const copied = await Clipboard.setStringAsync(value, { android: { isSensitive: true } });
-      if (alive.current && focused.current && generation === session.getSnapshot().generation) setLinkMessage(
-        copied ? calendar?.labels.copied || copy.copied : calendar?.labels.copyError || copy.copyFailed);
+      if (alive.current && focused.current && generation === session.getSnapshot().generation) {
+        if (copied) setLinkMessage(calendar?.labels.copied || copy.copied);
+        else submissionError.showError(calendar?.labels.copyError || copy.copyFailed);
+      }
     } catch (failure) {
       if (alive.current && focused.current && generation === session.getSnapshot().generation) {
         clearDeniedAccess(failure, generation);
-        setLinkMessage(failure instanceof MobileApiError ? errorMessage(failure) : copy.copyFailed);
+        submissionError.showError(failure instanceof MobileApiError ? errorMessage(failure) : copy.copyFailed);
       }
     } finally { linkPending.current = false; if (alive.current) setLinkBusy(false); }
   }
@@ -120,7 +124,7 @@ function OwnCalendar() {
     } catch (failure) {
       if (alive.current && focused.current && generation === session.getSnapshot().generation) {
         clearDeniedAccess(failure, generation);
-        setLinkMessage(copy.subscriptionUnavailable);
+        submissionError.showError(copy.subscriptionUnavailable);
       }
     } finally { linkPending.current = false; if (alive.current) setLinkBusy(false); }
   }
@@ -142,6 +146,7 @@ function OwnCalendar() {
     </>;
   }
   return <AppScreen>
+    {submissionError.dialog}
     <AppButton title={uiCopy.myChart.back} variant="secondary" onPress={() => router.navigate('/my-chart')} />
     <ThemedText type="title" accessibilityRole="header">{calendar?.labels.title || copy.title}</ThemedText>
     {calendar?.help.overview && <ContextualHelp help={calendar.help.overview} />}

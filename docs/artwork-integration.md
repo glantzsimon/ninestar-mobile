@@ -22,7 +22,10 @@ Expo install; FileSystem is already bundled in Expo Go. No native directories or
 configuration plugins were changed. The root layout refreshes at startup, on
 foreground and every five minutes; images never initiate catalogue requests.
 
-`ArtworkImage` chooses an actual dark variant, falling back to default. It passes
+`ArtworkImage` uses the supplied default variant for ui.* icons in both themes;
+non-UI artwork chooses an actual dark variant, falling back to default. The
+owner's ec40fa6d refresh mapping is documented in ui-artwork-refresh.md. New UI
+IDs can resolve previous catalogue IDs while deployment is pending. It passes
 exact returned URLs (including revision queries) to expo-image with memory/disk
 caching and URL cache keys, so identical-content aliases share entries. It tries
 catalogue, then legacy URL, then bundled fallback on image errors. It never
