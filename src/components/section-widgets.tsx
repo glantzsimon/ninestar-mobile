@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from 'react-native';
+import type { ReactNode } from 'react';
 import { ThemedText } from '@/components/themed-text';
 import { ArtworkImage } from '@/components/artwork-image';
 import { Radius, Spacing } from '@/constants/theme';
@@ -22,7 +23,7 @@ const icons: Record<string, string> = {
 };
 
 export function SectionWidgets({ items, selected, onSelect, energy, disabled = false }: {
-  items: { key: string; title: string; artworkId?: string; hint?: string; fallbackArtwork?: ImageSource }[];
+  items: { key: string; title: string; artworkId?: string; icon?: ReactNode; hint?: string; fallbackArtwork?: ImageSource }[];
   selected: string; onSelect: (key: string) => void; energy?: ChartEnergy; disabled?: boolean;
 }) {
   const theme = useTheme();
@@ -39,7 +40,8 @@ export function SectionWidgets({ items, selected, onSelect, energy, disabled = f
       backgroundColor: pressed || selected === item.key ? theme.backgroundSelected : theme.panelHeader,
       borderColor: selected === item.key ? theme.primary : theme.border,
     }]}>
-    {(item.key === 'personality' || item.key === 'character') && energy ? <ArtworkImage artworkId={energy.artworkId} legacyUrl={energy.imageUrl}
+    {item.icon ? <View style={styles.icon} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">{item.icon}</View>
+      : (item.key === 'personality' || item.key === 'character') && energy ? <ArtworkImage artworkId={energy.artworkId} legacyUrl={energy.imageUrl}
       fallback={EnergyArtwork[energy.number]} style={styles.icon} contentFit="contain" accessible={false} />
       : (item.artworkId || icons[item.key] || item.fallbackArtwork) && <ArtworkImage artworkId={item.artworkId ?? icons[item.key]}
         fallback={item.fallbackArtwork}

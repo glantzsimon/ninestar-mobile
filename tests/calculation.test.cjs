@@ -19,6 +19,19 @@ const saved = () => ({ birthDate: '1984-02-29', calculation: {
 const initial = (account = saved(), genders = options.genders, today = new Date(2026, 9, 25), random = () => 0) =>
   calculationDraft(account, genders, today, random);
 
+test('explicit Now ignores retained custom date errors; SelectedDate uses local time without sending its UI mode', () => {
+  const retained = { ...initial(), selectedDate: 'invalid retained date', selectedTime: 'invalid retained time', displayDataFor: 'Now' };
+  assert.equal(buildCalculation(retained, options, true).selectedDateTime, null);
+  assert.throws(() => buildCalculation({ ...retained, displayDataFor: 'SelectedDate' }, options, true), error => error.field === 'selectedDate');
+  const selected = { ...retained, displayDataFor: 'SelectedDate', selectedDate: '2026-10-29', selectedTime: '17:35' };
+  const result = buildCalculation(selected, options, true);
+  assert.equal(result.selectedDateTime, '2026-10-29T17:35:00');
+  assert.equal(result.userTimeZoneId, selected.userTimeZoneId);
+  assert.equal(result.displayDataFor, undefined);
+  assert.equal(buildCalculation(selected, options, false).selectedDateTime, null);
+  assert.equal(retained.selectedDate, 'invalid retained date');
+});
+
 test('calculator validation identifies each input including a partially specified prediction date/time', () => {
   for (const [field, value] of [['name', 'a'.repeat(201)], ['dateOfBirth', '1900-02-29'], ['timeOfBirthKnown', ''],
     ['timeOfBirth', '24:00'], ['gender', ''], ['birthTimeZoneId', ''], ['userTimeZoneId', ''],

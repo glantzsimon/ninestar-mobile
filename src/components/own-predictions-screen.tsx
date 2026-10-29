@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, AppState, Platform } from 'react-native';
@@ -13,6 +14,7 @@ import { session } from '@/lib/session';
 import { uiCopy } from '@/lib/ui-copy';
 
 export default function PredictionsScreen() {
+  useUiLabels();
   const { generation, status } = useSession();
   const copy = uiCopy.predictions;
   if (Platform.OS === 'web' || status === 'signed-out' || status === 'changing') return <AppScreen>
@@ -25,6 +27,7 @@ export default function PredictionsScreen() {
 }
 
 function OwnPredictions() {
+  useUiLabels();
   const theme = useTheme();
   const copy = uiCopy.predictions;
   const [reading, setReading] = useState<Reading | null>(null);
@@ -61,7 +64,8 @@ function OwnPredictions() {
   }, [load]));
   return <AppScreen>
     <AppButton title={uiCopy.myChart.back} variant="secondary" onPress={() => router.navigate('/my-chart')} />
-    {reading && !busy ? <Predictions predictions={reading} title={reading.labels.yourPredictions || copy.ownTitle} /> : <>
+    {reading && !busy ? <Predictions predictions={reading} title={reading.labels.yourPredictions || copy.ownTitle}
+      onCalendar={() => router.push('/my-chart/calendar')} /> : <>
       <ThemedText type="title">{copy.ownTitle}</ThemedText>
       {busy && <ActivityIndicator color={theme.primary} accessibilityLabel={copy.loading} />}
     </>}

@@ -11,7 +11,7 @@ export function AppFieldErrors({ errors, children }: PropsWithChildren<{ errors:
   return <AttemptContext.Provider value={errors}>{children}</AttemptContext.Provider>;
 }
 
-export function AppField({ label, error, children }: PropsWithChildren<{ label: string; error?: string }>) {
+export function AppField({ label, error, helper, children }: PropsWithChildren<{ label: string; error?: string; helper?: string }>) {
   const target = useRef<ComponentRef<typeof View>>(null);
   const registerError = useScreenErrorScroll();
   const attempt = useContext(AttemptContext);
@@ -25,6 +25,7 @@ export function AppField({ label, error, children }: PropsWithChildren<{ label: 
       <ThemedText type="small" themeColor="error" accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.message}>{error}</ThemedText>
     </View>}
     {children}
+    {!!helper && <ThemedText type="small" themeColor="textSecondary">{helper}</ThemedText>}
   </View>;
 }
 const styles = StyleSheet.create({ field: { gap: Spacing.one }, error: { flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.two }, message: { flex: 1 } });

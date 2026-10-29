@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { useState } from 'react';
 import { CalculationPersonFields } from '@/components/calculation-person-fields';
 import { AppButton } from '@/components/ui/app-button';
@@ -15,6 +16,7 @@ export function CompatibilityForm({ first, second, options, onFirstChange, onSec
   hideSexualChemistry: boolean; onHideSexualChemistryChange: (hide: boolean) => void; busy: boolean; onSubmit: () => void;
   errors?: FieldErrors;
 }) {
+  useUiLabels();
   const copy = uiCopy.compatibility;
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   return <>

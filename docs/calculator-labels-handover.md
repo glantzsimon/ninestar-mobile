@@ -1,7 +1,12 @@
 # Calculator labels and date selection — 2026-10-29
 
-Status: source/live audit complete; API additions needed before UI wiring.
-This is a proposed handover, not a change to the shared API contract.
+Status update: backend 46951b37 now documents these additions in
+ninestar/docs/mobile-ui-labels.md and mobile-api.md. Source contract gap resolved;
+Integration recheck now returns labels 200 and the documented date choices in
+options. The shared catalogue and calculator wiring are implemented; see
+ui-labels-validation.md for evidence, remaining gaps and the next iPhone check.
+The original proposed handover below is retained as request history, not a change
+to the shared API contract.
 
 ## Owner request
 

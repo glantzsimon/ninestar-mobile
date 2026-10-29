@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet } from 'react-native';
@@ -18,11 +19,13 @@ import { session } from '@/lib/session';
 import { uiCopy } from '@/lib/ui-copy';
 
 export function IChingCalculatorScreen() {
+  useUiLabels();
   const { generation } = useSession();
   return <Calculator key={generation} />;
 }
 
 function Calculator() {
+  useUiLabels();
   const errorDialog = useSubmissionError();
   const [reading, setReading] = useState<Reading | null>(null);
   const [introduction, setIntroduction] = useState<Introduction | null>(null);

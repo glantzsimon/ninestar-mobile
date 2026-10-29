@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { createContext, useCallback, useContext, useRef, useState, type ComponentRef, type PropsWithChildren } from 'react';
 import { Modal, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -20,6 +21,7 @@ export const useModalMenu = () => useContext(ModalMenuContext);
 export function AppModal({ title, onClose, backToTopLabel, children, edgeToEdge = false }: PropsWithChildren<{
   title: string; onClose: () => void; backToTopLabel?: string; edgeToEdge?: boolean;
 }>) {
+  useUiLabels();
   const theme = useTheme();
   const [scrolledDown, setScrolledDown] = useState(false);
   const [minimumHeight, setMinimumHeight] = useState(0);

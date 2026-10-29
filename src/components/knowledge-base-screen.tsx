@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ArtworkDiagram } from '@/components/artwork-diagram';
@@ -15,6 +16,7 @@ import type { KnowledgeReading } from '@/lib/knowledge-base';
 import { uiCopy } from '@/lib/ui-copy';
 
 export function KnowledgeBaseScreen() {
+  useUiLabels();
   const { sections, loading, failed } = useKnowledgeBase();
   const [selected, setSelected] = useState('');
   const article = sections.find(item => item.key === selected);
@@ -31,6 +33,7 @@ export function KnowledgeBaseScreen() {
 }
 
 export function KnowledgeGroupScreen() {
+  useUiLabels();
   const { section } = useLocalSearchParams<{ section: string }>();
   const { sections, loading, failed } = useKnowledgeBase();
   const group = sections.find(item => item.key === section && item.isGroup);
@@ -43,6 +46,7 @@ export function KnowledgeGroupScreen() {
 }
 
 function KnowledgeGroup({ group }: { group: KnowledgeReading }) {
+  useUiLabels();
   const [selected, setSelected] = useState('');
   const reading = group.children.find(item => item.key === selected);
   return <>
@@ -57,11 +61,13 @@ function KnowledgeGroup({ group }: { group: KnowledgeReading }) {
 }
 
 function KnowledgeButtons({ items, onSelect }: { items: KnowledgeReading[]; onSelect: (key: string) => void }) {
+  useUiLabels();
   return <SectionWidgets selected="" items={items.map(item => ({ ...item,
     fallbackArtwork: require('../../assets/images/ninestar-mark.png') }))} onSelect={onSelect} />;
 }
 
 function KnowledgeArticle({ reading, titled = false }: { reading: KnowledgeReading; titled?: boolean }) {
+  useUiLabels();
   return <AppPanel title={titled ? reading.title : undefined}>
     {reading.key !== 'origins' && reading.artworkId && <ArtworkDiagram artworkId={reading.artworkId} />}
     <ReadingContent blocks={reading.blocks} />
@@ -69,10 +75,12 @@ function KnowledgeArticle({ reading, titled = false }: { reading: KnowledgeReadi
 }
 
 function KnowledgeDetail({ reading, onClose }: { reading: KnowledgeReading; onClose: () => void }) {
+  useUiLabels();
   return <AppModal title={reading.title} onClose={onClose}><KnowledgeArticle reading={reading} /></AppModal>;
 }
 
 function KnowledgeStatus() {
+  useUiLabels();
   const { loading, retry } = useKnowledgeBase();
   return loading ? <AppLoadingPanel message={uiCopy.knowledge.loading} />
     : <AppPanel><ThemedText>{uiCopy.knowledge.unavailable}</ThemedText>

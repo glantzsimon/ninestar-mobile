@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { useState } from 'react';
 import { router } from 'expo-router';
 import * as Linking from 'expo-linking';
@@ -13,6 +14,7 @@ import { websiteLinks } from '@/lib/website-links';
 import { useSubmissionError } from '@/hooks/use-submission-error';
 
 export default function ExploreScreen() {
+  useUiLabels();
   const errorDialog = useSubmissionError();
   const [selected, setSelected] = useState('');
   const feature = exploreFeatures.find((item) => item.key === selected);
@@ -29,6 +31,8 @@ export default function ExploreScreen() {
           : key === 'compatibility' ? router.push('/explore/compatibility')
           : key === 'iching' ? router.push('/explore/iching')
           : key === 'knowledge' ? router.push('/explore/knowledge-base')
+          : key === 'ai' ? void Linking.openURL(websiteLinks(API_BASE_URL).aiAstrologer)
+            .catch(() => errorDialog.showError(uiCopy.externalLinkError))
           : key === 'articles' ? void Linking.openURL(websiteLinks(API_BASE_URL).articles)
             .catch(() => errorDialog.showError(uiCopy.externalLinkError)) : setSelected(key)} />
     </AppPanel>)}

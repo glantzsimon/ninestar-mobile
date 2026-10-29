@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Platform, StyleSheet, Switch, View } from 'react-native';
@@ -15,13 +16,14 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useSubmissionError } from '@/hooks/use-submission-error';
+import { uiLabel } from '@/lib/ui-labels';
 import { uiCopy } from '@/lib/ui-copy';
 import { FieldValidationError, type FieldErrors } from '@/lib/field-validation';
 import { accountDraft, accountOptions, buildAccountUpdate, type AccountDraft, type AccountOptions } from '@/lib/account';
 import { settleAccountLoad } from '@/lib/account-load';
 import { getOwnAccount, getTimezones, MobileApiError, mobileApiRequest, signOut, updateOwnAccount } from '@/lib/mobile-api';
 
-const yesNo = [{ value: 'false', label: 'No' }, { value: 'true', label: 'Yes' }];
+
 const errors: Record<string, string> = {
   authentication_required: 'Please sign in on My Chart, then return to My Account.',
   invalid_csrf_token: 'Your session could not be verified. Your edits are still here. Please try saving again.',
@@ -39,6 +41,7 @@ function messageFor(error: unknown) {
 }
 
 export default function MyAccountScreen() {
+  useUiLabels();
   const submissionError = useSubmissionError();
   const { generation, status } = useSession();
   const [signingOut, setSigningOut] = useState(false);
@@ -57,8 +60,8 @@ export default function MyAccountScreen() {
   if (status === 'signed-out' || status === 'changing') return (
     <AppScreen>{submissionError.dialog}<ThemedText type="title">{uiCopy.accountTitle}</ThemedText>
       <ThemedText>Please sign in on My Chart to open your account.</ThemedText>
-      <AppButton title="Go to Sign In" onPress={() => router.navigate('/my-chart/personal-chart')} />
-      {!!logoutError && <AppButton title="Try Signing Out Again" onPress={logout} loading={signingOut} />}
+      <AppButton title={uiCopy.calendar.signIn} onPress={() => router.navigate('/my-chart/personal-chart')} />
+      {!!logoutError && <AppButton title={uiLabel('screens.account.actions.trySignOutAgain')} onPress={logout} loading={signingOut} />}
     </AppScreen>
   );
   // Identity changes discard the previous account's form; access-only refreshes do not.
@@ -66,6 +69,10 @@ export default function MyAccountScreen() {
 }
 
 function AccountForm({ onSignOut }: { onSignOut: () => Promise<void> }) {
+  const labels = useUiLabels();
+  const accountLabels = labels.screens.account;
+  const yesNo = [{ value: 'false', label: labels.shared.actions.no }, { value: 'true', label: labels.shared.actions.yes }];
+  const [membershipName, setMembershipName] = useState('');
   const submissionError = useSubmissionError();
   const theme = useTheme();
   const [draft, setDraft] = useState<AccountDraft | null>(null);
@@ -93,6 +100,9 @@ function AccountForm({ onSignOut }: { onSignOut: () => Promise<void> }) {
     }
     const nextOptions = accountOptions(metadata.data, choices);
     if (!alive.current) return;
+    setMembershipName(typeof account.data.membership === 'object' && account.data.membership !== null &&
+      'displayName' in account.data.membership && typeof account.data.membership.displayName === 'string'
+      ? account.data.membership.displayName : '');
     setDraft(nextDraft);
     setBaseline(nextDraft);
     setOptions(nextOptions);
@@ -174,7 +184,7 @@ function AccountForm({ onSignOut }: { onSignOut: () => Promise<void> }) {
     } finally { pending.current = false; if (alive.current) setSaving(false); }
   }
 
-  if (Platform.OS === 'web') return <AppScreen><ThemedText type="title">{uiCopy.accountTitle}</ThemedText><ThemedText>Open the mobile app to edit your account.</ThemedText></AppScreen>;
+  if (Platform.OS === 'web') return <AppScreen><ThemedText type="title">{uiCopy.accountTitle}</ThemedText><ThemedText>{uiLabel('screens.account.mobileOnly')}</ThemedText></AppScreen>;
   const disabled = loading || saving || uncertain;
   const dirty = draft !== null && baseline !== null &&
     (Object.keys(baseline) as (keyof AccountDraft)[]).some((key) => draft[key] !== baseline[key]);
@@ -191,49 +201,49 @@ function AccountForm({ onSignOut }: { onSignOut: () => Promise<void> }) {
       {submissionError.dialog}
       <ThemedText type="title" accessibilityRole="header">{uiCopy.accountTitle}</ThemedText>
       {!!message && <ThemedText accessibilityLiveRegion="polite" themeColor={saved ? 'success' : 'text'}>{message}</ThemedText>}
-      {draft && !signedOut && <MembershipStatus refreshOnFocus />}
+      {draft && !signedOut && <MembershipStatus refreshOnFocus displayName={membershipName} />}
       {loading && <ActivityIndicator size="large" color={theme.primary} accessibilityLabel="Loading account details" />}
       {draft && options && !loading && (
         <>
-          <AppPanel title="Personal Details">
-            <AppInput label="First name" value={draft.firstName} error={fieldErrors.firstName} onChangeText={(value) => edit('firstName', value)} maxLength={100} editable={!disabled} autoComplete="given-name" />
-            <AppInput label="Last name" value={draft.lastName} error={fieldErrors.lastName} onChangeText={(value) => edit('lastName', value)} maxLength={100} editable={!disabled} autoComplete="family-name" />
-            <AppInput label="Email address" value={draft.emailAddress} error={fieldErrors.emailAddress} onChangeText={(value) => edit('emailAddress', value)} maxLength={200} editable={!disabled} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} />
-            <AppInput label="Phone number (optional)" value={draft.phoneNumber} error={fieldErrors.phoneNumber} onChangeText={(value) => edit('phoneNumber', value)} maxLength={100} editable={!disabled} keyboardType="phone-pad" />
+          <AppPanel title={accountLabels.personalDetails}>
+            <AppInput label={accountLabels.fields.firstName} value={draft.firstName} error={fieldErrors.firstName} onChangeText={(value) => edit('firstName', value)} maxLength={100} editable={!disabled} autoComplete="given-name" />
+            <AppInput label={accountLabels.fields.lastName} value={draft.lastName} error={fieldErrors.lastName} onChangeText={(value) => edit('lastName', value)} maxLength={100} editable={!disabled} autoComplete="family-name" />
+            <AppInput label={accountLabels.email} value={draft.emailAddress} error={fieldErrors.emailAddress} onChangeText={(value) => edit('emailAddress', value)} maxLength={200} editable={!disabled} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} />
+            <AppInput label={accountLabels.fields.optionalPhoneNumber} value={draft.phoneNumber} error={fieldErrors.phoneNumber} onChangeText={(value) => edit('phoneNumber', value)} maxLength={100} editable={!disabled} keyboardType="phone-pad" />
           </AppPanel>
-          <AppPanel title="Birth Details">
+          <AppPanel title={uiCopy.calculator.birthDetails}>
             <AppDateTimeField label={uiCopy.calculator.dateOfBirth} mode="date" value={draft.dateOfBirth} error={fieldErrors.dateOfBirth} onChange={(value) => edit('dateOfBirth', value)} disabled={disabled} />
-            <AppSelect label="Do you know your birth time?" value={draft.timeOfBirthKnown} error={fieldErrors.timeOfBirthKnown} options={yesNo} onChange={(value) => edit('timeOfBirthKnown', value)} disabled={disabled} />
+            <AppSelect label={uiCopy.calculator.timeKnown} value={draft.timeOfBirthKnown} error={fieldErrors.timeOfBirthKnown} options={yesNo} onChange={(value) => edit('timeOfBirthKnown', value)} disabled={disabled} />
             <AppDateTimeField label={uiCopy.calculator.timeOfBirth} mode="time" value={draft.timeOfBirth} error={fieldErrors.timeOfBirth} onChange={(value) => edit('timeOfBirth', value)} disabled={disabled} allowClear />
             <ThemedText type="small" themeColor="textSecondary">If your birth time is unknown, choose No. You can leave the time blank.</ThemedText>
-            <AppSelect label="Birth timezone" value={draft.birthTimeZoneId} error={fieldErrors.birthTimeZoneId} options={options.timezones} onChange={(value) => edit('birthTimeZoneId', value)} disabled={disabled} />
-            <AppSelect label="Gender" value={draft.gender} error={fieldErrors.gender} options={options.genders} onChange={(value) => edit('gender', value)} disabled={disabled} />
-            <AppSelect label="Current timezone" value={draft.userTimeZoneId} error={fieldErrors.userTimeZoneId} options={options.timezones} onChange={(value) => edit('userTimeZoneId', value)} disabled={disabled} />
+            <AppSelect label={uiCopy.calculator.birthTimezone} value={draft.birthTimeZoneId} error={fieldErrors.birthTimeZoneId} options={options.timezones} onChange={(value) => edit('birthTimeZoneId', value)} disabled={disabled} />
+            <AppSelect label={uiCopy.calculator.gender} value={draft.gender} error={fieldErrors.gender} options={options.genders} onChange={(value) => edit('gender', value)} disabled={disabled} />
+            <AppSelect label={uiCopy.calculator.currentTimezone} helper={labels.shared.calculator.help.currentTimeZone} value={draft.userTimeZoneId} error={fieldErrors.userTimeZoneId} options={options.timezones} onChange={(value) => edit('userTimeZoneId', value)} disabled={disabled} />
           </AppPanel>
           {(!draft.calculationMethod || !draft.housesDisplay || !draft.invertNatal || !draft.invertCycles) && (
             <ThemedText type="small">{uiCopy.calculator.missingPreferences}</ThemedText>
           )}
           <AppPanel title={uiCopy.calculator.preferences}>
-            <AppSelect label="Calculation method" value={draft.calculationMethod} error={fieldErrors.calculationMethod} options={options.calculationMethods} onChange={(value) => edit('calculationMethod', value)} disabled={disabled} />
-            <AppSelect label="House display" value={draft.housesDisplay} error={fieldErrors.housesDisplay} options={options.houseDisplays} onChange={(value) => edit('housesDisplay', value)} disabled={disabled} />
-            <AppSelect label="Invert natal daily/hourly energies for the southern hemisphere" value={draft.invertNatal} error={fieldErrors.invertNatal} options={yesNo} onChange={(value) => edit('invertNatal', value)} disabled={disabled} />
-            <AppSelect label="Invert daily/hourly cycles for the southern hemisphere" value={draft.invertCycles} error={fieldErrors.invertCycles} options={yesNo} onChange={(value) => edit('invertCycles', value)} disabled={disabled} />
+            <AppSelect label={uiCopy.calculator.calculationMethod} value={draft.calculationMethod} error={fieldErrors.calculationMethod} options={options.calculationMethods} onChange={(value) => edit('calculationMethod', value)} disabled={disabled} />
+            <AppSelect label={uiCopy.calculator.housesDisplay} value={draft.housesDisplay} error={fieldErrors.housesDisplay} options={options.houseDisplays} onChange={(value) => edit('housesDisplay', value)} disabled={disabled} />
+            <AppSelect label={uiCopy.calculator.invertNatal} value={draft.invertNatal} error={fieldErrors.invertNatal} options={yesNo} onChange={(value) => edit('invertNatal', value)} disabled={disabled} />
+            <AppSelect label={uiCopy.calculator.invertCycles} value={draft.invertCycles} error={fieldErrors.invertCycles} options={yesNo} onChange={(value) => edit('invertCycles', value)} disabled={disabled} />
           </AppPanel>
           <View style={styles.toggle}>
             <ThemedText style={styles.toggleLabel}>Receive marketing emails</ThemedText>
             <Switch accessibilityLabel="Receive marketing emails" value={draft.allowMarketingEmails} onValueChange={(value) => edit('allowMarketingEmails', value)} disabled={disabled} />
           </View>
           {dirty && !uncertain && <>
-            <AppButton title="Save Changes" onPress={save} loading={saving} disabled={disabled} />
-            <AppButton title="Discard Changes" variant="secondary" onPress={discard} disabled={disabled} />
+            <AppButton title={accountLabels.actions.saveChanges} onPress={save} loading={saving} disabled={disabled} />
+            <AppButton title={accountLabels.actions.discardChanges} variant="secondary" onPress={discard} disabled={disabled} />
           </>}
         </>
       )}
-      {signedOut && <AppButton title="Go to Sign In" onPress={() => router.navigate('/my-chart/personal-chart')} />}
+      {signedOut && <AppButton title={uiCopy.calendar.signIn} onPress={() => router.navigate('/my-chart/personal-chart')} />}
       {saved && !uncertain && <AppButton title="View My Chart" onPress={() => router.navigate('/my-chart/personal-chart')} />}
       {!loading && !signedOut && (uncertain || (!draft && !!message)) &&
-        <AppButton title={uncertain ? 'Check Saved Details' : 'Try Again'} variant="secondary" onPress={reload} disabled={saving} />}
-      {!signedOut && <AppButton title="Sign Out" variant="secondary" onPress={onSignOut} disabled={loading || saving} />}
+        <AppButton title={uncertain ? accountLabels.actions.checkSavedDetails : uiCopy.calendar.retry} variant="secondary" onPress={reload} disabled={saving} />}
+      {!signedOut && <AppButton title={labels.shared.actions.signOut} variant="secondary" onPress={onSignOut} disabled={loading || saving} />}
       </AppFieldErrors>
     </AppScreen>
   );

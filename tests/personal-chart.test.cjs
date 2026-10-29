@@ -17,7 +17,8 @@ function moduleFromSource(name, imports = {}) {
 const text = moduleFromSource('reading-text');
 const help = moduleFromSource('contextual-help', { './reading-text': text });
 const health = moduleFromSource('chart-health', { './reading-text': text });
-const { parsePersonalChart } = moduleFromSource('personal-chart', { './reading-text': text, './contextual-help': help, './chart-health': health });
+const labels = require('./load-library.cjs')()('ui-labels');
+const { parsePersonalChart } = moduleFromSource('personal-chart', { './ui-labels': labels, './reading-text': text, './contextual-help': help, './chart-health': health });
 
 const overviewMetadata = {
   number: 3, colour: 'Bright Green', direction: 'East', familyMember: 'Eldest Son',

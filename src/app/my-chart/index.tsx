@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { router } from 'expo-router';
 import { SectionWidgets } from '@/components/section-widgets';
 import { ThemedText } from '@/components/themed-text';
@@ -11,6 +12,7 @@ const destinations = {
 } as const;
 
 export default function MyChartHub() {
+  useUiLabels();
   return <AppScreen>
     <ThemedText type="title" accessibilityRole="header">{uiCopy.myChart.title}</ThemedText>
     <AppPanel>

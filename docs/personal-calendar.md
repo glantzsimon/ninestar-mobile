@@ -1,5 +1,13 @@
 # My Chart hub and native personal calendar
 
+Calendar zoom added 2026-10-29: the shared own-calendar controller now combines
+the existing Gregorian GET month/day grid with POST planner Year/NineYear/
+EightyOneYear views. API metadata labels, server bounds, local interior anchors,
+single-overview requests and bounded in-memory Back history are documented in
+calendar-zoom-validation.md. No local Ki calculation, profile save, extra login
+or feed action is introduced by navigation. Both standard and expanded views
+use the same state and controls.
+
 ## Implementation (2026-10-26)
 
 Selected-day typography now follows chart details: the date retains AppPanel's

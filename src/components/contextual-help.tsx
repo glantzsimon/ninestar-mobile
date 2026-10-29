@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { ReadingContent, ReadingInline } from '@/components/reading-content';
@@ -9,6 +10,7 @@ import { type ContextualHelp as Help } from '@/lib/contextual-help';
 import { uiCopy } from '@/lib/ui-copy';
 
 export function ContextualHelp({ help }: { help: Help }) {
+  useUiLabels();
   const [expanded, setExpanded] = useState(false);
   const theme = useTheme();
   const progress = useSharedValue(0);

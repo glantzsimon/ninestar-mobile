@@ -3,7 +3,8 @@ import { session } from './session';
 import { requestDiagnostics } from './request-diagnostics';
 import { parseContextualHelp } from './contextual-help';
 
-export const API_BASE_URL = 'https://int.9starkiastrology.com/api/mobile/v1';
+import { API_BASE_URL } from './api-environment';
+export { API_BASE_URL } from './api-environment';
 
 export class MobileApiError extends Error {
   constructor(public readonly code: string, public readonly status?: number, public readonly endpoint?: string) {
@@ -15,10 +16,10 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-type Endpoint = 'metadata/options' | 'metadata/timezones' | 'account/me' | 'account/csrf' |
+type Endpoint = 'metadata/options' | 'metadata/labels' | 'metadata/timezones' | 'account/me' | 'account/csrf' |
   'account/login' | 'account/logout' | 'account/update' | 'membership/entitlements' |
   'personal-chart/me' | 'personal-chart/me/free' | 'personal-chart/calculate' |
-  'predictions/me' | 'predictions/calculate' | 'readings/predictions/me/free' | 'compatibility/calculate' | 'compatibility/help' | 'calendar/subscription' | 'calendar/revoke' |
+  'predictions/me' | 'predictions/calculate' | 'predictions/planner' | 'readings/predictions/me/free' | 'compatibility/calculate' | 'compatibility/help' | 'calendar/subscription' | 'calendar/revoke' |
   'iching/cast' | 'iching/help' | 'knowledge-base' | 'calendar/month' | `calendar/month?year=${number}&month=${number}`;
 type Post = { body: Record<string, unknown>; csrfToken: string };
 
@@ -256,7 +257,7 @@ export async function getPersonalChartIntroduction() {
 }
 
 // A full arbitrary-person calculation, never a complementary-credit purchase.
-async function calculate(endpoint: 'personal-chart/calculate' | 'predictions/calculate' | 'compatibility/calculate', body: Record<string, unknown>) {
+async function calculate(endpoint: 'personal-chart/calculate' | 'predictions/calculate' | 'predictions/planner' | 'compatibility/calculate', body: Record<string, unknown>) {
   const generation = session.getSnapshot().generation;
   const csrfToken = await getCsrfToken();
   if (generation !== session.getSnapshot().generation) throw new MobileApiError('session_changed');
@@ -265,6 +266,8 @@ async function calculate(endpoint: 'personal-chart/calculate' | 'predictions/cal
 export const calculatePersonalChart = (body: Record<string, unknown>) => calculate('personal-chart/calculate', body);
 export const calculatePredictions = (body: Record<string, unknown>) => calculate('predictions/calculate', body);
 export const calculateCompatibility = (body: Record<string, unknown>) => calculate('compatibility/calculate', body);
+// One overview per explicit navigation; same fresh-CSRF/session guards, no retries.
+export const getPredictionsPlanner = (body: Record<string, unknown>) => calculate('predictions/planner', body);
 
 // Public casting still requires the existing anti-forgery cookie/token pair.
 // One explicit cast only: no initial cast, automatic replay or membership route.

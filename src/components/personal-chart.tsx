@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -14,6 +15,7 @@ import { uiCopy } from '@/lib/ui-copy';
 
 // Reusable chart presentation: selection uses only the supplied chart data.
 export function PersonalChart({ chart, title }: { chart: Chart; title?: string }) {
+  useUiLabels();
   const [selected, setSelected] = useState<string | null>(null);
   const detail = selected ? selectChartDetail(chart, selected) : null;
 

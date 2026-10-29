@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -35,6 +36,7 @@ const copy = {
 };
 
 export default function StyleGuideScreen() {
+  useUiLabels();
   const submissionError = useSubmissionError();
   const theme = useTheme();
   const [name, setName] = useState('');

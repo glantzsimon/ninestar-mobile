@@ -1,3 +1,4 @@
+import { uiLabel } from './ui-labels';
 import { readingBlocks, readingText, type ReadingBlock } from './reading-text';
 import { parseContextualHelp, type ContextualHelp } from './contextual-help';
 import { parseChartHealth, type ChartHealth } from './chart-health';
@@ -11,7 +12,7 @@ export type ChartEnergy = {
   element: string;
   imageUrl?: string;
   artworkId?: string;
-  facts?: { label: string; value: string; artworkId?: string }[];
+  facts?: { key?: string; label: string; value: string; artworkId?: string }[];
   descriptionBlocks: ReadingBlock[];
 };
 export type ChartReading = {
@@ -53,17 +54,17 @@ export function parsePersonalChart(data: Record<string, unknown>, access: 'full'
       artworkId: typeof energy.artworkId === 'string' ? energy.artworkId : undefined,
       facts: [
         ...(access === 'full' ? [
-          ['Yin / Yang', 'yinYang', 'yinYangArtworkId'], ['Element', 'element', 'elementArtworkId'],
-          ['Group', 'modality', 'modalityArtworkId'], ['Trigram', 'trigram', 'trigramArtworkId'],
+          ['yinYang', 'yinYang', 'yinYangArtworkId'], ['element', 'element', 'elementArtworkId'],
+          ['group', 'modality', 'modalityArtworkId'], ['trigram', 'trigram', 'trigramArtworkId'],
         ] : []),
-        ['Colour', 'colour'], ['Direction', 'direction'], ['Family Member', 'familyMember'],
-        ['Season', 'season'], ['Internal Representation', 'internalRepresentation'],
-        ['Physiognomy', 'physiognomy'], ['Primary Attributes', 'primaryAttributes'],
-        ['Most Harmonious Combinations', 'mostHarmoniousCombinations'],
-        ['Most Challenging Combinations', 'mostChallengingCombinations'],
-      ].flatMap(([label, field, artwork]) => {
+        ['colour', 'colour'], ['direction', 'direction'], ['familyMember', 'familyMember'],
+        ['season', 'season'], ['internalRepresentation', 'internalRepresentation'],
+        ['physiognomy', 'physiognomy'], ['primaryAttributes', 'primaryAttributes'],
+        ['mostHarmoniousCombinations', 'mostHarmoniousCombinations'],
+        ['mostChallengingCombinations', 'mostChallengingCombinations'],
+      ].flatMap(([key, field, artwork]) => {
         const value = readingText(energy[field]);
-        return value ? [{ label, value, artworkId: artwork && typeof energy[artwork] === 'string' ? energy[artwork] as string : undefined }] : [];
+        return value ? [{ key, get label() { return uiLabel(`screens.personalChart.facts.${key}`); }, value, artworkId: artwork && typeof energy[artwork] === 'string' ? energy[artwork] as string : undefined }] : [];
       }),
       name: readingText(energy.name),
       element: readingText(energy.element),

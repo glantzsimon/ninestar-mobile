@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { useRef, useState, type ComponentRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { CompatibilityGauges } from '@/components/compatibility-gauges';
@@ -16,6 +17,7 @@ import { uiCopy } from '@/lib/ui-copy';
 
 // Direct section navigation: no energy selection/banner or extra modal step.
 export function Compatibility({ reading }: { reading: CompatibilityReading }) {
+  useUiLabels();
   const [selected, setSelected] = useState('');
   const menu = useRef<ComponentRef<typeof View>>(null);
   const target = useRef<ComponentRef<typeof View>>(null);

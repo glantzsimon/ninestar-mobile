@@ -8,6 +8,12 @@ const hexagram = () => ({ number: 46, name: 'API Pushing Upward',
     summary: '<p>API summary.</p>', details: '<h3>API detail heading</h3><p>Long interpretation.</p>',
     changingLinesInterpretation: '<h5>API changing line 1</h5><p>First line reading.</p><h5>API changing line 2</h5><p>Second line reading.</p>' } });
 
+test('server-formatted hexagram heading is retained without reconstructing a local prefix', () => {
+  const primary = { ...hexagram(), heading: 'Hexagramme 46 : Monter' };
+  assert.equal(parseIChing({ primary }).primary.heading, primary.heading);
+  assert.equal(parseIChing({ primary: hexagram() }).primary.heading, undefined);
+});
+
 test('single hexagram retains API order, reading fields, help and HTML without mutating its input', () => {
   const data = { primary: hexagram(), transformed: null,
     help: { overview: { title: 'API I Ching help', htmlBody: '<p>Generic introduction.</p>', culture: 'en-GB' } } };

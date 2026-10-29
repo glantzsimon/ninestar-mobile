@@ -5,6 +5,8 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { AppState } from 'react-native';
 import { artworkEnvironment, artworkStore } from '@/lib/artwork-store';
+import { refreshUiLabels } from '@/lib/ui-label-runtime';
+import { session } from '@/lib/session';
 
 import AppTabs from '@/components/app-tabs';
 import { Colors } from '@/constants/theme';
@@ -13,6 +15,18 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 SplashScreen.preventAutoHideAsync();
 
 export default function TabLayout() {
+  useEffect(() => {
+    void refreshUiLabels();
+    let generation = session.getSnapshot().generation;
+    const unsubscribe = session.subscribe(() => {
+      const next = session.getSnapshot().generation;
+      if (next !== generation) { generation = next; void refreshUiLabels(); }
+    });
+    const subscription = AppState.addEventListener('change', state => {
+      if (state === 'active') void refreshUiLabels();
+    });
+    return () => { unsubscribe(); subscription.remove(); };
+  }, []);
   useEffect(() => {
     const refresh = () => { void artworkStore.refresh(artworkEnvironment); };
     refresh();

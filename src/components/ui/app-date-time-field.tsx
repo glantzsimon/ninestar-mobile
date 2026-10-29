@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { useState } from 'react';
 import { Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,6 +14,7 @@ import { uiCopy } from '@/lib/ui-copy';
 import type { AppDateTimeFieldProps } from './app-date-time-field.types';
 
 export function AppDateTimeField({ label, mode, value, onChange, disabled = false, error, allowClear = false }: AppDateTimeFieldProps) {
+  useUiLabels();
   const theme = useTheme();
   const scheme = useColorScheme();
   const [open, setOpen] = useState(false);

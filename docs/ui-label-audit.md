@@ -1,5 +1,12 @@
 # Domain UI label audit — 2026-10-26
 
+2026-10-29 update: backend 46951b37 and deployed metadata/labels resolve the
+central 173-entry inventory plus calculator/chart/menu/fact/Account labels.
+These now use a shared catalogue with approved API bootstrap. The inventory below
+is historical source evidence, not a claim that all listed fields are still
+missing. Remaining scattered-copy gaps and live/automated results are maintained
+in ui-labels-validation.md; do not recreate already-exposed resources.
+
 Source audit of the rendered app, central uiCopy, chart/prediction/calendar
 parsers, shared ninestar/docs/mobile-api.md and backend mappers/Dictionary.resx.
 This reports source/contract availability, not authenticated Integration payload

@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { StyleSheet, View } from 'react-native';
 import { AppInput } from '@/components/ui/app-input';
 import { AppDateTimeField } from '@/components/ui/app-date-time-field';
@@ -14,6 +15,7 @@ export function CalculationPersonFields({ draft, options, onChange, busy, title 
   draft: CalculationDraft; options: AccountOptions; onChange: (draft: CalculationDraft) => void; busy: boolean; title?: string;
   errors?: FieldErrors; prefix?: string;
 }) {
+  useUiLabels();
   const copy = uiCopy.calculator;
   const visible = calculationVisibility(draft);
   const yesNo = [{ value: 'false', label: copy.no }, { value: 'true', label: copy.yes }];
@@ -22,7 +24,7 @@ export function CalculationPersonFields({ draft, options, onChange, busy, title 
     <AppInput label={label} value={draft[key]} error={error(key)} maxLength={maxLength} editable={!busy} autoCorrect={false}
       onChangeText={value => onChange({ ...draft, [key]: value })} />;
   const select = (key: keyof CalculationDraft, label: string, choices: { value: string; label: string }[]) =>
-    <AppSelect label={label} value={draft[key]} error={error(key)} options={choices} disabled={busy}
+    <AppSelect label={label} value={draft[key] ?? ''} error={error(key)} options={choices} disabled={busy}
       onChange={value => onChange({ ...draft, [key]: value })} />;
   return <AppPanel title={title}><View>
     <View style={styles.fields}>

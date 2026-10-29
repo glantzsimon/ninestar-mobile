@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { useState } from 'react';
 import { Pressable } from 'react-native';
 import { ReadingContent } from '@/components/reading-content';
@@ -7,6 +8,7 @@ import { summaryPreview } from '@/lib/reading-presentation';
 import { uiCopy } from '@/lib/ui-copy';
 
 export function SummaryPreview({ blocks, onExpand }: { blocks: ReadingBlock[]; onExpand?: () => void }) {
+  useUiLabels();
   const [expanded, setExpanded] = useState(false);
   const preview = summaryPreview(blocks);
   const visibleBlocks = expanded ? blocks : preview.blocks;

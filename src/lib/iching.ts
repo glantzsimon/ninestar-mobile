@@ -3,6 +3,7 @@ import { readingBlocks, readingText, type ReadingBlock } from './reading-text';
 
 export type HexagramLine = 'Yin' | 'Yang' | 'ChangingYin' | 'ChangingYang';
 export type HexagramReading = { number: number; name: string; lines: HexagramLine[];
+  heading?: string;
   stage: string; readingName: string; title: ReadingBlock[]; summary: ReadingBlock[];
   details: ReadingBlock[]; changingLines: ReadingBlock[] };
 export type IChingReading = { primary: HexagramReading; transformed: HexagramReading | null;
@@ -17,7 +18,7 @@ function parseHexagram(value: unknown): HexagramReading {
     !Array.isArray(raw.lines) || raw.lines.length !== 6 || !raw.lines.every(line => typeof line === 'string' && lineTypes.has(line))) {
     throw new Error('invalid_response');
   }
-  return { number: raw.number as number, name, lines: [...raw.lines] as HexagramLine[],
+  return { number: raw.number as number, name, heading: readingText(raw.heading) || undefined, lines: [...raw.lines] as HexagramLine[],
     stage: readingText(info.stage), readingName: readingText(info.name), title: readingBlocks(info.title),
     summary: readingBlocks(info.summary), details: readingBlocks(info.details), changingLines: readingBlocks(info.changingLinesInterpretation) };
 }

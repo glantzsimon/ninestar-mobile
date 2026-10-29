@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { type ComponentRef, useRef, useState } from 'react';
 import { Platform, StyleSheet, TextInput, View } from 'react-native';
 
@@ -13,6 +14,7 @@ export function AccountLogin({ busy, onSubmit }: {
   busy: boolean;
   onSubmit: (username: string, password: string, rememberMe: boolean) => Promise<void>;
 }) {
+  useUiLabels();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);

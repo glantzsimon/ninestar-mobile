@@ -1,14 +1,23 @@
 # Explore availability and AI Astrologer handoff
 
-2026-10-27
+Updated 2026-10-29
 
 ## Implemented
 
 Removed the Karmic Numerology entry from exploreFeatures at the owner's request.
 Its unused central label and artwork ID remain available for a later return.
-AI Astrologer retains its existing native availability placeholder; no old GPT
-link exists in the current Explore implementation and no replacement link was
-invented. No backend, dependencies, session or account behavior changed.
+AI Astrologer now opens the owner's explicitly approved temporary existing GPT
+destination using Expo Linking, with the shared external-link error dialog.
+Source: website Views/Shared/_Navbar.cshtml uses
+ApiConfiguration.Instance.NineStarKiAstrologerGptUrl; Config/appsettings.json sets
+https://chatgpt.com/g/g-67b146c065ec8191b7ec0850404fef33-9-star-ki-astrologer.
+website-links.ts owns that exact public URL. No credentials, chart/profile data,
+prefilled messages or query parameters are passed. OS browser/app handling is
+platform-controlled; iPhone handoff is still unverified. No expiry date was
+independently established. The native calculators remain native.
+The public Integration homepage was also checked on 2026-10-29 and contains
+the identical GPT URL. This verifies the deployed website destination, not
+ChatGPT availability, sign-in or an iPhone launch.
 
 ## ChatGPT plugin proposal
 
@@ -38,7 +47,8 @@ starting point once the owner supplies it; its mobile behavior must be tested.
 
 ## Blockers and next step
 
-Owner update: plugin is under review, so this work is parked until they resume.
+Owner update: plugin is under review, so the replacement handoff remains parked.
+The temporary existing-GPT destination is now explicitly authorised and wired.
 Articles is separately approved as a website blog link; see knowledge-base.md.
 
 Need the exact plugin share/install link and its availability to intended users.

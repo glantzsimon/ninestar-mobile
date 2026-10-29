@@ -6,6 +6,19 @@ const { calculationDraft } = load('calculation');
 const draft = () => calculationDraft({}, [{ value: 'Female', label: 'Female' }], new Date(2026, 9, 25), () => 0);
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
+test('date-target preference preserves hidden date/time drafts across reopen without mixing accounts', async () => {
+  let disk;
+  const storage = { read: async () => disk, write: async value => { disk = clone(value); } };
+  const store = createCalculatorMemory(storage);
+  const inputs = { ...draft(), displayDataFor: 'Now', selectedDate: '2026-10-29', selectedTime: '12:34' };
+  await store.remember('integration', 'a', 'predictions', inputs);
+  const restored = await createCalculatorMemory(storage).read('integration', 'a', 'predictions');
+  assert.equal(restored.displayDataFor, 'Now');
+  assert.equal(restored.selectedTime, '12:34');
+  assert.equal(restored.selectedDate, '2026-10-29');
+  assert.equal(await store.read('integration', 'b', 'predictions'), null);
+});
+
 test('last used calculator inputs survive a store restart, isolated by account/environment/calculator', async () => {
   let disk = null;
   const storage = { read: async () => disk, write: async (value) => { disk = clone(value); } };

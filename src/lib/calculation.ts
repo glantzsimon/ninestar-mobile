@@ -10,7 +10,12 @@ export type CalculationDraft = {
   gender: string; birthTimeZoneId: string; userTimeZoneId: string;
   calculationMethod: string; housesDisplay: string;
   invertNatal: string; invertCycles: string; selectedDate: string; selectedTime: string;
+  displayDataFor?: 'Now' | 'SelectedDate';
 };
+
+export function predictionDateMode(draft: CalculationDraft): 'Now' | 'SelectedDate' {
+  return draft.displayDataFor ?? (draft.selectedDate || draft.selectedTime ? 'SelectedDate' : 'Now');
+}
 
 const object = (value: unknown): Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : {};
@@ -76,7 +81,7 @@ export function buildCalculationPerson(draft: CalculationDraft, options: Account
 export function buildCalculation(draft: CalculationDraft, options: AccountOptions, selectedDate = false): Record<string, unknown> {
   const person = buildCalculationPerson(draft, options);
   const useSelectedDate = calculationVisibility(draft, selectedDate).predictionSettings &&
-    (draft.selectedDate !== '' || draft.selectedTime !== '');
+    predictionDateMode(draft) === 'SelectedDate';
   const errors = uiCopy.calculator.errors;
   const selections: [keyof CalculationDraft, { value: string }[]][] = [
     ['userTimeZoneId', options.timezones], ['calculationMethod', options.calculationMethods], ['housesDisplay', options.houseDisplays],

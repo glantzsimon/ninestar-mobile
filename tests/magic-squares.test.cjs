@@ -2,7 +2,6 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 const load = require('./load-library.cjs')();
 const { parseMagicSquare, parseMagicSquares, squareArrowGeometry } = load('magic-squares');
-const { createEnergyDisplay } = load('energy-display');
 const { parsePredictions } = load('predictions');
 const houses = [4, 9, 2, 3, 5, 7, 8, 1, 6];
 const numbers = [1, 6, 8, 9, 2, 4, 5, 7, 3];
@@ -87,14 +86,4 @@ test('Predictions stays usable on old/restricted servers; hourly travelSummary i
   assert.equal(next.travelSummary, null); // Missing three-period evidence: deliberately not displayed.
   const free = parsePredictions({ year: { number: 2 }, magicSquares: { personal: { year: square() } } }, 'free');
   assert.equal(free.magicSquares, null);
-});
-
-test('display choice shares only a session presentation value and reset restores Graphical', () => {
-  const store = createEnergyDisplay(); let calls = 0;
-  const unsubscribe = store.subscribe(() => calls++);
-  assert.equal(store.get(), 'Graphical');
-  store.set('MagicSquare'); assert.equal(store.get(), 'MagicSquare'); assert.equal(calls, 1);
-  store.set('MagicSquare'); store.set('invalid'); assert.equal(calls, 1);
-  store.reset(); assert.equal(store.get(), 'Graphical'); assert.equal(calls, 2);
-  unsubscribe(); store.set('MagicSquare'); assert.equal(calls, 2);
 });

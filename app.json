@@ -36,11 +36,23 @@
         }
       ],
       "expo-video",
-      "expo-image"
+      "expo-image",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "44a130c1-bfdd-4f58-b529-544d46ddcf88"
+      }
+    },
+    "owner": "simonglantz"
   }
 }

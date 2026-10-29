@@ -1,9 +1,11 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { router, useFocusEffect } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, AppState, Platform } from 'react-native';
 import { ContextualHelp } from '@/components/contextual-help';
 import { PersonalCalendar } from '@/components/personal-calendar';
+import { CalendarOverview, CalendarZoomNavigation } from '@/components/calendar-overview';
 import { ThemedText } from '@/components/themed-text';
 import { AppButton } from '@/components/ui/app-button';
 import { AppInput } from '@/components/ui/app-input';
@@ -14,17 +16,23 @@ import { AppScreen } from '@/components/ui/app-screen';
 import { useSession } from '@/hooks/use-session';
 import { useSubmissionError } from '@/hooks/use-submission-error';
 import { API_BASE_URL, createCalendarSubscription, getCalendarMonth, getOwnAccount,
-  MobileApiError, revokeCalendarSubscription } from '@/lib/mobile-api';
+  getPredictionsPlanner, mobileApiRequest, MobileApiError, revokeCalendarSubscription } from '@/lib/mobile-api';
+import { backCalendarPage, calendarPageUp, localPlannerDate, ownPlannerCalculation, parsePlannerOverview,
+  plannerItemAnchor, plannerRequest, plannerViewOptions, rememberCalendarPage,
+  type CalendarHistory, type CalendarPage, type CalendarView, type OverviewView, type PlannerItem, type PlannerNavigationDirection } from '@/lib/calendar-planner';
 import { calendarSelection, calendarSubscriptionUrl, parseCalendarMonth, type CalendarMonth } from '@/lib/personal-calendar';
 import { session } from '@/lib/session';
 import { uiCopy } from '@/lib/ui-copy';
 
 const copy = uiCopy.calendar;
+type CalendarRequest = { kind: 'Month'; year?: number; month?: number; date?: string; remember: boolean }
+  | { kind: OverviewView; anchor: string; direction: PlannerNavigationDirection; remember: boolean };
 function errorMessage(error: unknown) {
   return error instanceof MobileApiError ? copy[error.code as keyof typeof copy] ?? copy.unavailable : copy.unavailable;
 }
 
 export default function CalendarScreen() {
+  useUiLabels();
   const { generation, status } = useSession();
   if (Platform.OS === 'web' || status === 'signed-out' || status === 'changing') return <AppScreen>
     <AppButton title={uiCopy.myChart.back} variant="secondary" onPress={() => router.navigate('/my-chart')} />
@@ -36,8 +44,14 @@ export default function CalendarScreen() {
 }
 
 function OwnCalendar() {
+  useUiLabels();
   const submissionError = useSubmissionError();
   const [calendar, setCalendar] = useState<CalendarMonth | null>(null);
+  const [page, setPage] = useState<CalendarPage | null>(null);
+  const [canGoBack, setCanGoBack] = useState(false);
+  const [views, setViews] = useState<{ value: CalendarView; label: string }[]>([]);
+  const [plannerZone, setPlannerZone] = useState('');
+  const [canPlan, setCanPlan] = useState(false);
   const [selected, setSelected] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -47,48 +61,153 @@ function OwnCalendar() {
   const [linkMessage, setLinkMessage] = useState('');
   const pending = useRef(false), linkPending = useRef(false), alive = useRef(true);
   const focused = useRef(false);
-  const target = useRef<{ year: number; month: number } | undefined>(undefined);
+  const navigation = useRef<CalendarHistory>({ current: null, previous: [] });
+  const calculation = useRef<Record<string, unknown> | null>(null);
+  const viewOptions = useRef<{ value: CalendarView; label: string }[]>([]);
+  const retry = useRef<CalendarRequest | null>(null);
+  const applyNavigation = useCallback((next: CalendarHistory) => {
+    navigation.current = next;
+    setPage(next.current); setCanGoBack(next.previous.length > 0);
+    if (next.current) {
+      setSelected(next.current.selectedDate);
+      if (next.current.kind === 'Month') setCalendar(next.current.calendar);
+    }
+  }, []);
+  const commit = useCallback((next: CalendarPage, remember: boolean) => {
+    applyNavigation(remember ? rememberCalendarPage(navigation.current, next) : { ...navigation.current, current: next });
+  }, [applyNavigation]);
+  const clearProtected = useCallback(() => {
+    applyNavigation({ current: null, previous: [] });
+    calculation.current = null;
+    setCanPlan(false); setPlannerZone('');
+    setSelected('');
+    setCalendar(null); setExpanded(false); setLink('');
+  }, [applyNavigation]);
+  const prepare = useCallback(async (refresh = false) => {
+    if (calculation.current && !refresh) return calculation.current;
+    const generation = session.getSnapshot().generation;
+    const [account, metadata] = await Promise.all([
+      getOwnAccount(), viewOptions.current.length ? Promise.resolve(null) : mobileApiRequest('metadata/options').catch(() => null),
+    ]);
+    if (!alive.current || generation !== session.getSnapshot().generation) throw new MobileApiError('session_changed');
+    let next: Record<string, unknown> | null = null;
+    try { next = ownPlannerCalculation(account.data); }
+    catch { /* An older account projection must not prevent the existing Gregorian grid. */ }
+    if (calculation.current && JSON.stringify(next) !== JSON.stringify(calculation.current)) {
+      // Changed saved settings invalidate previously calculated period snapshots.
+      applyNavigation({ current: null, previous: [] });
+      setCalendar(null); setSelected(''); setLink('');
+    }
+    calculation.current = next;
+    setCanPlan(next !== null); setPlannerZone(typeof next?.userTimeZoneId === 'string' ? next.userTimeZoneId : '');
+    if (metadata) {
+      viewOptions.current = plannerViewOptions(metadata.data.plannerViews);
+      setViews(viewOptions.current);
+    }
+    return next;
+  }, [applyNavigation]);
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
-  const load = useCallback(async (year?: number, month?: number) => {
+  const load = useCallback(async (year?: number, month?: number, wantedDate?: string, remember = false, refresh = false) => {
     if (pending.current) return;
     pending.current = true;
     setBusy(true); setError('');
-    target.current = year !== undefined && month !== undefined ? { year, month } : undefined;
+    retry.current = { kind: 'Month', year, month, date: wantedDate, remember };
     const generation = session.getSnapshot().generation;
     try {
-      await getOwnAccount();
+      await prepare(refresh);
       if (!alive.current || generation !== session.getSnapshot().generation) return;
       const result = await getCalendarMonth(year, month);
       if (!alive.current || generation !== session.getSnapshot().generation) return;
       const next = parseCalendarMonth(result.data);
-      setCalendar(next);
-      setSelected(previous => calendarSelection(next, previous).date);
+      const date = calendarSelection(next, wantedDate ?? navigation.current.current?.selectedDate ?? '').date;
+      commit({ kind: 'Month', calendar: next, selectedDate: date }, remember);
     } catch (failure) {
       if (!alive.current || generation !== session.getSnapshot().generation) return;
       setError(errorMessage(failure));
       if (failure instanceof MobileApiError && [401, 403, 409].includes(failure.status ?? 0)) {
-        setCalendar(null); setExpanded(false); setLink('');
+        clearProtected();
         if (failure.status === 403) session.clearEntitlements(generation);
       }
     } finally { pending.current = false; if (alive.current) setBusy(false); }
-  }, []);
+  }, [prepare, commit, clearProtected]);
+  const loadOverview = useCallback(async (view: OverviewView, anchor: string, direction: PlannerNavigationDirection = 'None', remember = true, refresh = false) => {
+    if (pending.current) return;
+    pending.current = true; setBusy(true); setError('');
+    retry.current = { kind: view, anchor, direction, remember };
+    const generation = session.getSnapshot().generation;
+    try {
+      const context = await prepare(refresh);
+      if (!context) throw new MobileApiError('calendar_details_required', 409);
+      if (!viewOptions.current.some(option => option.value === view)) throw new MobileApiError('invalid_response');
+      const result = await getPredictionsPlanner(plannerRequest(context, view, anchor, direction));
+      if (!alive.current || generation !== session.getSnapshot().generation) return;
+      const overview = parsePlannerOverview(result.data, view);
+      // Preserve the caller's selected day when it belongs to the returned parent;
+      // adjacent-period navigation uses the returned interior anchor instead.
+      const selectedDate = direction === 'None' ? anchor.slice(0, 10) : overview.anchor.slice(0, 10);
+      commit({ kind: view, planner: overview, selectedDate }, remember);
+    } catch (failure) {
+      if (!alive.current || generation !== session.getSnapshot().generation) return;
+      setError(errorMessage(failure));
+      if (failure instanceof MobileApiError && [401, 403, 409].includes(failure.status ?? 0)) {
+        clearProtected();
+        if (failure.status === 403) session.clearEntitlements(generation);
+      }
+    } finally { pending.current = false; if (alive.current) setBusy(false); }
+  }, [prepare, commit, clearProtected]);
+  const refreshCurrent = useCallback(() => {
+    const current = navigation.current.current;
+    if (current && current.kind !== 'Month') {
+      void loadOverview(current.kind, localPlannerDate(current.selectedDate), 'None', false, true);
+    } else void load(current?.calendar.year, current?.calendar.month, current?.selectedDate, false, true);
+  }, [load, loadOverview]);
   useFocusEffect(useCallback(() => {
     focused.current = true;
-    void load();
+    refreshCurrent();
     let wasBackground = AppState.currentState === 'background';
     const subscription = AppState.addEventListener('change', state => {
       if (state === 'active' && wasBackground) {
         wasBackground = false;
-        void load(target.current?.year, target.current?.month);
+        refreshCurrent();
       }
       if (state === 'background') wasBackground = true;
     });
     return () => { focused.current = false; subscription.remove(); setLink(''); setLinkMessage(''); };
-  }, [load]));
+  }, [refreshCurrent]));
+
+  function selectDay(date: string) {
+    const current = navigation.current.current;
+    if (current?.kind === 'Month') commit({ ...current, selectedDate: date }, false);
+  }
+  function zoomOut() {
+    const current = navigation.current.current;
+    const view = current && calendarPageUp(current);
+    if (view && current) void loadOverview(view, localPlannerDate(current.selectedDate));
+  }
+  function drill(item: PlannerItem) {
+    const current = navigation.current.current;
+    if (!current || current.kind === 'Month' || pending.current) return;
+    const anchor = plannerItemAnchor(item, current.selectedDate);
+    if (!anchor) return;
+    if (item.childView === 'Month') {
+      const [year, month] = anchor.slice(0, 10).split('-').map(Number);
+      void load(year, month, anchor.slice(0, 10), true);
+    } else void loadOverview(item.childView, anchor);
+  }
+  function goBack() {
+    if (pending.current || linkPending.current) return;
+    setError(''); applyNavigation(backCalendarPage(navigation.current));
+  }
+  function retryNavigation() {
+    const request = retry.current;
+    if (!request) return;
+    if (request.kind === 'Month') void load(request.year, request.month, request.date, request.remember, true);
+    else void loadOverview(request.kind, request.anchor, request.direction, request.remember, true);
+  }
 
   function clearDeniedAccess(failure: unknown, generation: number) {
     if (failure instanceof MobileApiError && [401, 403, 409].includes(failure.status ?? 0)) {
-      setCalendar(null); setExpanded(false); setLink('');
+      clearProtected();
       setError(errorMessage(failure));
       if (failure.status === 403) session.clearEntitlements(generation);
     }
@@ -134,15 +253,25 @@ function OwnCalendar() {
     ]);
   }
   function content(inModal = false) {
+    const up = page && calendarPageUp(page);
+    const upLabel = canPlan ? views.find(option => option.value === up)?.label : undefined;
+    const navigationControls = <CalendarZoomNavigation upLabel={upLabel} onUp={up ? zoomOut : undefined}
+      onBack={canGoBack ? goBack : undefined} busy={busy || linkBusy} />;
     return <>
       {busy && <AppLoadingPanel message={copy.loading} />}
       {!!error && <AppPanel><ThemedText accessibilityLiveRegion="polite">{error}</ThemedText>
-        <AppButton title={copy.retry} disabled={busy} onPress={() => load(target.current?.year, target.current?.month)} />
+        <AppButton title={copy.retry} disabled={busy} onPress={retryNavigation} />
         <AppButton title={calendar?.labels.myAccount || copy.account} variant="secondary" onPress={() => router.navigate('/account')} />
       </AppPanel>}
-      {calendar && <PersonalCalendar calendar={calendar} selected={selected} onSelect={setSelected} inModal={inModal}
+      {page?.kind === 'Month' && <PersonalCalendar calendar={page.calendar} selected={selected} onSelect={selectDay} inModal={inModal}
+        navigation={navigationControls}
         onMonth={(year, month) => { void load(year, month); }} busy={busy || linkBusy}
         onExpand={inModal ? undefined : () => setExpanded(true)} />}
+      {page && page.kind !== 'Month' && <CalendarOverview planner={page.planner}
+        title={views.find(option => option.value === page.kind)?.label ?? ''} navigation={navigationControls}
+        selectedDate={page.selectedDate} timeZone={plannerZone}
+        onSelect={drill} onAdjacent={direction => { void loadOverview(page.kind as OverviewView, page.planner.anchor, direction); }}
+        busy={busy || linkBusy} inModal={inModal} onExpand={inModal ? undefined : () => setExpanded(true)} />}
     </>;
   }
   return <AppScreen>

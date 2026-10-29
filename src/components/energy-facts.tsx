@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { StyleSheet, View } from 'react-native';
 import { ArtworkImage } from '@/components/artwork-image';
 import { ThemedText } from '@/components/themed-text';
@@ -8,15 +9,16 @@ import { useTheme } from '@/hooks/use-theme';
 import type { ChartEnergy } from '@/lib/personal-chart';
 
 export function EnergyFacts({ energy }: { energy: ChartEnergy }) {
+  const labels = useUiLabels();
   const theme = useTheme();
-  const symbols = ['Yin / Yang', 'Element', 'Group', 'Trigram'].flatMap((label) => {
-    const fact = energy.facts?.find((item) => item.label === label);
+  const symbols = ['yinYang', 'element', 'group', 'trigram'].flatMap((key) => {
+    const fact = energy.facts?.find((item) => item.key === key);
     return fact ? [fact] : [];
   });
   const facts = energy.facts?.filter((fact) => !symbols.includes(fact)) ?? [];
-  const columns = [{ label: 'Energy', value: energy.name || `${energy.number}`, artworkId: energy.artworkId,
+  const columns = [{ label: labels.screens.personalChart.facts.energy, value: energy.name || `${energy.number}`, artworkId: energy.artworkId,
     legacyUrl: energy.imageUrl, fallback: EnergyArtwork[energy.number] },
-    ...symbols.map((fact) => ({ ...fact, label: fact.label === 'Yin / Yang' ? 'Yin/Yang' : fact.label,
+    ...symbols.map((fact) => ({ ...fact, label: fact.label,
       legacyUrl: undefined, fallback: undefined }))];
   return <View style={styles.rows}>
     {symbols.length < 4 && <ThemedText type="small" themeColor="textSecondary">
@@ -34,7 +36,7 @@ export function EnergyFacts({ energy }: { energy: ChartEnergy }) {
           style={styles.image} contentFit="contain" accessible={false} />
       </View>)}</View>
     </View>
-    {!!facts.length && <AppDisclosure title="More Details">
+    {!!facts.length && <AppDisclosure title={labels.shared.actions.moreDetails}>
       <View style={[styles.table, { borderColor: theme.border }]}>
       {facts.map((fact, index) => <View key={fact.label} style={[styles.row, {
         borderColor: theme.border, borderTopWidth: index ? 1 : 0,

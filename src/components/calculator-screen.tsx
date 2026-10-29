@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Platform } from 'react-native';
@@ -40,17 +41,17 @@ type Configuration = {
 };
 const calculators: Record<CalculatorKind, Configuration> = {
   'personal-chart': {
-    title: uiCopy.calculator.title, signInRequired: uiCopy.calculator.signInRequired,
+    get title() { return uiCopy.calculator.title; }, get signInRequired() { return uiCopy.calculator.signInRequired; },
     introduction: getPersonalChartIntroduction, calculate: calculatePersonalChart,
     parse: (data: Record<string, unknown>): Result => ({ kind: 'personal-chart', chart: parsePersonalChart(data, 'full') }),
   },
   predictions: {
-    title: uiCopy.predictionCalculator.title, signInRequired: uiCopy.predictionCalculator.signInRequired,
+    get title() { return uiCopy.predictionCalculator.title; }, get signInRequired() { return uiCopy.predictionCalculator.signInRequired; },
     introduction: getPredictionsIntroduction, calculate: calculatePredictions,
     parse: (data: Record<string, unknown>): Result => ({ kind: 'predictions', predictions: parsePredictions(data, 'full') }),
   },
   compatibility: {
-    title: uiCopy.compatibility.title, signInRequired: uiCopy.compatibility.signInRequired,
+    get title() { return uiCopy.compatibility.title; }, get signInRequired() { return uiCopy.compatibility.signInRequired; },
     introduction: getCompatibilityIntroduction, calculate: calculateCompatibility,
     parse: (data, hide) => ({ kind: 'compatibility', compatibility: parseCompatibility(data, hide) }),
   },
@@ -72,6 +73,7 @@ function describeError(error: unknown, kind: CalculatorKind) {
 }
 
 export function CalculatorScreen({ kind }: { kind: CalculatorKind }) {
+  useUiLabels();
   const { generation, status } = useSession();
   const copy = uiCopy.calculator;
   const config = calculators[kind];
@@ -88,6 +90,7 @@ export function CalculatorScreen({ kind }: { kind: CalculatorKind }) {
 }
 
 function Calculator({ kind }: { kind: CalculatorKind }) {
+  useUiLabels();
   const submissionError = useSubmissionError();
   const copy = uiCopy.calculator;
   const config = calculators[kind];

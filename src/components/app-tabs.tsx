@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { NativeTabs } from 'expo-router/native-tabs';
 
 import { Colors } from '@/constants/theme';
@@ -5,6 +6,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { uiCopy } from '@/lib/ui-copy';
 
 export default function AppTabs() {
+  useUiLabels();
   const scheme = useColorScheme();
   const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
 

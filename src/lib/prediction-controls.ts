@@ -1,5 +1,5 @@
 import { readingText } from './reading-text';
-import type { EnergyDisplay } from './energy-display';
+type EnergyDisplay = 'Graphical' | 'MagicSquare';
 
 export type PredictionControls = {
   controls: { display: string; advancedOptions: string; directionology: string; showDirections: string };

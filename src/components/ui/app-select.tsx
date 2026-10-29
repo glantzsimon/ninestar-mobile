@@ -9,17 +9,19 @@ import { AppField } from '@/components/ui/app-field';
 import { ControlHeight, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { type Option } from '@/lib/account';
+import { useUiLabels } from '@/hooks/use-ui-labels';
 
-export function AppSelect({ label, value, options, onChange, disabled = false, error }: {
-  label: string; value: string; options: Option[]; onChange: (value: string) => void; disabled?: boolean; error?: string;
+export function AppSelect({ label, value, options, onChange, disabled = false, error, helper }: {
+  label: string; value: string; options: Option[]; onChange: (value: string) => void; disabled?: boolean; error?: string; helper?: string;
 }) {
+  const labels = useUiLabels();
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const selected = options.find((item) => item.value === value);
   const filtered = options.filter((item) => `${item.label} ${item.value}`.toLowerCase().includes(search.toLowerCase()));
   return (
-    <AppField label={label} error={error}>
+    <AppField label={label} error={error} helper={helper}>
       <Pressable
         accessibilityRole="button"
         accessibilityHint={error}
@@ -49,7 +51,7 @@ export function AppSelect({ label, value, options, onChange, disabled = false, e
               </Pressable>
             )}
           />
-          <AppButton title="Cancel" variant="secondary" onPress={() => setOpen(false)} />
+          <AppButton title={labels.shared.actions.cancel} variant="secondary" onPress={() => setOpen(false)} />
         </SafeAreaView>
       </Modal>
     </AppField>

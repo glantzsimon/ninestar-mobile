@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { StyleSheet, View } from 'react-native';
 import { ArtworkImage } from '@/components/artwork-image';
 import { ChartReading } from '@/components/chart-reading';
@@ -11,6 +12,7 @@ import { coreReading } from '@/lib/core-menu';
 import { uiCopy } from '@/lib/ui-copy';
 
 function Organs({ panel }: { panel: OrganPanel }) {
+  useUiLabels();
   return <AppPanel title={panel.title}>
     <ReadingContent blocks={panel.blocks} />
     <View style={styles.organs}>{[...panel.yinOrgans, ...panel.yangOrgans].map((organ, index) => (
@@ -24,6 +26,7 @@ function Organs({ panel }: { panel: OrganPanel }) {
 }
 
 export function ChartHealth({ detail }: { detail: ChartDetail }) {
+  useUiLabels();
   const health = detail.health;
   const illnesses = detail.groups.flatMap((group) => group.readings).find((reading) => reading.key === 'illnesses');
   return <View style={styles.content}>

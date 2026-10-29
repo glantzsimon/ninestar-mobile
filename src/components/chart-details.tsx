@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { useRef, useState, type ComponentRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ChartReading } from '@/components/chart-reading';
@@ -14,10 +15,12 @@ import { EnergyBanner } from '@/components/energy-banner';
 import { uiCopy } from '@/lib/ui-copy';
 
 export function ChartDetails({ detail }: { detail: ChartDetail }) {
+  useUiLabels();
   return detail.key === 'core' ? <CoreDetails detail={detail} /> : <OtherDetails detail={detail} />;
 }
 
 function CoreDetails({ detail }: { detail: ChartDetail }) {
+  useUiLabels();
   const registerMenu = useModalMenu();
   const menu = useRef<ComponentRef<typeof View>>(null);
   const [selected, setSelected] = useState('');
@@ -55,6 +58,7 @@ function CoreDetails({ detail }: { detail: ChartDetail }) {
 }
 
 function OtherDetails({ detail }: { detail: ChartDetail }) {
+  useUiLabels();
   const registerMenu = useModalMenu();
   const menu = useRef<ComponentRef<typeof View>>(null);
   const scrollTo = useModalScroll();
@@ -73,7 +77,7 @@ function OtherDetails({ detail }: { detail: ChartDetail }) {
   const sections = detail.key === 'character'
     ? [{ key: 'energyFacts', title: uiCopy.coreSections.energyFacts }, ...(detail.navigation ?? []).map((item) =>
       item.key === 'character' ? { ...item, key: 'essence', title: uiCopy.coreSections.essence } : item)]
-    : [{ key: 'energyFacts', title: 'Overview' }, { key: 'essence', title: 'Essence' }, ...nature.map(({ key, title }) => ({ key, title })),
+    : [{ key: 'energyFacts', title: uiCopy.coreSections.energyFacts }, { key: 'essence', title: uiCopy.coreSections.essence }, ...nature.map(({ key, title }) => ({ key, title })),
     ...detail.groups.filter((group) => detail.key !== 'core' || group.title !== 'Your Nature')
       .map((group) => ({ key: group.title, title: group.title }))];
   const group = detail.groups.find((item) => item.title === selected);
@@ -104,13 +108,13 @@ function OtherDetails({ detail }: { detail: ChartDetail }) {
             pendingScroll.current = false; scrollTo(readingView.current);
           }
         }}>
-        {selected === 'energyFacts' ? <AppPanel title="Overview"><EnergyFacts energy={detail.energy} /></AppPanel>
+        {selected === 'energyFacts' ? <AppPanel title={uiCopy.coreSections.energyFacts}><EnergyFacts energy={detail.energy} /></AppPanel>
           : detail.key === 'character' ? characterSection && <>
             {selected === 'adultChildRelationship' && detail.contextualHelp?.adultChildRelationship
               && <ContextualHelp help={detail.contextualHelp.adultChildRelationship} />}
             <ChartReading title={selected === 'essence' ? uiCopy.coreSections.essence : characterSection.heading}
               reading={characterSection.reading} initialFull={selected === 'stressResponse'} />
-          </> : <ChartReading title={active?.title ?? 'Essence'} reading={active ?? detail.reading} />}
+          </> : <ChartReading title={active?.title ?? uiCopy.coreSections.essence} reading={active ?? detail.reading} />}
       </View>}
     </View>
   );

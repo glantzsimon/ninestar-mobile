@@ -11,7 +11,9 @@ function inputs(value: unknown): CalculationDraft | null {
   const raw = object(value);
   if (fields.some((field) => typeof raw[field] !== 'string' || (raw[field] as string).length > 200)) return null;
   // Explicit allowlist: never retain account data, credentials, results or access.
-  return Object.fromEntries(fields.map((field) => [field, raw[field]])) as CalculationDraft;
+  const copy = Object.fromEntries(fields.map((field) => [field, raw[field]])) as CalculationDraft;
+  if (raw.displayDataFor === 'Now' || raw.displayDataFor === 'SelectedDate') copy.displayDataFor = raw.displayDataFor;
+  return copy;
 }
 
 export function createCalculatorMemory(storage: Storage) {

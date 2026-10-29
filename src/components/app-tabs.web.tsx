@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import {
   Tabs,
   TabList,
@@ -16,6 +17,7 @@ import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
 export default function AppTabs() {
+  useUiLabels();
   return (
     <Tabs>
       <TabSlot style={{ height: '100%' }} />
@@ -41,6 +43,7 @@ type TabButtonProps = Omit<TabTriggerSlotProps, 'ref'> &
   Pick<ComponentProps<typeof Pressable>, 'ref'>;
 
 export function TabButton({ children, isFocused, ...props }: TabButtonProps) {
+  useUiLabels();
   return (
     <Pressable {...props} style={({ pressed }) => [styles.tabButton, pressed && styles.pressed]}>
       <ThemedView
@@ -55,6 +58,7 @@ export function TabButton({ children, isFocused, ...props }: TabButtonProps) {
 }
 
 export function CustomTabList(props: TabListProps) {
+  useUiLabels();
   return (
     <View {...props} style={styles.tabListContainer}>
       <ThemedView type="backgroundElement" style={styles.innerContainer}>

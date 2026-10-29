@@ -9,6 +9,93 @@ Never record credentials, tokens or cookies.
 
 ## Current priorities (2026-10-29)
 
+Owner confirms EAS iPhone registration complete. Requested development build
+attempted with the existing internal development profile and device-profile
+refresh; EAS stopped before queuing because suitable signing credentials do not
+yet exist. Next: owner runs the interactive build command in PowerShell and
+completes private Apple signing/device selection. See development-build.md.
+No build artifact exists yet; no credentials/device identifiers recorded.
+
+Calendar interaction follow-up: owner notes taps normally select readings below
+and asks about double tap. Recommended single-tap selection plus explicit zoom-in
+and zoom-out actions, avoiding double tap. Awaiting agreement; existing immediate
+tap-to-drill implementation is unchanged.
+
+Calendar zoom implemented against the owner's explicit existing-contract
+instructions, superseding the earlier wait-for-extra-fields proposal. The shared
+own calendar combines Gregorian GET Month with POST Year/NineYear/EightyOneYear,
+metadata view labels, safe local anchors, None/Back/Forward navigation and cached
+Back restoration of exact views/dates. No child fan-out or local Ki calculations.
+Read-only requests preserve the saved calculator type/both hemisphere flags;
+explicit calculator/account saves remain Advanced. Private feed actions and
+account drafts are separate. See calendar-zoom-validation.md for public labels,
+anonymous CSRF/auth boundary evidence, automated results and first iPhone check.
+All 227 tests, lint/typecheck, offline iOS export and scoped whitespace checks
+passed. No authenticated live planner sample was read; next: on iPhone select
+a day in Your Calendar and tap ↑ Year View, confirming the solar-year monthly
+overview appears. Then progress through the remaining hierarchy one step at a time.
+
+Owner refinement: removed mobile Graphical/Magic Square selection entirely;
+ordinary prediction cards/details retain energy images. Squares are confined to
+Directionology, with summary first, and shared number alignment now uses central
+SVG baseline at each cell centre. Your Predictions has bottom Directionology and
+Calendar SectionWidgets together; Calendar opens the existing shared own-calendar
+route. No dedicated API arrow icon exists, so Directionology uses a decorative
+themed navigation icon. Calendar zoom 81-year → 9-year → year → month is feasible
+using existing planner data, but presentation/drill-in/context fields need an
+agreed backend addition. See calendar-zoom-review.md and directionology-validation.md.
+Validation: 218 tests, lint, typecheck, iOS export and scoped whitespace checks
+passed. Next: iPhone Directionology summary/centred-number check, then Calendar
+shortcut; hierarchy implementation awaits the documented API presentation work.
+
+Device registration prompt issue diagnosed: Git Bash reports stdin not readable
+before account selection. Owner should run npx.cmd eas-cli@latest device:create
+in an interactive PowerShell window, accept simonglantz, and complete private
+Apple prompts there. No credentials/device IDs recorded; signing still pending.
+
+Owner resumes signed-build work with Apple Developer account. EAS account
+simonglantz verified; @simonglantz/ninestar-mobile created/linked, retaining
+com.ninestarkiastrology.mobile. Next: device registration/private Apple login in
+owner's terminal, then development build. No signed build or Store submission
+yet. See development-build.md. Reconciled current open-work list is
+outstanding-tasks.md; old pending flags below are historical.
+
+Build preflight: Expo install --fix aligned current SDK 58 patches/RN 0.88.1;
+Doctor now passes 20/20, all 219 tests, lint/typecheck and offline iOS export pass.
+Apple/device action remains pending, so no build/install success is claimed.
+Dependency audit findings need an SDK-compatible review; no forced downgrade or
+audit fix was applied. Details in development-build.md.
+
+Public metadata recheck confirms energyDisplays/predictionControls now live,
+resolving the earlier Directionology deployment gate. Authenticated summary and
+native rendering still need iPhone checks.
+
+Labels deployment recheck passed: metadata/labels 200, version 1/en-GB and
+no-store; options now has the documented Now/SelectedDate choices. Implemented
+shared catalogue refresh with verified Dictionary bootstrap, all 173 central
+uiCopy mappings, calculator target/helper, chart menus/facts, Account labels/
+membership displayName and I Ching heading consumption. Preserve exact casing,
+hidden selected-date values, account drafts and session guards. Scattered legacy
+copy still lacking API fields is listed in ui-labels-validation.md. The earlier
+404/pending-wiring entries below are historical and superseded.
+219 automated tests, lint/typecheck and offline iOS export passed. Next: first
+iPhone Predictions Calculator date-selector check.
+
+AI Astrologer temporary GPT link explicitly approved and wired to the exact
+website-configured public destination. Plugin replacement remains under review;
+no guessed plugin/mobile URL, profile transfer or new UI wording. See
+ai-astrologer-handoff.md. Next device check after calculator: Explore → AI
+Astrologer opens the existing GPT.
+
+UI label contract 46951b37 reviewed: public metadata/labels documents all 173
+audited uiCopy mappings, calculator date choices/helper, chart/menu/fact and
+Account labels. Source contract gap resolved; live deployment check failed:
+Integration labels 404, options 200 but displayDataForPeriods absent. Shared UI
+wiring has not started, per owner's live-verification gate. Approved offline/
+bootstrap labels retained. See ui-labels-validation.md. Next: backend deployment,
+then recheck live JSON before migrating shared UI; private membership displayName
+and I Ching heading require later user/device checks.
+
 Calculator copy/date target: owner requests a Current Timezone helper, explicit
 Now / Selected Date and Time choice, and website Dictionary casing for all labels.
 Public Integration metadata checked: 200, but these form labels/helper/options

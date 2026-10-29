@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -41,6 +42,7 @@ function describeError(error: unknown) {
 }
 
 export default function HomeScreen() {
+  useUiLabels();
   const submissionError = useSubmissionError();
   const { generation, status } = useSession();
   const [chart, setChart] = useState<Chart | null>(null);

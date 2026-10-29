@@ -1,5 +1,12 @@
 # Saved login and session persistence
 
+Current build status (2026-10-29): owner resumes with Apple Developer account.
+The permanent identifier is already agreed/configured as
+com.ninestarkiastrology.mobile; EAS project is linked under simonglantz.
+Private Apple sign-in/device registration and first build are next. Team ID and
+website association remain outstanding. This supersedes old pending-enrollment
+and missing-identifier notes below; see development-build.md.
+
 ## Implemented 2026-10-25
 
 AccountLogin now offers Stay signed in, enabled by default and disabled while
@@ -45,10 +52,9 @@ iPhone build/domain-autofill completion until enrollment resumes; continue Expo
 Go development. Persistent-login and logout restart behavior already passed on
 the owner's iPhone; this dependency does not block chart/UI work.
 
-app.json currently has no ios.bundleIdentifier or android.package. Do not invent
-permanent identifiers, Apple Team ID or signing certificate fingerprints. Before
-website-linked autofill can be completed, agree those identifiers and obtain
-non-secret public signing identity details from the configured build.
+app.json has the agreed iOS bundle identifier and Android package. Do not invent
+Apple Team ID or signing certificate fingerprints. Website-linked autofill still
+requires the actual public signing identity from the configured build.
 
 - iOS: configure the webcredentials associated domain and coordinate the website's
   apple-app-site-association webcredentials apps entries using the actual Team ID

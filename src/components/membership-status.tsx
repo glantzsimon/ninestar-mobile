@@ -7,8 +7,10 @@ import { AppButton } from '@/components/ui/app-button';
 import { AppPanel } from '@/components/ui/app-panel';
 import { useSession } from '@/hooks/use-session';
 import { MobileApiError, refreshEntitlements } from '@/lib/mobile-api';
+import { useUiLabels } from '@/hooks/use-ui-labels';
 
-export function MembershipStatus({ refreshOnFocus = false }: { refreshOnFocus?: boolean }) {
+export function MembershipStatus({ refreshOnFocus = false, displayName = '' }: { refreshOnFocus?: boolean; displayName?: string }) {
+  const labels = useUiLabels();
   const { status } = useSession();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -45,12 +47,15 @@ export function MembershipStatus({ refreshOnFocus = false }: { refreshOnFocus?: 
     return () => subscription.remove();
   }, [refresh, refreshOnFocus, status]));
 
-  // Refresh access independently of account drafts. A normal membership panel
-  // awaits a server-authored display label; protocol enum keys are not UI copy.
-  return message ? (
-    <AppPanel title="Your Membership">
+  // This private display label comes from the owning account response. Access
+  // refresh remains independent of the form and never changes its draft.
+  return message || displayName.trim() ? (
+    <AppPanel title={labels.screens.account.currentMembership}>
+      {!!displayName.trim() && <ThemedText>{displayName}</ThemedText>}
+      {!!message && <>
       <ThemedText type="small" accessibilityLiveRegion="polite">{message}</ThemedText>
-      <AppButton title="Try Again" variant="secondary" onPress={refresh} loading={busy} disabled={status === 'changing'} />
+      <AppButton title={labels.screens.calendar.ui.retry} variant="secondary" onPress={refresh} loading={busy} disabled={status === 'changing'} />
+      </>}
     </AppPanel>
   ) : null;
 }

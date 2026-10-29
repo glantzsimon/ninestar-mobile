@@ -37,8 +37,8 @@ export function MagicSquare({ square, compact = false, arrows = false }: { squar
         stroke={cell.isActive || cell.isLunarActive ? theme.primary : 'none'}
         strokeWidth={cell.isActive ? 1.4 : 0.8} strokeDasharray={cell.isLunarActive ? '2 1' : undefined} />)}
       {square.cells.map(cell => <SvgText key={`number:${cell.row}:${cell.column}`}
-        x={(cell.column + 0.5) * 100 / 3} y={(cell.row + 0.5) * 100 / 3 + 6}
-        textAnchor="middle" fontFamily={BrandFonts.bold} fontSize={18} fill={cell.color}>{cell.number}</SvgText>)}
+        x={(cell.column + 0.5) * 100 / 3} y={(cell.row + 0.5) * 100 / 3}
+        textAnchor="middle" alignmentBaseline="central" fontFamily={BrandFonts.bold} fontSize={18} fill={cell.color}>{cell.number}</SvgText>)}
       {shownArrows.map((arrow, index) => <Arrow key={`${arrow.key}:${index}`} arrow={arrow} />)}
     </Svg>
   </View>;

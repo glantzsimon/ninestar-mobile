@@ -29,6 +29,29 @@ const failure = (status, code) => ({
   status, body: { success: false, data: null, error: { code } },
 });
 
+test('planner uses exactly one cookie-aware POST with fresh CSRF and no child/calendar fan-out', async () => {
+  const api = client([success({ requestToken: 'fixture-token' }), success({ view: 'Year' })]);
+  const body = { person: { dateOfBirth: '1984-02-29', timeOfBirth: '06:07:00' }, selectedDateTime: '2026-10-29T12:00:00',
+    userTimeZoneId: 'Europe/London', calculatorType: 'Advanced', view: 'Year', display: 'PersonalKi', navigationDirection: 'None', includeMoonPhases: false };
+  await api.getPredictionsPlanner(body);
+  assert.equal(api.calls.length, 2);
+  assert.ok(api.calls[0].url.endsWith('/account/csrf'));
+  assert.ok(api.calls[1].url.endsWith('/predictions/planner'));
+  assert.equal(api.calls[1].options.method, 'POST');
+  assert.equal(api.calls[1].options.headers['X-CSRF-Token'], 'fixture-token');
+  assert.deepEqual(JSON.parse(api.calls[1].options.body), body);
+  const failed = client([success({ requestToken: 'fixture-token' }), failure(403, 'membership_required')]);
+  await assert.rejects(failed.getPredictionsPlanner(body), error => error.status === 403);
+  assert.equal(failed.calls.length, 2);
+});
+
+test('a session change during planner CSRF prevents the old-account calculation POST', async () => {
+  let api;
+  api = client([() => { api.session.change(); return success({ requestToken: 'fixture-token' }); }]);
+  await assert.rejects(api.getPredictionsPlanner({ view: 'Year' }), error => error.code === 'session_changed');
+  assert.equal(api.calls.length, 1);
+});
+
 test('knowledge base uses one cookie-aware GET without CSRF, account writes or retries', async () => {
   const data = { help: { origins: { title: 'Server origins', htmlBody: '<p>Introduction.</p>', culture: 'en-GB' } } };
   const api = client([success(data)]);

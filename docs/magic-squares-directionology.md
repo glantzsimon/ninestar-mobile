@@ -1,5 +1,12 @@
 # Magic squares and Directionology: website review and mobile plan
 
+Superseding owner refinement (2026-10-29): display-mode selection is removed.
+Cards/details keep ordinary artwork; squares are Directionology-only, summary
+first. Shared SVG number alignment is central. Bottom own-Predictions shortcuts
+group Directionology/Calendar. See directionology-validation.md for current
+behaviour and calendar-zoom-review.md for the researched future hierarchy.
+Earlier Graphical/MagicSquare feature plans below are retained as history.
+
 Current status (2026-10-29): the revised feature/ui-artwork-refresh contract
 resolves the initial display-label and hourly-summary gaps. The app now uses
 data.labels.controls/displayOptions and renders travelSummary only when periods

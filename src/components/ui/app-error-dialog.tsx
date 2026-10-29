@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { Modal, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
@@ -9,6 +10,7 @@ import { uiCopy } from '@/lib/ui-copy';
 
 // One acknowledgement only: dismissing an error never resubmits a request.
 export function AppErrorDialog({ message, onClose }: { message: string; onClose: () => void }) {
+  useUiLabels();
   const theme = useTheme();
   return <Modal visible transparent animationType="fade" presentationStyle="overFullScreen" onRequestClose={onClose}>
     <SafeAreaView style={[styles.overlay, { backgroundColor: theme.shadow }]}>

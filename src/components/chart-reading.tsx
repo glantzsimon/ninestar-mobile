@@ -8,14 +8,16 @@ import { FadeView } from '@/components/ui/fade-view';
 import { EnergyArtwork } from '@/constants/energy-artwork';
 import type { ChartEnergy, ChartReading as Reading } from '@/lib/personal-chart';
 import { readingPresentation } from '@/lib/reading-presentation';
+import { useUiLabels } from '@/hooks/use-ui-labels';
 
 export function ChartReading({ reading, title, energy, initialFull = false }: {
   reading: Reading; title: string; energy?: ChartEnergy; initialFull?: boolean;
 }) {
+  const labels = useUiLabels().shared.actions;
   const [full, setFull] = useState(initialFull);
   const presentation = readingPresentation(reading, full);
   return <AppPanel title={title} headerAction={presentation.canToggle ? {
-    title: full ? 'View Summary' : 'View Full Text', expanded: full, onPress: () => setFull(!full),
+    title: full ? labels.viewSummary : labels.viewFullText, expanded: full, onPress: () => setFull(!full),
     icon: full ? 'summary' : 'fullText',
   } : undefined}>
     {energy && <ArtworkImage artworkId={energy.artworkId} legacyUrl={energy.imageUrl}

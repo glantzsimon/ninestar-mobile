@@ -1,5 +1,15 @@
 # NineStar mobile design system
 
+Predictions navigation refinement (2026-10-29): the bottom Directionology/Calendar
+actions use shared SectionWidgets, including equal-width pairing and the existing
+72-point artwork frame. SectionWidgets accepts an optional decorative React icon
+in that same frame; this is used for Directionology's arrows because no dedicated
+catalogue artwork exists. Do not invent an artwork ID or display labels. Other
+menus retain their current catalogue images and alignment. Magic-square number
+text uses cell-centre coordinates and SVG central baseline rather than an offset.
+Regular prediction cards/details retain energy artwork; square rendering belongs
+only to Directionology, whose summary precedes its year/month/day panels.
+
 Submission failures use the shared warning dialog; field errors remain inline
 and scroll to the first invalid field. Success and background loading errors
 remain contextual. See [submission-error-feedback.md](submission-error-feedback.md).

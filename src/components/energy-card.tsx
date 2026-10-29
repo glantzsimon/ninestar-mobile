@@ -1,3 +1,4 @@
+import { useUiLabels } from '@/hooks/use-ui-labels';
 import { ArtworkImage } from '@/components/artwork-image';
 import type { ReactNode } from 'react';
 import { SymbolView } from 'expo-symbols';
@@ -11,13 +12,15 @@ import { type ChartEnergy } from '@/lib/personal-chart';
 import { uiCopy } from '@/lib/ui-copy';
 
 export function EnergyCard({ energy, title, hint, compact = false, selected = false, onPress,
-  artworkSize, artworkFrameSize, subtitle, caption, artwork }: {
+  artworkSize, artworkFrameSize, subtitle, caption, artwork, disabled = false }: {
   energy: ChartEnergy; title: string; hint: string; compact?: boolean;
   selected?: boolean; onPress?: () => void;
   artworkSize?: number; subtitle?: string; caption?: string;
   artworkFrameSize?: number;
   artwork?: ReactNode;
+  disabled?: boolean;
 }) {
+  useUiLabels();
   const theme = useTheme();
   const secondary = subtitle !== undefined ? subtitle
     : energy.name ? `${energy.name}${energy.element ? ` · ${energy.element}` : ''}` : '';
@@ -25,8 +28,8 @@ export function EnergyCard({ energy, title, hint, compact = false, selected = fa
     <Pressable accessible accessibilityRole={onPress ? 'button' : 'text'}
       accessibilityLabel={[title, secondary || String(energy.number), caption].filter(Boolean).join(', ')}
       accessibilityHint={onPress ? uiCopy.energyDetailsHint : undefined}
-      accessibilityState={onPress ? { selected } : undefined}
-      disabled={!onPress} onPress={onPress}
+      accessibilityState={onPress ? { selected, disabled } : undefined}
+      disabled={disabled || !onPress} onPress={onPress}
       style={({ pressed }) => [styles.card, compact && styles.compact, {
         backgroundColor: pressed || selected ? theme.backgroundSelected : theme.panelHeader,
         borderColor: selected ? theme.primary : 'transparent',

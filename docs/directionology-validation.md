@@ -2,6 +2,43 @@
 
 2026-10-29
 
+Latest owner refinement: remove the Graphical/Magic Square Advanced Options
+feature from mobile. Predictions cards/details now always retain ordinary energy
+artwork. Squares appear only in Directionology, with travelSummary first, then
+personal year/month/day squares. The unused display-mode store/hook and its
+obsolete unit test were removed. API label parsing remains compatible.
+
+Numbers now use the exact cell centre plus SVG central baseline, replacing the
+manual +6 baseline offset in shared MagicSquare; iPhone visual confirmation is
+still needed. No cell values, active flags, server colours or arrows changed.
+
+Your Predictions groups Directionology and Calendar in the existing bottom
+SectionWidgets convention. Calendar reuses /my-chart/calendar. Public artwork
+catalogue check found no dedicated arrows/compass/directionology image; the new
+Directionology navigation icon is a decorative themed four-arrow SVG, not a
+fabricated API artwork ID or calculated directional guidance. Calendar retains
+FeatureArtwork.calendar (ui.monthly-planner). No extra login or requests on render.
+
+Calendar hierarchy feasibility and the exact website/API gaps are recorded in
+calendar-zoom-review.md. Zoom itself is not implemented by this refinement.
+Earlier display-mode notes below are historical and superseded.
+
+Refinement validation: all 218 remaining automated tests passed, lint and
+typecheck passed, and scoped git diff --check passed. The deleted 219th test
+covered the deliberately removed display-mode state store; domain parsing,
+three-period summary, access/session and calendar transport tests remain.
+Native text centring, arrow appearance and the paired buttons still need iPhone
+visual confirmation; no screenshot-based rendering parity is claimed.
+Offline iOS export also passed: 1869 modules, 46 assets and a 2.9 MB JavaScript
+bundle in ignored .expo/predictions-navigation-validation. No app deployment.
+
+Later public recheck during signed-build preparation: Integration metadata/options
+now returns energyDisplays (Graphical/0/Graphical Display and MagicSquare/1/Magic
+Square) and predictionControls (Display, Advanced Options, Directionology,
+Show Directions), all en-GB. This resolves the public deployment gate recorded
+below. It does not verify authenticated magicSquares or travelSummary.periods;
+the signed-in iPhone check remains next. No membership or purchasing changes.
+
 ## Contract evidence
 
 Local ninestar/docs/mobile-api.md still described hourly scoring and lacked the
@@ -63,13 +100,14 @@ unchanged. No new dependency or persistent protected-data cache was introduced.
 - Offline iOS export passed: 1865 modules, 46 assets, 2.9 MB JavaScript bundle.
   No development server, deployment or native build was started.
 
-## Remaining deployment gate and next step
+## Remaining device checks and next step
 
-Source-contract blockers are resolved. Integration still lacks the public
-metadata additions, and authenticated summary/square availability has not been
-verified. Backend owner deploys the revised branch, then recheck the two metadata
-fields and confirm a full authorised response includes periods year/month/day.
+Source-contract blockers and the public metadata deployment gate are resolved.
+Authenticated summary/square availability and native appearance remain unverified
+here. Confirm a full authorised response includes periods year/month/day.
 
-First iPhone step after deployment: My Chart → Your Predictions, expand Advanced
-Options and confirm its two API-labelled display choices. Then check Magic Square
-mode and Directionology summary, without signing in again or changing memberships.
+First iPhone step: My Chart → Your Predictions, scroll to the bottom and open
+Directionology. Confirm the summary is first, then year/month/day squares, with
+numbers visually centred. Regular cycle details must show no squares or display
+selector. Next check the neighbouring Calendar shortcut opens the existing shared
+calendar without another sign-in. No membership changes are needed.

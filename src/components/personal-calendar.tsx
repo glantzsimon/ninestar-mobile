@@ -1,4 +1,5 @@
-import { useRef, type ComponentRef } from 'react';
+import { useUiLabels } from '@/hooks/use-ui-labels';
+import { useRef, type ComponentRef, type ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { ArtworkImage } from '@/components/artwork-image';
 import { ReadingContent } from '@/components/reading-content';
@@ -14,10 +15,11 @@ import { adjacentCalendarMonth, calendarDateLabel, calendarWeekdays, type Calend
 import { uiCopy } from '@/lib/ui-copy';
 
 // Shared native calendar presentation; own and future hosts supply server months.
-export function PersonalCalendar({ calendar, selected, onSelect, onMonth, busy, onExpand, inModal = false }: {
+export function PersonalCalendar({ calendar, selected, onSelect, onMonth, busy, onExpand, inModal = false, navigation }: {
   calendar: CalendarMonth; selected: string; onSelect: (date: string) => void;
-  onMonth: (year: number, month: number) => void; busy: boolean; onExpand?: () => void; inModal?: boolean;
+  onMonth: (year: number, month: number) => void; busy: boolean; onExpand?: () => void; inModal?: boolean; navigation?: ReactNode;
 }) {
+  useUiLabels();
   const theme = useTheme();
   const screenScroll = useScreenScroll();
   const modalScroll = useModalScroll();
@@ -42,6 +44,7 @@ export function PersonalCalendar({ calendar, selected, onSelect, onMonth, busy, 
     Array.from({ length: 7 }, (_, column) => slots[week * 7 + column] ?? null));
   return <>
     <AppPanel title={calendar.title} flush={inModal}>
+      {navigation}
       <View style={styles.toolbar}>
         <View style={styles.action}><AppButton title="‹" accessibilityLabel={calendar.labels.previousMonth || copy.previous} variant="secondary"
           disabled={busy || !previous} onPress={() => previous && onMonth(previous.year, previous.month)} /></View>
