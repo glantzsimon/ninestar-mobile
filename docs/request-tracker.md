@@ -9,6 +9,23 @@ Never record credentials, tokens or cookies.
 
 ## Current priorities (2026-10-29)
 
+Directionology scale alignment (2026-10-30): correction from owner—the screenshot
+shows the gold plate inset smaller than the SVG grid. Shared MagicSquare now
+uniformly scales the plate 1.13x so its visible border meets the outer grid; the
+API arrow overlay scales to 1.16x, larger than both. Numbers and server data stay
+unchanged. 12 focused tests, lint, typecheck and diff check pass. iPhone visual
+recheck next. See directionology-validation.md.
+
+AI Astrologer (2026-10-30): implemented native `/explore/ai-astrologer` screen;
+each focus fetches `content/ai-astrologer`, renders its returned title/HTML and
+uses only nullable `externalUrl` for launch. Null/invalid URL hides launch.
+The screen uses the existing API navigation label for the action. All 230 tests,
+lint, typecheck and diff checks pass. The shared API contract file does
+not yet document this endpoint; owner should add its exact response contract.
+Live Integration and iPhone checks remain pending. See ai-astrologer-handoff.md.
+Follow-up: AI Astrologer back action now uses the API-backed “Back to Explore”
+label, replacing the accidentally reused “Back to Knowledge Base” text.
+
 Owner confirms EAS iPhone registration complete. Requested development build
 attempted with the existing internal development profile and device-profile
 refresh; EAS stopped before queuing because suitable signing credentials do not
@@ -16,10 +33,22 @@ yet exist. Next: owner runs the interactive build command in PowerShell and
 completes private Apple signing/device selection. See development-build.md.
 No build artifact exists yet; no credentials/device identifiers recorded.
 
-Calendar interaction follow-up: owner notes taps normally select readings below
-and asks about double tap. Recommended single-tap selection plus explicit zoom-in
-and zoom-out actions, avoiding double tap. Awaiting agreement; existing immediate
-tap-to-drill implementation is unchanged.
+Calendar interaction (2026-10-30): single tap immediately selects and displays
+period details. Drillable child cards have two compact circular, right-aligned
+buttons beneath the full-width card: eye/view at left displays details,
+and down chevron at right drills in with accessible name “See {API view label}.”
+No double-tap. The planner parent has its right chevron. The helper explains this
+interaction. There is no extra gap above child controls and 12 points below.
+Children omit
+Harvest-style captions, leaving
+descriptions at parent only. Planner parent card keeps returned bounds, larger
+image/heading and right chevron; tapping it displays its details. Gregorian Month has no parent
+card; it is just the existing calendar grid and selected-day details. Drilling to
+Month opens that grid and Back restores the planner view. Date titles use smaller
+single-line text fitted to the available width. Selected reading boxes end with
+“Back to top” to scroll to the planner/calendar controls. Lint, typecheck and
+diff checks pass; iPhone checks next.
+See calendar-zoom-validation.md.
 
 Calendar zoom implemented against the owner's explicit existing-contract
 instructions, superseding the earlier wait-for-extra-fields proposal. The shared
@@ -81,11 +110,10 @@ copy still lacking API fields is listed in ui-labels-validation.md. The earlier
 219 automated tests, lint/typecheck and offline iOS export passed. Next: first
 iPhone Predictions Calculator date-selector check.
 
-AI Astrologer temporary GPT link explicitly approved and wired to the exact
-website-configured public destination. Plugin replacement remains under review;
-no guessed plugin/mobile URL, profile transfer or new UI wording. See
-ai-astrologer-handoff.md. Next device check after calculator: Explore → AI
-Astrologer opens the existing GPT.
+Historical status superseded 2026-10-30: the former static GPT link has been
+removed. The current AI Astrologer screen uses the API content endpoint and
+server-returned launch URL; see the current status at the top and
+ai-astrologer-handoff.md.
 
 UI label contract 46951b37 reviewed: public metadata/labels documents all 173
 audited uiCopy mappings, calculator date choices/helper, chart/menu/fact and

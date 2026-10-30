@@ -25,7 +25,8 @@ export function MagicSquare({ square, compact = false, arrows = false }: { squar
     accessibilityLabel={compact ? undefined : [square.title, square.houseName,
       square.cells.map(cell => cell.number).join(', '),
       ...shownArrows.map(arrow => `${arrow.title}: ${arrow.direction.label}`)].filter(Boolean).join('. ')}>
-    {square.artworkId && <ArtworkImage artworkId={square.artworkId} style={StyleSheet.absoluteFill}
+    {square.artworkId && <ArtworkImage artworkId={square.artworkId}
+      style={[StyleSheet.absoluteFill, styles.plateArtwork]}
       contentFit="contain" accessible={false} />}
     <Svg viewBox="0 0 100 100" width="100%" height="100%" accessible={false}>
       <Rect x={0.5} y={0.5} width={99} height={99} fill="none" stroke={theme.border} strokeWidth={0.4} />
@@ -39,8 +40,11 @@ export function MagicSquare({ square, compact = false, arrows = false }: { squar
       {square.cells.map(cell => <SvgText key={`number:${cell.row}:${cell.column}`}
         x={(cell.column + 0.5) * 100 / 3} y={(cell.row + 0.5) * 100 / 3}
         textAnchor="middle" alignmentBaseline="central" fontFamily={BrandFonts.bold} fontSize={18} fill={cell.color}>{cell.number}</SvgText>)}
-      {shownArrows.map((arrow, index) => <Arrow key={`${arrow.key}:${index}`} arrow={arrow} />)}
     </Svg>
+    {!!shownArrows.length && <Svg pointerEvents="none" viewBox="0 0 100 100" width="116%" height="116%"
+      style={styles.arrowArtwork} accessible={false}>
+      {shownArrows.map((arrow, index) => <Arrow key={`${arrow.key}:${index}`} arrow={arrow} />)}
+    </Svg>}
   </View>;
 }
 
@@ -66,4 +70,6 @@ export function MagicSquareReading({ square, arrows = false }: { square: Square;
 const styles = StyleSheet.create({
   board: { width: '100%', maxWidth: 320, aspectRatio: 1, alignSelf: 'center', marginVertical: Spacing.two },
   compact: { maxWidth: undefined, marginVertical: 0 },
+  plateArtwork: { transform: [{ scale: 1.13 }] },
+  arrowArtwork: { position: 'absolute', left: '-8%', top: '-8%' },
 });

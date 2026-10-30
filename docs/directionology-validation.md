@@ -8,9 +8,18 @@ artwork. Squares appear only in Directionology, with travelSummary first, then
 personal year/month/day squares. The unused display-mode store/hook and its
 obsolete unit test were removed. API label parsing remains compatible.
 
-Numbers now use the exact cell centre plus SVG central baseline, replacing the
-manual +6 baseline offset in shared MagicSquare; iPhone visual confirmation is
-still needed. No cell values, active flags, server colours or arrows changed.
+Owner corrected the screenshot diagnosis (2026-10-30): the issue is scale
+mismatch, not number baseline. The returned 512px square plate contains an inset
+gold border, so shared MagicSquare uniformly scales the plate 1.13x to align that
+visible border with the SVG grid's outer edge. Direction arrows render in a 1.16x
+SVG overlay, larger than both plate and grid. Numbers, grid divisions, cell
+highlights, colours and API arrow coordinates remain unchanged. No source asset
+was edited or distorted. Device visual confirmation remains pending.
+
+Validation (2026-10-30): 12 focused magic-square and travel summary tests passed;
+project lint, TypeScript and scoped `git diff --check` pass. Next: view the
+Directionology square on iPhone and confirm the gold border meets the grid and
+arrows extend beyond both.
 
 Your Predictions groups Directionology and Calendar in the existing bottom
 SectionWidgets convention. Calendar reuses /my-chart/calendar. Public artwork

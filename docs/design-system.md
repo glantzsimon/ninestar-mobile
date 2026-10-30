@@ -5,8 +5,10 @@ actions use shared SectionWidgets, including equal-width pairing and the existin
 72-point artwork frame. SectionWidgets accepts an optional decorative React icon
 in that same frame; this is used for Directionology's arrows because no dedicated
 catalogue artwork exists. Do not invent an artwork ID or display labels. Other
-menus retain their current catalogue images and alignment. Magic-square number
-text uses cell-centre coordinates and SVG central baseline rather than an offset.
+menus retain their current catalogue images and alignment. In shared MagicSquare,
+the supplied plate is uniformly enlarged until its gold border meets the grid's
+outer edge; server arrows use a 1.16x overlay extending beyond both. Digits remain
+at API cell centres. Do not distort or alter the source artwork.
 Regular prediction cards/details retain energy artwork; square rendering belongs
 only to Directionology, whose summary precedes its year/month/day panels.
 
@@ -137,12 +139,17 @@ available for a future theme selector.
 | Heading | `#0a4070` | `#e7e7e7` |
 | Primary | `#337ab7` | `#63a0d4` |
 | Border | `#dddddd` | `#b8b8b8` |
+| Action surface | `#276e93` | `#0f2c3a` |
+| Action icon | `#ffffff` | `#ffffff` |
 
 Owner's grey-border trial (2026-10-26): ordinary dark-theme outlines and dividers
 use the shared border token #b8b8b8 instead of white. Panels, disclosures, fields,
 section widgets, tables and calendar cells inherit it centrally. Focus/selection
 and button accents keep the semantic primary colour. Do not hardcode border
 colours per screen or change stroke widths for this brightness adjustment.
+Calendar planner actions use the semantic action surface, faint action border,
+pressed surface and white icon tokens from the theme palettes instead of screen-
+local colours.
 Validation: lint, typecheck and targeted whitespace checks passed; ignored Expo
 route declarations regenerated before typecheck. iPhone appearance review pending.
 

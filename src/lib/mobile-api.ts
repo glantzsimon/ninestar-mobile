@@ -2,6 +2,7 @@ import { entitlementSnapshotsAgree, parseEntitlements } from './entitlements';
 import { session } from './session';
 import { requestDiagnostics } from './request-diagnostics';
 import { parseContextualHelp } from './contextual-help';
+import { parseAiAstrologerContent } from './ai-astrologer';
 
 import { API_BASE_URL } from './api-environment';
 export { API_BASE_URL } from './api-environment';
@@ -20,7 +21,7 @@ type Endpoint = 'metadata/options' | 'metadata/labels' | 'metadata/timezones' | 
   'account/login' | 'account/logout' | 'account/update' | 'membership/entitlements' |
   'personal-chart/me' | 'personal-chart/me/free' | 'personal-chart/calculate' |
   'predictions/me' | 'predictions/calculate' | 'predictions/planner' | 'readings/predictions/me/free' | 'compatibility/calculate' | 'compatibility/help' | 'calendar/subscription' | 'calendar/revoke' |
-  'iching/cast' | 'iching/help' | 'knowledge-base' | 'calendar/month' | `calendar/month?year=${number}&month=${number}`;
+  'iching/cast' | 'iching/help' | 'knowledge-base' | 'content/ai-astrologer' | 'calendar/month' | `calendar/month?year=${number}&month=${number}`;
 type Post = { body: Record<string, unknown>; csrfToken: string };
 
 const activeRequests = new Map<number, () => void>();
@@ -291,6 +292,11 @@ export async function getCompatibilityIntroduction() {
 export async function getIChingIntroduction() {
   const { data } = await mobileApiRequest('iching/help');
   return parseContextualHelp(data.help).overview ?? null;
+}
+
+export async function getAiAstrologerContent() {
+  const { data } = await mobileApiRequest('content/ai-astrologer');
+  return parseAiAstrologerContent(data);
 }
 
 export async function updateOwnAccount(body: Record<string, unknown>) {

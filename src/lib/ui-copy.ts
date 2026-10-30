@@ -1,5 +1,16 @@
 // Compatibility projection of documented API labels; values are never authored here.
 import { uiLabel } from './ui-labels';
+
+// Approved local functional copy; keep templates central so they can be translated.
+export const calendarInteractionCopy = {
+  monthInstructions: "Tap an item to view details.",
+  backToTop: "Back to top",
+  overviewInstructions: (viewLabel?: string) => viewLabel
+    ? `Tap an item to view details. Use the arrow below a period to open the ${viewLabel}.`
+    : "Tap an item to view details.",
+  seeView: (viewLabel: string) => `See ${viewLabel}`,
+};
+
 export const uiCopy = {
 "knowledge": {
 get "back"() { return uiLabel("screens.knowledgeBase.ui.back"); },

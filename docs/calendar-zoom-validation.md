@@ -1,3 +1,81 @@
+# Calendar parent and card actions — 2026-10-30
+
+- Superseding the earlier double-tap/icon experiment below: one tap on a parent
+  or child immediately selects it and scrolls its reading into view. Each
+  drillable child has two 32-point circular buttons, right-aligned with a small
+  inset, beneath
+  its full-width card content: eye/view on the left selects and shows details;
+  downward chevron on the right drills into the next API view. Its accessible
+  label uses “See ” plus the exact API destination view label. There is no
+  double-tap drill gesture. Parent details use the parent's single tap and retain
+  their right-side chevron for consistency. Card content uses half the former vertical padding above;
+  the other half sits below the buttons.
+- Navigation helper now tells users to tap for details and use the arrow below a
+  period to open the named API view. No extra request is made for selection.
+- Latest refinement retains the parent chevron, pairs eye/view and down
+  drill buttons beneath children, with half the former top padding and more
+  bottom padding to centre the controls in the card's lower space.
+- The card has no extra gap between content and controls, with 12-point bottom
+  padding so the buttons sit closer to the text while retaining space below.
+- The circles are 32 points wide/high with unchanged icons and 44-point
+  effective touch targets.
+- Selected-period detail panels end with centralised “Back to top”, returning to
+  the planner controls/card list in either the screen or expanded modal host.
+- Buttons use theme action-surface/pressed/border tokens and white icons: dark
+  teal in the app's default dark theme, with a contrast-safe teal counterpart in
+  light mode.
+- Validation: lint, TypeScript (`tsc --noEmit`) and scoped `git diff --check`
+  pass. Native visual/touch verification remains pending on iPhone.
+
+- Historical implementation (superseded above): selection was delayed 300ms to
+  support double-tap drilling, with separate detail and magnifier icons. This
+  behavior was removed by the owner’s latest interaction preference.
+- Child period cards no longer show cycle-descriptive captions; those remain on
+  the parent summary/details. Parent boundaries remain inside the prominent card.
+- Owner correction (2026-10-30): Gregorian Month is a calendar month and has no
+  parent card. It retains the existing month controls/grid and selected-day detail
+  panel. Drilling from a planner month opens this grid; Back restores the previous
+  planner view without a month parent summary.
+- Two shared-theme dividers bracket the central localised instruction. Overview wording names the destination view using its API plannerViews label;
+  the Gregorian month instruction mentions detail selection only. These functional strings live in central uiCopy.
+- Selected day remains the Gregorian month detail anchor. Back restores the prior
+  planner snapshot; no parent period is added to the Gregorian month page.
+
+Validation after these layout reversals: project lint, TypeScript and scoped
+`git diff --check` pass. No dependency, API or purchasing changes. Native gesture,
+symbol, scroll, and visual checks remain pending on iPhone.
+
+---
+
+# Calendar interaction refinement — 2026-10-30
+
+Implemented the owner's queued changes in CalendarOverview shared by normal and
+expanded modes at Year/NineYear/EightyOneYear levels. Gregorian Month is unchanged.
+The planner parent card contains its server boundary range and uses larger artwork.
+No new labels.
+
+Single tap selects a period and displays its combined HTML, falling back to its
+existing energy reading, in the standard panel beneath. Parent is selectable too.
+Selected descriptions scroll flush-top through the existing screen/modal measured
+scroll helpers. Double tap drills using the existing safe server-bound anchor and
+one request. Single activation waits 300ms so the first tap cannot scroll the
+second tap's target away. Pending activation cancels on unmount/disabled changes;
+ordinary EnergyCards retain immediate single-tap behavior. Accessibility exposes
+a separate drill action labelled with the API child-view caption. Native assistive
+technology behavior remains a device check. Out-of-range children allow reading
+selection while omitting drilling. Back snapshots and same-period refresh retain
+the selected item; no private content is newly persisted or fetched on selection.
+
+Automated validation: all 227 tests passed (0 failed), lint and typecheck passed,
+and scoped git diff --check passed. History regression coverage now explicitly
+checks selected-period restoration. Native gestures/visuals remain unverified. No backend change, new dependency,
+deployment or signing action in this refinement. Existing API/access safeguards
+remain unchanged. Next iPhone check: open Year View, single-tap a month and confirm
+its description appears below; return to the cards and double-tap that month to
+open the Gregorian calendar. Repeat in expanded view, then test larger levels.
+
+---
+
 # Shared calendar zoom — 2026-10-29
 
 ## Implemented flow
@@ -12,8 +90,8 @@ earlier proposal to wait for extra presentation fields. No backend changes.
 - Each higher level uses one POST predictions/planner with fresh CSRF, existing
   cookies/session guards and a 15-second deadline. No automatic POST retries,
   complementary-credit routes, child-calendar fan-out or local Ki calculations.
-- A tapped 9-year period fetches NineYear (its yearly overview); a tapped year
-  fetches Year (its monthly overview); a tapped month returns to GET calendar/month
+- A double-tapped 9-year period fetches NineYear (its yearly overview); a double-tapped year
+  fetches Year (its monthly overview); a double-tapped month returns to GET calendar/month
   for the Gregorian month containing the safe selected date. No solar-month rows
   are passed to the strict Gregorian month parser.
 - Initial/drill/zoom calls use navigationDirection None; overview arrows use Back

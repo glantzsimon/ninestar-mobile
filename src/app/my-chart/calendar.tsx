@@ -145,7 +145,11 @@ function OwnCalendar() {
       // Preserve the caller's selected day when it belongs to the returned parent;
       // adjacent-period navigation uses the returned interior anchor instead.
       const selectedDate = direction === 'None' ? anchor.slice(0, 10) : overview.anchor.slice(0, 10);
-      commit({ kind: view, planner: overview, selectedDate }, remember);
+      const current = navigation.current.current;
+      const selectedPeriod = direction === 'None' && current?.kind === view &&
+        current.planner.startsOn === overview.startsOn && overview.items.some(item => item.startsOn === current.selectedPeriod)
+        ? current.selectedPeriod : undefined;
+      commit({ kind: view, planner: overview, selectedDate, selectedPeriod }, remember);
     } catch (failure) {
       if (!alive.current || generation !== session.getSnapshot().generation) return;
       setError(errorMessage(failure));
@@ -184,6 +188,12 @@ function OwnCalendar() {
     const view = current && calendarPageUp(current);
     if (view && current) void loadOverview(view, localPlannerDate(current.selectedDate));
   }
+  function selectPeriod(item: PlannerItem | null) {
+    const current = navigation.current.current;
+    if (!current || current.kind === 'Month' || pending.current) return;
+    const anchor = item && plannerItemAnchor(item, current.selectedDate);
+    commit({ ...current, selectedPeriod: item?.startsOn, selectedDate: anchor?.slice(0, 10) ?? current.selectedDate }, false);
+  }
   function drill(item: PlannerItem) {
     const current = navigation.current.current;
     if (!current || current.kind === 'Month' || pending.current) return;
@@ -191,7 +201,7 @@ function OwnCalendar() {
     if (!anchor) return;
     if (item.childView === 'Month') {
       const [year, month] = anchor.slice(0, 10).split('-').map(Number);
-      void load(year, month, anchor.slice(0, 10), true);
+      void load(year, month, anchor.slice(0, 10), true, false);
     } else void loadOverview(item.childView, anchor);
   }
   function goBack() {
@@ -263,14 +273,16 @@ function OwnCalendar() {
         <AppButton title={copy.retry} disabled={busy} onPress={retryNavigation} />
         <AppButton title={calendar?.labels.myAccount || copy.account} variant="secondary" onPress={() => router.navigate('/account')} />
       </AppPanel>}
-      {page?.kind === 'Month' && <PersonalCalendar calendar={page.calendar} selected={selected} onSelect={selectDay} inModal={inModal}
+      {page?.kind === 'Month' && <PersonalCalendar calendar={page.calendar} selected={selected} onSelect={selectDay}
+        inModal={inModal}
         navigation={navigationControls}
         onMonth={(year, month) => { void load(year, month); }} busy={busy || linkBusy}
         onExpand={inModal ? undefined : () => setExpanded(true)} />}
       {page && page.kind !== 'Month' && <CalendarOverview planner={page.planner}
         title={views.find(option => option.value === page.kind)?.label ?? ''} navigation={navigationControls}
-        selectedDate={page.selectedDate} timeZone={plannerZone}
-        onSelect={drill} onAdjacent={direction => { void loadOverview(page.kind as OverviewView, page.planner.anchor, direction); }}
+        selectedDate={page.selectedDate} selectedPeriod={page.selectedPeriod} timeZone={plannerZone}
+        childLabel={views.find(option => option.value === page.planner.childView)?.label} onDrill={drill}
+        onSelect={selectPeriod} onAdjacent={direction => { void loadOverview(page.kind as OverviewView, page.planner.anchor, direction); }}
         busy={busy || linkBusy} inModal={inModal} onExpand={inModal ? undefined : () => setExpanded(true)} />}
     </>;
   }

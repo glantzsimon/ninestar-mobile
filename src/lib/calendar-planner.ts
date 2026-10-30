@@ -16,7 +16,7 @@ export type PlannerOverview = {
   blocks: ReadingBlock[]; items: PlannerItem[];
 };
 export type CalendarPage = { kind: 'Month'; calendar: CalendarMonth; selectedDate: string }
-  | { kind: OverviewView; planner: PlannerOverview; selectedDate: string };
+  | { kind: OverviewView; planner: PlannerOverview; selectedDate: string; selectedPeriod?: string };
 export type CalendarHistory = { current: CalendarPage | null; previous: CalendarPage[] };
 export const overviewViews = ['Year', 'NineYear', 'EightyOneYear'] as const;
 const childViews: Record<OverviewView, CalendarView> = { Year: 'Month', NineYear: 'Year', EightyOneYear: 'NineYear' };

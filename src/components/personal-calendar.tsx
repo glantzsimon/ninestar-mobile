@@ -12,7 +12,7 @@ import { EnergyArtwork } from '@/constants/energy-artwork';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { adjacentCalendarMonth, calendarDateLabel, calendarWeekdays, type CalendarMonth } from '@/lib/personal-calendar';
-import { uiCopy } from '@/lib/ui-copy';
+import { calendarInteractionCopy, uiCopy } from '@/lib/ui-copy';
 
 // Shared native calendar presentation; own and future hosts supply server months.
 export function PersonalCalendar({ calendar, selected, onSelect, onMonth, busy, onExpand, inModal = false, navigation }: {
@@ -25,8 +25,12 @@ export function PersonalCalendar({ calendar, selected, onSelect, onMonth, busy, 
   const modalScroll = useModalScroll();
   const scrollTo = (target: ComponentRef<typeof View>) => inModal
     ? modalScroll(target, { topInset: 0 }) : screenScroll(target, { topInset: 0, ensureSpace: true });
+  const calendarTop = useRef<ComponentRef<typeof View>>(null);
   const details = useRef<ComponentRef<typeof View>>(null);
   const pendingScroll = useRef(false);
+  function scrollToCalendar() {
+    if (calendarTop.current) scrollTo(calendarTop.current);
+  }
   function chooseDay(date: string) {
     if (date === selected && details.current) { scrollTo(details.current); return; }
     pendingScroll.current = true;
@@ -43,7 +47,7 @@ export function PersonalCalendar({ calendar, selected, onSelect, onMonth, busy, 
   const weeks = Array.from({ length: Math.ceil(slots.length / 7) }, (_, week) =>
     Array.from({ length: 7 }, (_, column) => slots[week * 7 + column] ?? null));
   return <>
-    <AppPanel title={calendar.title} flush={inModal}>
+    <View ref={calendarTop} collapsable={false}><AppPanel title={calendar.title} flush={inModal}>
       {navigation}
       <View style={styles.toolbar}>
         <View style={styles.action}><AppButton title="‹" accessibilityLabel={calendar.labels.previousMonth || copy.previous} variant="secondary"
@@ -54,6 +58,9 @@ export function PersonalCalendar({ calendar, selected, onSelect, onMonth, busy, 
           disabled={busy || !next} onPress={() => next && onMonth(next.year, next.month)} /></View>
       </View>
       {onExpand && <AppButton title={calendar.labels.expand || copy.expand} variant="secondary" onPress={onExpand} disabled={busy} />}
+      <View style={[styles.divider, { backgroundColor: theme.border }]} />
+      <ThemedText type="small" themeColor="textSecondary">{calendarInteractionCopy.monthInstructions}</ThemedText>
+      <View style={[styles.divider, { backgroundColor: theme.border }]} />
       <View style={styles.grid}>
         <View style={styles.week}>
             {weekdays.map((weekday) => <View key={`weekday-${weekday.dayOfWeek}`} style={styles.cell}>
@@ -82,7 +89,7 @@ export function PersonalCalendar({ calendar, selected, onSelect, onMonth, busy, 
             </View> : <View key={`empty-${column}`} style={styles.cell} accessible={false} />)}
         </View>)}
       </View>
-    </AppPanel>
+    </AppPanel></View>
     {day && <View key={day.date} ref={details} collapsable={false} onLayout={() => {
       if (pendingScroll.current && details.current) {
         pendingScroll.current = false;
@@ -91,6 +98,7 @@ export function PersonalCalendar({ calendar, selected, onSelect, onMonth, busy, 
     }}><AppPanel title={day.dateLabel || calendarDateLabel(day.date, culture)} flush={inModal} joined={inModal}>
       <ThemedText type="sectionTitle" accessibilityRole="header">{day.houses || `${day.yearHouse}.${day.monthHouse}.${day.dayHouse}`}</ThemedText>
       <ReadingContent blocks={day.blocks} />
+      <AppButton title={calendarInteractionCopy.backToTop} variant="secondary" onPress={scrollToCalendar} />
     </AppPanel></View>}
   </>;
 }
@@ -104,5 +112,6 @@ const styles = StyleSheet.create({
   dayContent: { width: '100%', aspectRatio: 1, marginTop: Spacing.half,
     alignItems: 'center', justifyContent: 'center' },
   artwork: { width: '64%', aspectRatio: 1, transform: [{ translateY: Spacing.one + 1 }] }, centred: { textAlign: 'center' },
+  divider: { height: 1, width: '100%', marginVertical: Spacing.two },
   date: { position: 'absolute', top: 0, left: Spacing.one },
 });

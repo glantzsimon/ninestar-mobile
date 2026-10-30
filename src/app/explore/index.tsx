@@ -31,8 +31,7 @@ export default function ExploreScreen() {
           : key === 'compatibility' ? router.push('/explore/compatibility')
           : key === 'iching' ? router.push('/explore/iching')
           : key === 'knowledge' ? router.push('/explore/knowledge-base')
-          : key === 'ai' ? void Linking.openURL(websiteLinks(API_BASE_URL).aiAstrologer)
-            .catch(() => errorDialog.showError(uiCopy.externalLinkError))
+          : key === 'ai' ? router.push('/explore/ai-astrologer')
           : key === 'articles' ? void Linking.openURL(websiteLinks(API_BASE_URL).articles)
             .catch(() => errorDialog.showError(uiCopy.externalLinkError)) : setSelected(key)} />
     </AppPanel>)}

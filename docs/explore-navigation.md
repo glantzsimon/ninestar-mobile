@@ -22,8 +22,9 @@ matching owner-approved website names, not an invented API feature-label payload
 An eventual API-provided feature catalogue/labels would replace these fallbacks.
 
 Karmic Numerology was temporarily removed on 2026-10-27 at the owner's request.
-AI Astrologer remains a placeholder while the proposed ChatGPT-plugin handoff is
-parked during plugin review; see ai-astrologer-handoff.md. No external AI link is wired yet.
+AI Astrologer opens the native information screen. It fetches the server-authored
+content and current launch URL whenever the screen gains focus; a null URL omits
+the launch action. See ai-astrologer-handoff.md.
 Knowledge Base now opens native /explore/knowledge-base; Articles is the owner's
 explicit website-link exception and opens /latest-articles using the API
 environment's origin. This supersedes their older placeholder status and the
@@ -44,9 +45,9 @@ and validation. Other Explore
 features remain availability placeholders. My Chart and My Account retain their
 existing result/forms. Owner
 requires one app sign-in, so the initial website fallback was removed completely,
-not just its notice. Explore's introduction and groups are unchanged; no Opens
-website badges, browser redirects, URL builder or browser-opening hook remain in
-this flow. Cards for unbuilt features open a native AppModal with a central
+not just its notice. Explore's introduction and groups are unchanged. Articles
+opens its approved website URL, and AI Astrologer opens only the current URL
+returned by its API content endpoint. Cards for other unbuilt features open a native AppModal with a central
 Coming soon message and Close control. No extra authentication, API calls, reading
 credits, payments or calculator submissions occur when these placeholders open.
 

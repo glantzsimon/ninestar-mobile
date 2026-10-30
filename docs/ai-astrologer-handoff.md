@@ -1,23 +1,29 @@
 # Explore availability and AI Astrologer handoff
 
-Updated 2026-10-29
+Updated 2026-10-30
 
-## Implemented
+## Current implementation
 
 Removed the Karmic Numerology entry from exploreFeatures at the owner's request.
 Its unused central label and artwork ID remain available for a later return.
-AI Astrologer now opens the owner's explicitly approved temporary existing GPT
-destination using Expo Linking, with the shared external-link error dialog.
-Source: website Views/Shared/_Navbar.cshtml uses
-ApiConfiguration.Instance.NineStarKiAstrologerGptUrl; Config/appsettings.json sets
-https://chatgpt.com/g/g-67b146c065ec8191b7ec0850404fef33-9-star-ki-astrologer.
-website-links.ts owns that exact public URL. No credentials, chart/profile data,
-prefilled messages or query parameters are passed. OS browser/app handling is
-platform-controlled; iPhone handoff is still unverified. No expiry date was
-independently established. The native calculators remain native.
-The public Integration homepage was also checked on 2026-10-29 and contains
-the identical GPT URL. This verifies the deployed website destination, not
-ChatGPT availability, sign-in or an iPhone launch.
+Explore opens `/explore/ai-astrologer`. Each screen focus fetches
+`GET /api/mobile/v1/content/ai-astrologer` through the normal cookie-aware
+15-second/session-aware API transport. The response's root `title`, `htmlBody`
+and `culture` form the shared expandable ContextualHelp panel; its nullable
+`externalUrl` is the only launch destination. The button uses the existing
+Dictionary-backed AI Astrologer navigation label and is omitted for null or
+invalid non-web URLs. A fetch/open failure uses the shared error dialog. No URL
+is hardcoded, cached between opens, or augmented with profile data, credentials,
+prompts or query parameters. The endpoint schema was provided by the owner for
+this task but is not yet present in the shared `ninestar/docs/mobile-api.md`;
+the shared contract documentation should be updated by its owner. No Integration
+response or native handoff was verified in this implementation pass.
+The screen's return action uses the API-backed “Back to Explore” label.
+
+The earlier temporary GPT destination was removed from `website-links.ts`.
+Its previous website observation below is historical evidence only and does not
+authorize fallback behavior if the API omits a URL. Native calculators remain
+native.
 
 ## ChatGPT plugin proposal
 
@@ -48,7 +54,8 @@ starting point once the owner supplies it; its mobile behavior must be tested.
 ## Blockers and next step
 
 Owner update: plugin is under review, so the replacement handoff remains parked.
-The temporary existing-GPT destination is now explicitly authorised and wired.
+The server-controlled external destination is now wired; its live value and
+phone handoff still need validation. Do not restore the former static GPT URL.
 Articles is separately approved as a website blog link; see knowledge-base.md.
 
 Need the exact plugin share/install link and its availability to intended users.
@@ -59,7 +66,9 @@ Automatic chat selection on mobile remains unconfirmed, not declared impossible.
 
 ## Validation
 
-Lint and typecheck passed. Initial typecheck encountered the known stale generated
+The parser is covered by `tests/ai-astrologer.test.cjs` (valid response, preserved
+HTML/title/culture, null/malformed URL and missing content). All 230 project
+tests, lint, TypeScript and `git diff --check` passed. Initial prior typecheck encountered the known stale generated
 Router declaration issue; regenerated declarations from src/app with the installed
 Expo CLI helper, then typecheck passed. Tracked-file whitespace check passed.
 No new tests were added for removing a feature-list entry. No iPhone

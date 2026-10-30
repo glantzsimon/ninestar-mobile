@@ -108,7 +108,7 @@ test('metadata view labels remain exact and absent labels are never manufactured
 
 test('Back restores cached views and their exact selected days without touching prior snapshots', () => {
   const month = { kind: 'Month', calendar: { year: 2026, month: 10 }, selectedDate: '2026-10-29' };
-  const year = { kind: 'Year', planner: parsePlannerOverview(fixture(), 'Year'), selectedDate: month.selectedDate };
+  const year = { kind: 'Year', planner: parsePlannerOverview(fixture(), 'Year'), selectedDate: month.selectedDate, selectedPeriod: fixture().items[0].energyStartsOn };
   let state = { current: null, previous: [] };
   state = rememberCalendarPage(state, month);
   state = rememberCalendarPage(state, year);
@@ -116,6 +116,7 @@ test('Back restores cached views and their exact selected days without touching 
   state = backCalendarPage(state);
   assert.equal(state.current, year);
   assert.equal(state.current.selectedDate, '2026-10-29');
+  assert.equal(state.current.selectedPeriod, fixture().items[0].energyStartsOn);
   state = backCalendarPage(state);
   assert.equal(state.current, month);
   assert.equal(calendarPageUp(month), 'Year');

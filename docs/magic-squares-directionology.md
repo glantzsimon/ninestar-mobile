@@ -2,9 +2,11 @@
 
 Superseding owner refinement (2026-10-29): display-mode selection is removed.
 Cards/details keep ordinary artwork; squares are Directionology-only, summary
-first. Shared SVG number alignment is central. Bottom own-Predictions shortcuts
-group Directionology/Calendar. See directionology-validation.md for current
-behaviour and calendar-zoom-review.md for the researched future hierarchy.
+first. Current shared renderer scales the plate 1.13x to align its visible edge
+to the grid and scales arrow overlay 1.16x beyond both, while preserving API cell
+coordinates. Bottom own-Predictions shortcuts group Directionology/Calendar. See
+directionology-validation.md for current behaviour and calendar-zoom-review.md
+for the researched future hierarchy.
 Earlier Graphical/MagicSquare feature plans below are retained as history.
 
 Current status (2026-10-29): the revised feature/ui-artwork-refresh contract

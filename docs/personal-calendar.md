@@ -226,3 +226,30 @@ day/next month/Today, expanded view, copy link and paste privately into Google
 Calendar on desktop, and confirmed disable only if the owner wants that test.
 Do not share the private link in chat or screenshots. Verify unsaved My Account
 edits survive hub/calendar navigation and logout/account switch clears readings.
+
+
+## Gregorian month presentation
+
+Owner correction (2026-10-30): Gregorian Month is a calendar month and has no
+parent card. It consists of the month controls/grid and selected day details.
+Month-house metadata remains in the parsed API model where used, but is not shown
+as a parent item or reading. Selecting Month from a planner period opens the
+existing Gregorian calendar and retains the normal day selection; Back restores
+the previous planner view.
+
+## Planner period interaction
+
+On Year, NineYear and EightyOneYear overviews, tapping a parent or child period
+selects it and scrolls its supplied reading into view. Drillable child cards place
+two 32-point circular controls, right-aligned with a small inset, beneath the full-width card content,
+with the original icons and 44-point touch targets:
+eye/view on the left selects and shows details, and down chevron on the right
+drills in; its accessible name is `See {API childView label}`. There is no
+double-tap gesture. The destination is still
+loaded once from the planner endpoint using the safe server-bounded anchor. The
+label prefix is the central translatable functional copy in `ui-copy.ts`; the
+period/view name remains verbatim from metadata/options.
+There is no extra gap between card content and controls, with 12 points beneath
+the buttons following the owner's spacing refinement. Selected-day detail panels
+end with centralised “Back to top”, returning to the month controls/grid in
+normal and expanded calendar modes.
